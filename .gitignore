@@ -9,6 +9,7 @@ __pycache__/
 *$py.class
 
 agent_home/*
+n8n_storage/*
 
 # dependencies
 /node_modules

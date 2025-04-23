@@ -228,6 +228,7 @@ services:
 
   onlysaid-n8n:
     image: docker.n8n.io/n8nio/n8n
+    container_name: onlysaid-n8n
     environment:
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=${PGHOST}
@@ -235,13 +236,22 @@ services:
       - DB_POSTGRESDB_DATABASE=${PGDATABASE}
       - DB_POSTGRESDB_USER=${PGUSER}
       - DB_POSTGRESDB_PASSWORD=${PGPASSWORD}
-      - N8N_PATH=/n8n
-      - WEBHOOK_URL=http://onlysaid-dev.com/n8n/
-      - N8N_EDITOR_BASE_URL=http://onlysaid-dev.com/n8n/
+      # Subdomain configuration
+      - N8N_HOST=n8n.onlysaid-dev.com
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://n8n.onlysaid-dev.com/
+      # Disable strict CORS and security for development
+      - N8N_DISABLE_PRODUCTION_MAIN_PROCESS=true
+      # Increase memory limits
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - N8N_SECURE_COOKIE=false
     ports:
       - "5678:5678"
     volumes:
       - n8n_storage:/home/node/.n8n
+      - ./local-files:/files
     links:
       - onlysaid-psqldb
     networks:
