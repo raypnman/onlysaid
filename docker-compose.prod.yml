@@ -309,6 +309,8 @@ volumes:
   postgres_data:
   qdrant_data:
   ollama_data:
+  pgadmin_data:
+  n8n_storage:
   redis-cluster_data-0:
     driver: local
   redis-cluster_data-1:
