@@ -227,7 +227,7 @@ services:
     networks:
       - onlysaid-network
     restart: always
-  
+
   onlysaid-n8n:
     image: docker.n8n.io/n8nio/n8n
     container_name: onlysaid-n8n
@@ -245,7 +245,7 @@ services:
       - NODE_ENV=production
       - WEBHOOK_URL=https://n8n.onlysaid.com/
       # Disable strict CORS and security for development
-      - N8N_DISABLE_PRODUCTION_MAIN_PROCESS=true
+      # - N8N_DISABLE_PRODUCTION_MAIN_PROCESS=true
       # Increase memory limits
       - NODE_OPTIONS=--max-old-space-size=4096
       - N8N_SECURE_COOKIE=true

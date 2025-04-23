@@ -461,7 +461,7 @@ export default function PlansLayout({ children }: { children: React.ReactNode })
                                                 {t("no_plans_found")}
                                             </Text>
                                         ) : (
-                                            filteredPlans.map((plan: any) => {
+                                            paginatedPlans.map((plan: any) => {
                                                 // Convert string dates to Date objects
                                                 const planWithDateObjects = {
                                                     ...plan,

@@ -10,6 +10,7 @@ __pycache__/
 
 agent_home/*
 n8n_storage/*
+config/sample_tunnel.*
 
 # dependencies
 /node_modules

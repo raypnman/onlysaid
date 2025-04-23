@@ -72,11 +72,11 @@ export default function WorkbenchLayout({
             label: t("file_explorer"),
             path: "/workbench/file_explorer",
         },
-        // {
-        //     icon: FaDiagramProject,
-        //     label: t("workflow"),
-        //     path: "/workbench/workflow",
-        // },
+        {
+            icon: FaDiagramProject,
+            label: t("workflow"),
+            path: "/workbench/workflow",
+        },
         {
             icon: FaBookOpen,
             label: t("learn"),

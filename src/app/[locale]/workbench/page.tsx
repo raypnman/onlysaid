@@ -29,21 +29,25 @@ const FeatureCard = ({ icon, title, description, onClick }: {
 
   return (
     <MotionBox
-      p={6}
+      p={4}
       borderWidth="1px"
       borderColor={colors.borderColor}
-      borderRadius="lg"
+      borderRadius="md"
       bg={colors.cardBg}
       boxShadow="sm"
-      whileHover={{ y: -5, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.2)" }}
+      whileHover={{ y: -3, boxShadow: "0 8px 20px -8px rgba(0,0,0,0.2)" }}
       transition={{ duration: 0.2 }}
       cursor={onClick ? "pointer" : "default"}
       onClick={onClick}
       height="100%"
+      display="flex"
+      flexDirection="column"
     >
-      <Icon as={icon} fontSize="3xl" color={colors.accentColor} mb={4} />
-      <Heading size="md" mb={3} color={colors.textColorHeading}>{title}</Heading>
-      <Text fontSize="sm" color={colors.textColorMuted}>{description}</Text>
+      <Flex align="center" mb={2}>
+        <Icon as={icon} fontSize="xl" color={colors.accentColor} mr={2} />
+        <Heading size="sm" color={colors.textColorHeading}>{title}</Heading>
+      </Flex>
+      <Text fontSize="xs" color={colors.textColorMuted}>{description}</Text>
     </MotionBox>
   );
 };
@@ -84,6 +88,7 @@ export default function DashboardPage() {
   // Navigation handlers
   const navigateToFileExplorer = () => router.push('/workbench/file_explorer');
   const navigateToLearn = () => router.push('/workbench/learn');
+  const navigateToWorkflow = () => router.push('/workbench/workflow');
 
   // Removed workflow navigation since it's not available yet
 
@@ -100,8 +105,8 @@ export default function DashboardPage() {
   return (
     <Container
       maxW="1400px"
-      px={{ base: 4, md: 6, lg: 8 }}
-      py={4}
+      px={{ base: 3, md: 4, lg: 6 }}
+      py={3}
       height="100%"
       position="relative"
       overflow="hidden"
@@ -117,27 +122,27 @@ export default function DashboardPage() {
         overflow="hidden"
         position="relative"
       >
-        <Heading size="lg" mb={6} display="flex" alignItems="center" color={colors.textColorHeading}>
+        <Heading size="lg" mb={4} display="flex" alignItems="center" color={colors.textColorHeading}>
           <Icon as={FaTools} mr={3} color={colors.accentColor} />
           {t("workbench")}
         </Heading>
 
         <Box
-          p={8}
+          p={4}
           bg={colors.bgColor}
           borderRadius="lg"
           boxShadow="sm"
-          height="calc(100vh - 200px)"
+          height="calc(100vh - 160px)"
           borderWidth="1px"
           borderColor={colors.borderColor}
           overflow="auto"
           position="relative"
         >
-          {/* Hero section */}
+          {/* Hero section - made more compact */}
           <MotionBox
-            mb={12}
-            p={8}
-            borderRadius="xl"
+            mb={4}
+            p={4}
+            borderRadius="lg"
             bg={gradientBg}
             boxShadow="md"
             initial={{ y: 20, opacity: 0 }}
@@ -145,43 +150,47 @@ export default function DashboardPage() {
             transition={{ delay: 0.2, duration: 0.5 }}
           >
             <Flex direction={{ base: "column", md: "row" }} align="center">
-              <Box flex="1" pr={{ base: 0, md: 8 }} mb={{ base: 6, md: 0 }}>
-                <Heading size="xl" mb={4} lineHeight="1.2" color={colors.textColorHeading}>
+              <Box flex="1" pr={{ base: 0, md: 4 }} mb={{ base: 4, md: 0 }}>
+                <Heading size="md" mb={2} lineHeight="1.2" color={colors.textColorHeading}>
                   {t("welcome_to_workbench")}
                 </Heading>
-                <Text fontSize="lg" mb={6} color={colors.textColorMuted}>
+                <Text fontSize="sm" mb={3} color={colors.textColorMuted}>
                   {t("workbench_description")}
                 </Text>
-                <Flex gap={4} flexWrap="wrap">
+                <Flex gap={2} flexWrap="wrap">
                   <Button
                     colorScheme="blue"
-                    size="lg"
+                    size="sm"
                     onClick={navigateToFileExplorer}
                   >
                     {t("explore_files")}
                   </Button>
-                  {/* Removed workflow button since it's not available yet */}
+                  <Button
+                    colorScheme="teal"
+                    size="sm"
+                    onClick={navigateToWorkflow}
+                  >
+                    {t("workflow")}
+                  </Button>
                 </Flex>
               </Box>
               <Center flex="1">
-                <Icon as={FaRocket} fontSize="9xl" color={colors.accentColor} />
+                <Icon as={FaRocket} fontSize="6xl" color={colors.accentColor} />
               </Center>
             </Flex>
           </MotionBox>
 
           {/* Features section */}
-          <Heading size="md" mb={6} color={colors.textColorHeading}>
+          <Heading size="sm" mb={3} color={colors.textColorHeading}>
             {t("available_tools")}
           </Heading>
 
-          <HStack gap={1} mb={12} flexWrap="wrap" alignItems="stretch">
+          <SimpleGrid columns={{ base: 1, md: 3 }} gap={3} mb={4}>
             <MotionFlex
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              flex="1"
-              minW={{ base: "100%", md: "280px" }}
-              maxW={{ base: "100%", md: "400px" }}
+              height="100%"
             >
               <FeatureCard
                 icon={FaFolder}
@@ -195,9 +204,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
-              flex="1"
-              minW={{ base: "100%", md: "280px" }}
-              maxW={{ base: "100%", md: "400px" }}
+              height="100%"
             >
               <FeatureCard
                 icon={FaBookOpen}
@@ -207,25 +214,25 @@ export default function DashboardPage() {
               />
             </MotionFlex>
 
-            {/* Commented out unavailable features
             <MotionFlex
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.5 }}
+              height="100%"
             >
               <FeatureCard
-                icon={FaCode}
-                title={`${t("code_editor")} (${t("coming_soon")})`}
-                description={t("code_editor_description")}
+                icon={FaNetworkWired}
+                title={t("workflow")}
+                description={t("workflow_description") || "Create and manage automated workflows for your data processing needs."}
+                onClick={navigateToWorkflow}
               />
             </MotionFlex>
-            */}
-          </HStack>
+          </SimpleGrid>
 
-          {/* Development note */}
+          {/* Development note - made more compact */}
           <MotionBox
-            p={6}
-            borderRadius="lg"
+            p={3}
+            borderRadius="md"
             borderWidth="1px"
             borderColor={colors.borderColor}
             bg={colors.subtleSelectedItemBg}
@@ -233,18 +240,18 @@ export default function DashboardPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.5 }}
+            mb={3}
           >
-            <Flex align="center" mb={2}>
-              <Icon as={FaTools} mr={2} />
-              <Heading size="sm">{t("under_development")}</Heading>
+            <Flex align="center">
+              <Icon as={FaTools} mr={2} fontSize="sm" />
+              <Text fontSize="xs" fontWeight="medium">
+                {t("under_development")}: {t("currently_only_file_browsing")}
+              </Text>
             </Flex>
-            <Text fontSize="sm" color={colors.textColorMuted}>
-              {t("currently_only_file_browsing")} {/* You may need to add this translation */}
-            </Text>
           </MotionBox>
 
           {/* Color mode toggle */}
-          <Center mt={8}>
+          <Center mt={3}>
             <ColorModeButton />
           </Center>
         </Box>

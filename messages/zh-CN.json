@@ -235,7 +235,9 @@
     "plan_was_created": "计划已创建",
     "log_type_performing_skill": "执行技能中",
     "log_type_skill_executed": "技能已执行",
-    "trust_mode": "信任模式"
+    "trust_mode": "信任模式",
+    "select_room_or_create_new": "选择聊天室或创建新聊天室",
+    "members": "成员"
   },
   "Plans": {
     "plans": "计划",
@@ -342,7 +344,31 @@
     "log_details": "日志详情",
     "log_type": "日志类型",
     "unknown": "未知",
-    "log_type_plan_created": "计划已创建"
+    "log_type_plan_created": "计划已创建",
+    "calendar": "日历",
+    "plan_calendar": "计划日历",
+    "plan_kanban": "计划看板",
+    "plan_status_updated": "计划状态已更新",
+    "room": "聊天室",
+    "moved_to": "已移动到",
+    "no_plans_available": "没有可用计划",
+    "drop_tasks_here": "将任务拖放到这里",
+    "no_plan_selected": "没有选择计划",
+    "select_plan_from_sidebar": "请从侧边栏选择计划",
+    "step": "步骤",
+    "task": "任务",
+    "task_status_updated": "任务状态已更新",
+    "related_task": "相关任务",
+    "loading_task_details": "加载任务详情中...",
+    "explanation": "说明",
+    "plan": "计划",
+    "task_id": "任务ID",
+    "no_skills_found": "没有找到技能",
+    "name": "名称",
+    "log_content": "日志内容",
+    "plan_approved": "计划已批准",
+    "no_tasks_available": "没有任务",
+    "plan_completed": "计划已完成"
   },
   "Learn": {
     "learn": "学习",
@@ -592,6 +618,17 @@
     "available_tools": "可用工具",
     "workflow_description": "创建和管理自动化工作流程",
     "code_editor": "代码编辑器",
-    "code_editor_description": "编写和执行代码"
+    "code_editor_description": "编写和执行代码",
+    "workflow_management": "工作流管理",
+    "workflow_iframe_error": "无法加载工作流框架",
+    "open_workflow_tool": "打开工作流工具",
+    "excel_file_with_sheets": "Excel 文件（含工作表）",
+    "showing_first_rows": "显示前几行",
+    "powerpoint_file": "PowerPoint 文件",
+    "download_to_view": "下载以查看",
+    "word_document_preview": "Word 文档预览",
+    "download_for_full_view": "下载以查看完整内容",
+    "currently_only_file_browsing": "目前仅支持文件浏览",
+    "learn": "学习"
   }
 } 
