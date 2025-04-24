@@ -19,9 +19,10 @@ import { IPlan, PlanStatus } from "@/types/plan";
 import StatusBadge, { getStatusColorScheme } from "@/components/ui/StatusBadge";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaCheck, FaStop } from 'react-icons/fa';
+import { FaCheck, FaStop, FaNetworkWired } from 'react-icons/fa';
 import { FiRefreshCw } from 'react-icons/fi';
 import { Tooltip } from "@/components/ui/tooltip";
+import Link from 'next/link';
 
 // Format date for display
 const formatDate = (date: Date | null): string => {
@@ -48,6 +49,11 @@ export default function PlanHeader({ plan, colors, isLoading = false, loadingTas
     const [assignerName, setAssignerName] = useState<string>("");
     const [assigneeName, setAssigneeName] = useState<string>("");
     const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(false);
+
+    // Determine the n8n URL based on NODE_ENV
+    const n8nUrl = process.env.NODE_ENV === 'development'
+        ? 'http://n8n.onlysaid-dev.com'
+        : 'https://n8n.onlysaid.com';
 
     useEffect(() => {
         if (plan?.room_id) {
@@ -134,6 +140,20 @@ export default function PlanHeader({ plan, colors, isLoading = false, loadingTas
                 </Box>
 
                 <Flex align="center" gap={3}>
+                    <Link href={n8nUrl} target="_blank" rel="noopener noreferrer">
+                        <Badge
+                            colorScheme="blue"
+                            px={2}
+                            py={1}
+                            borderRadius="md"
+                            display="flex"
+                            alignItems="center"
+                            cursor="pointer"
+                        >
+                            <Icon as={FaNetworkWired} mr={1} fontSize="xs" />
+                            {t("edit_plan_in_graph")}
+                        </Badge>
+                    </Link>
 
                     <StatusBadge status={plan.status as PlanStatus} />
                     <HStack width="150px">

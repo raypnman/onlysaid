@@ -621,7 +621,8 @@
     "name": "Name",
     "log_content": "Log Content",
     "plan_approved": "Plan Approved",
-    "open_plan": "Open Plan"
+    "open_plan": "Open Plan",
+    "edit_plan_in_graph": "Edit Plan in Graph"
   },
   "Notification": {
     "notifications": "Notifications",

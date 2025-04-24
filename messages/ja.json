@@ -320,7 +320,8 @@
     "plan_created": "プラン作成済み",
     "task_id": "タスクID",
     "skill_executed": "スキル実行済み",
-    "plan_completed": "プラン完了"
+    "plan_completed": "プラン完了",
+    "edit_plan_in_graph": "グラフでプランを編集"
   },
   "Learn": {
     "learn": "学ぶ",
@@ -591,6 +592,11 @@
     "available_tools": "利用可能なツール",
     "workflow_description": "自動化されたワークフローの作成と管理",
     "code_editor": "コードエディタ",
-    "code_editor_description": "コードの記述と実行"
+    "code_editor_description": "コードの記述と実行",
+    "workflow_management": "ワークフロー管理",
+    "workflow_iframe_error": "ワークフローフレームの読み込みに失敗しました",
+    "open_workflow_tool": "ワークフローツールを開く",
+    "currently_only_file_browsing": "現在はファイル閲覧のみ対応しています",
+    "learn": "学ぶ"
   }
 }

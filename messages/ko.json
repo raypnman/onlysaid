@@ -600,7 +600,8 @@
       "approve": "승인",
       "task_id": "태스크 ID",
       "skills": "스킬",
-      "edit": "편집"
+      "edit": "편집",
+      "edit_plan_in_graph": "그래프에서 플랜 편집"
     },
     "Notification": {
       "notifications": "알림",

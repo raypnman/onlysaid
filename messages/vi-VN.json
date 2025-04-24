@@ -342,7 +342,10 @@
     "log_details": "Chi tiết nhật ký",
     "log_type": "Loại nhật ký",
     "unknown": "Không xác định",
-    "log_type_plan_created": "Kế hoạch đã được tạo"
+    "log_type_plan_created": "Kế hoạch đã được tạo",
+    "no_plan_selected": "Chưa chọn kế hoạch",
+    "select_plan_from_sidebar": "Chọn kế hoạch từ thanh bên",
+    "edit_plan_in_graph": "Chỉnh sửa kế hoạch trong biểu đồ"
   },
   "Learn": {
     "learn": "Học tập",

@@ -29,7 +29,7 @@ const FeatureCard = ({ icon, title, description, onClick }: {
 
   return (
     <MotionBox
-      p={4}
+      p={3}
       borderWidth="1px"
       borderColor={colors.borderColor}
       borderRadius="md"
@@ -40,6 +40,7 @@ const FeatureCard = ({ icon, title, description, onClick }: {
       cursor={onClick ? "pointer" : "default"}
       onClick={onClick}
       height="100%"
+      width="100%"
       display="flex"
       flexDirection="column"
     >
@@ -79,18 +80,13 @@ export default function DashboardPage() {
   // Use useEffect for navigation instead of doing it during render
   useEffect(() => {
     // Removing the access restriction that redirects non-owner users
-    // Previously had:
-    // if (currentUser && !isOwner) {
-    //   router.push('/redirect/no_access?reason=Not available for UAT');
-    // }
   }, [currentUser, isOwner, router]);
 
   // Navigation handlers
   const navigateToFileExplorer = () => router.push('/workbench/file_explorer');
   const navigateToLearn = () => router.push('/workbench/learn');
   const navigateToWorkflow = () => router.push('/workbench/workflow');
-
-  // Removed workflow navigation since it's not available yet
+  const navigateToEditor = () => router.push('/workbench/editor');
 
   // Show loading state while checking authentication
   if (isLoading || !session) {
@@ -168,9 +164,9 @@ export default function DashboardPage() {
                   <Button
                     colorScheme="teal"
                     size="sm"
-                    onClick={navigateToWorkflow}
+                    onClick={navigateToLearn}
                   >
-                    {t("workflow")}
+                    {t("learn")}
                   </Button>
                 </Flex>
               </Box>
@@ -181,11 +177,11 @@ export default function DashboardPage() {
           </MotionBox>
 
           {/* Features section */}
-          <Heading size="sm" mb={3} color={colors.textColorHeading}>
+          <Heading size="sm" mb={2} color={colors.textColorHeading}>
             {t("available_tools")}
           </Heading>
 
-          <SimpleGrid columns={{ base: 1, md: 3 }} gap={3} mb={4}>
+          <SimpleGrid columns={{ base: 1, sm: 2 }} gap={2} mb={4}>
             <MotionFlex
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -227,31 +223,24 @@ export default function DashboardPage() {
                 onClick={navigateToWorkflow}
               />
             </MotionFlex>
+
+            <MotionFlex
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              height="100%"
+            >
+              <FeatureCard
+                icon={FaCode}
+                title={t("code_editor")}
+                description={t("code_editor_description") || "Edit and manage your code with our integrated code editor."}
+                onClick={navigateToEditor}
+              />
+            </MotionFlex>
           </SimpleGrid>
 
-          {/* Development note - made more compact */}
-          <MotionBox
-            p={3}
-            borderRadius="md"
-            borderWidth="1px"
-            borderColor={colors.borderColor}
-            bg={colors.subtleSelectedItemBg}
-            color={colors.accentColor}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            mb={3}
-          >
-            <Flex align="center">
-              <Icon as={FaTools} mr={2} fontSize="sm" />
-              <Text fontSize="xs" fontWeight="medium">
-                {t("under_development")}: {t("currently_only_file_browsing")}
-              </Text>
-            </Flex>
-          </MotionBox>
-
           {/* Color mode toggle */}
-          <Center mt={3}>
+          <Center mt={4}>
             <ColorModeButton />
           </Center>
         </Box>

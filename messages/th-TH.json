@@ -342,7 +342,11 @@
     "log_details": "รายละเอียดบันทึก",
     "log_type": "ประเภทบันทึก",
     "unknown": "ไม่ทราบ",
-    "log_type_plan_created": "สร้างแผนแล้ว"
+    "log_type_plan_created": "สร้างแผนแล้ว",
+    "no_plan_selected": "ยังไม่ได้เลือกแผน",
+    "select_plan_from_sidebar": "เลือกแผนจากแถบด้านข้าง",
+    "edit_plan_in_graph": "แก้ไขแผนในกราฟ",
+    "step": "ขั้นตอน"
   },
   "Learn": {
     "learn": "เรียนรู้",

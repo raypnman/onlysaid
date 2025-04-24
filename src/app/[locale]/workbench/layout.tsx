@@ -10,8 +10,8 @@ import {
     Text,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { FaDiagramProject, FaFolderTree } from "react-icons/fa6";
-import { FaBookOpen, FaTools } from "react-icons/fa";
+import { FaDiagramProject, FaFolderTree, FaBookOpen, FaCode } from "react-icons/fa6";
+import { FaBookOpen as FaBookOpenIcon, FaTools as FaToolsIcon } from "react-icons/fa";
 import { useTranslations } from "next-intl";
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
@@ -81,6 +81,11 @@ export default function WorkbenchLayout({
             icon: FaBookOpen,
             label: t("learn"),
             path: "/workbench/learn",
+        },
+        {
+            icon: FaCode,
+            label: t("code_editor"),
+            path: "/workbench/editor",
         },
     ];
 
@@ -215,7 +220,7 @@ export default function WorkbenchLayout({
                     >
                         <Box px={4} width="100%">
                             <Heading size="md" mb={8} display="flex" alignItems="center" color={textColorHeading}>
-                                <Icon as={FaTools} mr={3} color="blue.500" fontSize="2xl" />
+                                <Icon as={FaToolsIcon} mr={3} color="blue.500" fontSize="2xl" />
                                 {t("workbench")}
                             </Heading>
                             {navItems.map((item) => (
@@ -228,14 +233,14 @@ export default function WorkbenchLayout({
                                     bg={pathname === item.path ? activeTabBg : "transparent"}
                                     color={pathname === item.path ? activeTabColor : textColorHeading}
                                     fontWeight={pathname === item.path ? "bold" : "medium"}
+                                    fontSize="md"
                                     display="flex"
                                     alignItems="center"
-                                    fontSize="lg"
                                     _hover={{ bg: activeTabBg, color: activeTabColor, textDecoration: "none" }}
                                     transition="background 0.2s, color 0.2s"
                                     boxShadow={pathname === item.path ? "sm" : undefined}
                                 >
-                                    <Icon as={item.icon} mr={4} fontSize="xl" />
+                                    <Icon as={item.icon} mr={4} fontSize="1.2em" />
                                     <Text>{item.label}</Text>
                                 </Link>
                             ))}
