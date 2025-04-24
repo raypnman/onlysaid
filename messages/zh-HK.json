@@ -451,7 +451,8 @@
     "word_document_preview": "Word 文檔預覽",
     "download_for_full_view": "下載以查看完整內容",
     "currently_only_file_browsing": "目前僅支持文件瀏覽",
-    "learn": "學習"
+    "learn": "學習",
+    "learn_description": "學習是個人成長的關鍵，我們提供多種學習資源和工具，幫助你提升技能和知識。"
   },
   "AdminPanel": {
     "admin_panel": "管理面板",

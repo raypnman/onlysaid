@@ -19,7 +19,7 @@ import {
   Input
 } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaUsers, FaTasks, FaUserPlus, FaEdit, FaTimes, FaCalendarAlt, FaPlus, FaLink } from "react-icons/fa";
+import { FaUsers, FaUserPlus, FaEdit, FaTimes } from "react-icons/fa";
 import { useTranslations } from "next-intl";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import axios from "axios";
@@ -44,11 +44,9 @@ import {
   setUnreadCount,
   addMessage,
   updateMessage,
-  setPlanSectionWidth
 } from '@/store/features/chatSlice';
 import { updateActiveRooms } from '@/store/features/userSlice';
 import React from "react";
-import { ChatRoomList } from "@/components/chat/room_list";
 import { ChatMessageList } from "@/components/chat/message_list";
 import { ChatInput } from "@/components/chat/chat_input";
 import { CreateRoomForm } from "@/components/chat/create_room_form";
@@ -59,7 +57,6 @@ import { RoomInvitation } from "@/components/chat/room_invitation";
 import { useRouter } from "next/navigation";
 import OpenAI from "openai";
 import { v4 as uuidv4 } from "uuid";
-import { saveSession } from "@/store/middleware/streamingMiddleware";
 import { setStreamingState } from '@/store/features/assistantSlice';
 
 const MotionBox = motion.create(Box);

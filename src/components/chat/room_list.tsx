@@ -24,6 +24,7 @@ interface ChatRoomListProps {
     onSelectRoom: (roomId: string) => void;
     onCreateRoomClick: () => void;
     isCreatingRoomLoading: boolean;
+    width?: number; // Add width prop to control the width from parent
 }
 
 export const ChatRoomList = ({
@@ -33,6 +34,7 @@ export const ChatRoomList = ({
     onSelectRoom,
     onCreateRoomClick,
     isCreatingRoomLoading,
+    width = 280, // Default width if not provided
 }: ChatRoomListProps) => {
     const t = useTranslations("Chat");
     const colors = useChatRoomColors();
@@ -101,7 +103,7 @@ export const ChatRoomList = ({
 
     return (
         <Box
-            width="280px"
+            width={`${width}px`} // Use the width prop instead of hardcoded value
             height="100%"
             overflow="auto"
             pr={3}

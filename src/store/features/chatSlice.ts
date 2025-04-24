@@ -13,7 +13,8 @@ interface ChatState {
     isLoadingRooms: boolean;
     isLoadingMessages: boolean;
     messagesLoaded: Record<string, boolean>; // Track which rooms have loaded messages from server
-    planSectionWidth: number; // Add this new property for plan section width
+    planSectionWidth: number; // Width for plan section
+    sidebarWidth: number; // Add this new property for sidebar width
 }
 
 const initialState: ChatState = {
@@ -26,13 +27,14 @@ const initialState: ChatState = {
     isLoadingMessages: false,
     messagesLoaded: {},
     planSectionWidth: 250, // Default width
+    sidebarWidth: 300, // Default sidebar width
 };
 
 // Configure persist for chat slice
 const chatPersistConfig = {
     key: 'chat',
     storage,
-    whitelist: ['planSectionWidth'], // Add planSectionWidth to persisted state
+    whitelist: ['planSectionWidth', 'sidebarWidth'], // Add sidebarWidth to persisted state
 };
 
 export const chatSlice = createSlice({
@@ -191,6 +193,9 @@ export const chatSlice = createSlice({
         setPlanSectionWidth: (state, action: PayloadAction<number>) => {
             state.planSectionWidth = action.payload;
         },
+        setSidebarWidth: (state, action: PayloadAction<number>) => {
+            state.sidebarWidth = action.payload;
+        },
     },
 });
 
@@ -233,6 +238,7 @@ export const {
     deleteMessage,
     localDeleteMessage,
     setPlanSectionWidth,
+    setSidebarWidth,
 } = chatSlice.actions;
 
 export const setLoadingRooms = createAction<boolean>('chat/setLoadingRooms');
