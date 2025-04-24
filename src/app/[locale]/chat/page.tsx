@@ -44,6 +44,7 @@ import {
   setUnreadCount,
   addMessage,
   updateMessage,
+  setPlanSectionWidth
 } from '@/store/features/chatSlice';
 import { updateActiveRooms } from '@/store/features/userSlice';
 import React from "react";
@@ -58,6 +59,7 @@ import { useRouter } from "next/navigation";
 import OpenAI from "openai";
 import { v4 as uuidv4 } from "uuid";
 import { setStreamingState } from '@/store/features/assistantSlice';
+import PlanSection from "@/components/chat/plan_section";
 
 const MotionBox = motion.create(Box);
 const MESSAGE_LIMIT = 30;
@@ -102,6 +104,7 @@ const ChatPageContent = () => {
   const isSocketConnected = useSelector((state: RootState) => state.chat.isSocketConnected);
   const isStreaming = useSelector((state: RootState) => state.assistant.isStreaming);
   const streamingMessageId = useSelector((state: RootState) => state.assistant.streamingMessageId);
+  const planSectionWidth = useSelector((state: RootState) => state.chat.planSectionWidth);
 
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
   const isOwner = useSelector((state: RootState) => state.user.isOwner);
@@ -945,9 +948,9 @@ const ChatPageContent = () => {
   }
 
   return (
-    <Flex width="100%" height="100%">
+    <Flex width="100%" height="100%" overflow="hidden">
       {/* Chat Interface Component - Make it flexible */}
-      <Box flex="1" minWidth="0">
+      <Box flex="1" minWidth="0" height="100%" overflow="hidden">
         <ChatInterfaceContainer
           isCreatingRoom={isCreatingRoom}
           newRoomName={newRoomName}

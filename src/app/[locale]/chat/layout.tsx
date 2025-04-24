@@ -6,6 +6,7 @@ import {
     Flex,
     Heading,
     Icon,
+
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { FaComments } from "react-icons/fa";
@@ -69,9 +70,9 @@ export default function ChatLayout({
     const [resizeStartPosition, setResizeStartPosition] = useState(0);
     const [containerLeft, setContainerLeft] = useState<number | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const CONTAINER_MIN_WIDTH = 800; // Minimum container width
-    const MARGIN_PERCENT = 5; // 5% margin from window edges
-    const MIN_CONTAINER_WIDTH_PERCENT = 50; // Minimum width as percentage of window
+    const CONTAINER_MIN_WIDTH = 1200; // Minimum container width
+    const MARGIN_PERCENT = 1; // 1% margin from window edges
+    const MIN_CONTAINER_WIDTH_PERCENT = 85; // Minimum width as percentage of window
 
     // State for creating new room
     const [isCreatingRoom, setIsCreatingRoom] = useState(false);
@@ -81,13 +82,13 @@ export default function ChatLayout({
     const [sidebarResizing, setSidebarResizing] = useState(false);
     const sidebarRef = useRef<HTMLDivElement>(null);
     const MIN_SIDEBAR_WIDTH = 200;
-    const MAX_SIDEBAR_WIDTH = 400;
+    const MAX_SIDEBAR_WIDTH = 320;
 
     // Add state for plan section resizing
     const [planSectionResizing, setPlanSectionResizing] = useState(false);
     const planSectionRef = useRef<HTMLDivElement>(null);
     const MIN_PLAN_SECTION_WIDTH = 200;
-    const MAX_PLAN_SECTION_WIDTH = 500;
+    const MAX_PLAN_SECTION_WIDTH = 400;
 
     // Authentication check
     useEffect(() => {
@@ -353,14 +354,14 @@ export default function ChatLayout({
                 <Container
                     ref={containerRef}
                     maxW="none"
-                    width={containerWidth ? `${containerWidth}px` : "90%"}
-                    px={{ base: 4, md: 6, lg: 8 }}
-                    py={4}
+                    width={containerWidth ? `${containerWidth}px` : "98%"}
+                    px={{ base: 1, md: 2, lg: 4 }}
+                    py={3}
                     height="calc(100% - 10px)"
                     position="relative"
                     overflow="hidden"
                     css={{
-                        maxWidth: containerWidth ? `${containerWidth}px !important` : "90% !important",
+                        maxWidth: containerWidth ? `${containerWidth}px !important` : "98% !important",
                         transition: containerResizing ? 'none' : 'width 0.2s',
                         '&:hover .resize-handle': {
                             opacity: 0.7

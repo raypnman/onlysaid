@@ -103,19 +103,19 @@ export const ChatRoomList = ({
 
     return (
         <Box
-            width={`${width}px`} // Use the width prop instead of hardcoded value
+            width={`${width}px`}
             height="100%"
             overflow="auto"
-            pr={3}
+            pr={2}
         >
-            <Flex justifyContent="space-between" alignItems="center" mb={4}>
-                <Text fontSize="xl" fontWeight="bold" textAlign="left" color={colors.textColorHeading}>
+            <Flex justifyContent="space-between" alignItems="center" mb={3}>
+                <Text fontSize="lg" fontWeight="bold" textAlign="left" color={colors.textColorHeading}>
                     {t("rooms")}
                 </Text>
                 <Box
                     as="button"
-                    py={2}
-                    px={3}
+                    py={1.5}
+                    px={2.5}
                     borderRadius="md"
                     bg={colors.bgSubtle}
                     color={colors.textColor}
@@ -129,17 +129,17 @@ export const ChatRoomList = ({
                     disabled={isCreatingRoomLoading}
                 >
                     <Flex align="center" justify="center">
-                        <Icon as={FaPlus} mr={2} />
+                        <Icon as={FaPlus} mr={1.5} />
                         {t("new_room")}
                     </Flex>
                 </Box>
             </Flex>
 
-            <VStack align="stretch">
+            <VStack align="stretch" gap={2}>
                 {sortedRooms.map((room: IChatRoom) => (
                     <Flex
                         key={room.id}
-                        p={3}
+                        p={2.5}
                         borderRadius="lg"
                         bg={selectedRoomId === room.id ? colors.selectedRoomBg : colors.bgSubtle}
                         borderWidth="1px"
@@ -155,11 +155,11 @@ export const ChatRoomList = ({
                         transition="all 0.2s"
                     >
                         <Box flex="1">
-                            <Flex justify="space-between" align="center" mb={1}>
-                                <Text fontWeight="medium" fontSize="md" color={colors.textColorHeading}>
+                            <Flex justify="space-between" align="center" mb={0.5}>
+                                <Text fontWeight="medium" fontSize="md" color={colors.textColorHeading} lineClamp={1}>
                                     {room.name}
                                 </Text>
-                                <AvatarGroup gap="0" size="xs">
+                                <AvatarGroup gap="0" size="2xs">
                                     {(roomUsers[room.id] || []).slice(0, 3).map((user: User, idx: number) => (
                                         <Avatar.Root key={idx}>
                                             <Avatar.Fallback name={user.username} />
@@ -177,7 +177,7 @@ export const ChatRoomList = ({
                             </Flex>
 
                             <Flex justify="space-between" align="center">
-                                <Text fontSize="sm" color={colors.textColor} maxW="160px">
+                                <Text fontSize="xs" color={colors.textColor} maxW="160px">
                                     {new Date(room.last_updated).toLocaleString(undefined, {
                                         month: "short",
                                         day: "numeric",
@@ -189,8 +189,8 @@ export const ChatRoomList = ({
                                     <Badge
                                         borderRadius="full"
                                         colorScheme="blue"
-                                        fontSize="xs"
-                                        px={2}
+                                        fontSize="2xs"
+                                        px={1.5}
                                     >
                                         {unreadCounts[room.id]}
                                     </Badge>

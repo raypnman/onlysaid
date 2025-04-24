@@ -142,15 +142,13 @@ export default function PlanDetailsPage() {
                     '.viewToggleButtons': {
                         display: 'none !important'
                     },
-                    // Add styling for selected tasks in calendar view - use proper FullCalendar class names
-                    '.fc .fc-event.selected-task': {
+                    '.fc .fcEvent.selectedTask': {
                         borderWidth: '2px',
                         boxShadow: '0 0 0 1px rgba(66, 153, 225, 0.5)',
                         transform: 'scale(1.02)',
                         transition: 'all 0.2s ease-in-out'
                     },
-                    // Improve task popup/tooltip styling
-                    '.fc .fc-popover': {
+                    '.fc .fcPopover': {
                         borderRadius: '8px',
                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                         border: `1px solid ${colors.borderColor}`,
@@ -158,13 +156,11 @@ export default function PlanDetailsPage() {
                         maxWidth: '300px',
                         zIndex: 1000
                     },
-                    // Ensure calendar events have proper spacing and alignment
-                    '.fc .fc-event-main': {
+                    '.fc .fcEventMain': {
                         padding: '2px 4px',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
                     },
-                    // Add additional styling to improve calendar appearance
                     '.fc': {
                         height: '100%',
                         '--fc-border-color': colors.borderColor,
@@ -179,20 +175,20 @@ export default function PlanDetailsPage() {
                         '--fc-event-border-color': colors.accentColor,
                         '--fc-today-bg-color': `${colors.accentColor}10`
                     },
-                    '.fc .fc-toolbar': {
+                    '.fc .fcToolbar': {
                         padding: '8px',
                         marginBottom: '8px'
                     },
-                    '.fc .fc-toolbar-title': {
+                    '.fc .fcToolbarTitle': {
                         fontSize: '1.2rem',
                         color: colors.textColorHeading
                     },
-                    '.fc .fc-col-header-cell': {
+                    '.fc .fcColHeaderCell': {
                         padding: '8px 4px',
                         backgroundColor: `${colors.cardBg}`,
                         borderColor: colors.borderColor
                     },
-                    '.fc .fc-daygrid-day': {
+                    '.fc .fcDaygridDay': {
                         minHeight: '100px'
                     }
                 }}
