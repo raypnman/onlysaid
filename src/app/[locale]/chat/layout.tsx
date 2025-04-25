@@ -63,16 +63,8 @@ export default function ChatLayout({
         sidebarWidth
     } = useSelector((state: RootState) => state.chat);
 
-    // Add state for container resizing
-    const [containerResizing, setContainerResizing] = useState(false);
-    const [containerResizeEdge, setContainerResizeEdge] = useState<'left' | 'right' | null>(null);
-    const [containerWidth, setContainerWidth] = useState<number | null>(null);
-    const [resizeStartPosition, setResizeStartPosition] = useState(0);
-    const [containerLeft, setContainerLeft] = useState<number | null>(null);
+    // Remove container resizing state and functionality
     const containerRef = useRef<HTMLDivElement>(null);
-    const CONTAINER_MIN_WIDTH = 1200; // Minimum container width
-    const MARGIN_PERCENT = 1; // 1% margin from window edges
-    const MIN_CONTAINER_WIDTH_PERCENT = 85; // Minimum width as percentage of window
 
     // State for creating new room
     const [isCreatingRoom, setIsCreatingRoom] = useState(false);
@@ -89,6 +81,7 @@ export default function ChatLayout({
     const planSectionRef = useRef<HTMLDivElement>(null);
     const MIN_PLAN_SECTION_WIDTH = 200;
     const MAX_PLAN_SECTION_WIDTH = 400;
+    const [resizeStartPosition, setResizeStartPosition] = useState(0);
 
     // Authentication check
     useEffect(() => {
@@ -96,15 +89,6 @@ export default function ChatLayout({
             router.push("/signin");
         }
     }, [isAuthenticated, router]);
-
-    // Initialize container dimensions on mount
-    useEffect(() => {
-        if (containerRef.current && containerWidth === null) {
-            const rect = containerRef.current.getBoundingClientRect();
-            setContainerWidth(rect.width);
-            setContainerLeft(rect.left);
-        }
-    }, [containerWidth]);
 
     // Fetch rooms
     useEffect(() => {
@@ -161,74 +145,6 @@ export default function ChatLayout({
         // Reset unread count for this room
         dispatch(setUnreadCount({ roomId, count: 0 }));
     }, [dispatch]);
-
-    // Handle container resize
-    const handleContainerResizeStart = (e: React.MouseEvent, edge: 'left' | 'right') => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!containerRef.current) return;
-
-        const rect = containerRef.current.getBoundingClientRect();
-        setContainerResizing(true);
-        setContainerResizeEdge(edge);
-        setContainerWidth(rect.width);
-        setContainerLeft(rect.left);
-        setResizeStartPosition(e.clientX);
-    };
-
-    // Update container resize effect
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            if (!containerResizing || !containerResizeEdge || containerWidth === null) return;
-
-            const deltaX = e.clientX - resizeStartPosition;
-            const windowWidth = window.innerWidth;
-            const minMargin = windowWidth * (MARGIN_PERCENT / 100);
-
-            // Calculate minimum width based on percentage of window width
-            const minWidthFromPercent = windowWidth * (MIN_CONTAINER_WIDTH_PERCENT / 100);
-            const effectiveMinWidth = Math.max(CONTAINER_MIN_WIDTH, minWidthFromPercent);
-
-            let newWidth;
-
-            if (containerResizeEdge === 'right') {
-                // Resize from right edge
-                newWidth = Math.max(effectiveMinWidth, Math.min(windowWidth - (minMargin * 2), containerWidth + deltaX));
-            } else {
-                // Resize from left edge
-                newWidth = Math.max(effectiveMinWidth, Math.min(windowWidth - (minMargin * 2), containerWidth - deltaX));
-            }
-
-            // Update local state
-            setContainerWidth(newWidth);
-
-            // Update DOM directly
-            if (containerRef.current) {
-                containerRef.current.style.width = `${newWidth}px`;
-                containerRef.current.style.maxWidth = `${newWidth}px`;
-            }
-
-            setResizeStartPosition(e.clientX);
-        };
-
-        const handleMouseUp = () => {
-            setContainerResizing(false);
-            setContainerResizeEdge(null);
-        };
-
-        if (containerResizing) {
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-            document.body.style.userSelect = 'none';
-        }
-
-        return () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-            document.body.style.userSelect = '';
-        };
-    }, [containerResizing, containerResizeEdge, containerWidth, resizeStartPosition]);
 
     // Handle sidebar resize start
     const handleSidebarResizeStart = (e: React.MouseEvent) => {
@@ -354,52 +270,17 @@ export default function ChatLayout({
                 <Container
                     ref={containerRef}
                     maxW="none"
-                    width={containerWidth ? `${containerWidth}px` : "98%"}
+                    width="98%"
                     px={{ base: 1, md: 2, lg: 4 }}
                     py={3}
                     height="calc(100% - 10px)"
                     position="relative"
                     overflow="hidden"
                     css={{
-                        maxWidth: containerWidth ? `${containerWidth}px !important` : "98% !important",
-                        transition: containerResizing ? 'none' : 'width 0.2s',
-                        '&:hover .resize-handle': {
-                            opacity: 0.7
-                        },
+                        maxWidth: "98% !important",
                         overflow: 'visible !important'
                     }}
                 >
-                    {/* Resize handles */}
-                    <Box
-                        className="resize-handle"
-                        position="absolute"
-                        left="-4px"
-                        top="0"
-                        width="8px"
-                        height="100%"
-                        cursor="ew-resize"
-                        opacity={0}
-                        zIndex={100}
-                        _hover={{ opacity: 0.7, bg: `${colors.cardBg}33` }}
-                        onMouseDown={(e) => handleContainerResizeStart(e, 'left')}
-                        bg={containerResizing && containerResizeEdge === 'left' ? colors.cardBg : 'transparent'}
-                    />
-
-                    <Box
-                        className="resize-handle"
-                        position="absolute"
-                        right="-4px"
-                        top="0"
-                        width="8px"
-                        height="100%"
-                        cursor="ew-resize"
-                        opacity={0}
-                        zIndex={100}
-                        _hover={{ opacity: 0.7, bg: `${colors.cardBg}33` }}
-                        onMouseDown={(e) => handleContainerResizeStart(e, 'right')}
-                        bg={containerResizing && containerResizeEdge === 'right' ? colors.cardBg : 'transparent'}
-                    />
-
                     <MotionBox
                         width="100%"
                         height="100%"
