@@ -61,7 +61,6 @@ import { v4 as uuidv4 } from "uuid";
 import { setStreamingState } from '@/store/features/assistantSlice';
 import PlanSection from "@/components/chat/plan_section";
 
-const MotionBox = motion.create(Box);
 const MESSAGE_LIMIT = 30;
 const openai = new OpenAI({
   baseURL: process.env.NEXT_PUBLIC_OPENAI_API_BASE_URL,
@@ -1221,17 +1220,8 @@ const ChatInterfaceContainer = ({
   const { bgSubtle, textColor, textColorHeading, borderColor } = colors;
 
   return (
-    <MotionBox
-      layout
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1, scale: 1 }}
+    <Box
       style={{ backgroundColor: bgSubtle }}
-      transition={{
-        duration: 0.5,
-        ease: "easeInOut",
-        opacity: { duration: 0.3 },
-        scale: { duration: 0.3 }
-      }}
       height="100%"
       width="100%"
       overflow="hidden"
@@ -1241,7 +1231,6 @@ const ChatInterfaceContainer = ({
       borderWidth="1px"
       borderColor={borderColor}
       zIndex={2}
-      whileHover={{ boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
     >
       {/* Chat header */}
       <Flex
@@ -1395,6 +1384,6 @@ const ChatInterfaceContainer = ({
 
       {/* Input area */}
       <ChatInput {...chatInputProps} />
-    </MotionBox>
+    </Box>
   );
 };

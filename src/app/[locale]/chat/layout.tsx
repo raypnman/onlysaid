@@ -8,7 +8,6 @@ import {
     Icon,
 
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
 import { FaComments } from "react-icons/fa";
 import { useTranslations } from "next-intl";
 import { useSelector, useDispatch } from 'react-redux';
@@ -33,8 +32,6 @@ import Loading from "@/components/loading";
 import { useSession } from "next-auth/react";
 import { CreateRoomModal } from "@/components/chat/create_room_modal";
 import PlanSection from "@/components/chat/plan_section";
-
-const MotionBox = motion(Box);
 
 const colorPalettes = [
     "blue", "green", "yellow", "orange", "red", "purple", "teal", "gray"
@@ -281,12 +278,9 @@ export default function ChatLayout({
                         overflow: 'visible !important'
                     }}
                 >
-                    <MotionBox
+                    <Box
                         width="100%"
                         height="100%"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
                         display="flex"
                         flexDirection="column"
                         overflow="hidden"
@@ -381,7 +375,7 @@ export default function ChatLayout({
                                 />
                             </Box>
                         </Flex>
-                    </MotionBox>
+                    </Box>
                 </Container>
             </Box>
 
