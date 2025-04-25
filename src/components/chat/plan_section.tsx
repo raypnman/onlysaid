@@ -20,8 +20,6 @@ import PlanLogSection from "@/components/plans/plan_log_section";
 import { getStatusColorScheme } from "@/components/ui/StatusBadge";
 import PlanLogModal from "@/components/plans/plan_log_modal";
 
-const MotionBox = motion(Box);
-
 interface PlanSectionProps {
     currentRoom: IChatRoom | undefined;
     colors: any;
@@ -534,12 +532,8 @@ const PlanSection = ({
     };
 
     return (
-        <MotionBox
-            layout
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+        <Box
             bg={colors.cardBg}
-            transition={{ duration: 0.5 }}
             height="100%"
             width="100%"
             overflow="auto"
@@ -549,7 +543,7 @@ const PlanSection = ({
             borderWidth="1px"
             borderColor={colors.planSectionBorder}
             zIndex={1}
-            whileHover={{ boxShadow: colors.planSectionHoverShadow }}
+            _hover={{ boxShadow: colors.planSectionHoverShadow }}
         >
             <Box
                 p={4}
@@ -796,7 +790,7 @@ const PlanSection = ({
                 onDeny={handleDeny}
                 formattedContent={selectedLog && selectedLog.id ? formattedContents[selectedLog.id] || "" : ""}
             />
-        </MotionBox>
+        </Box>
     );
 };
 

@@ -64,6 +64,7 @@ export default function AppLayout({
                     overflow="auto"
                     position="relative"
                     zIndex="1"
+                    maxH={{ base: "calc(100vh - 120px)", md: "calc(100vh - 60px)" }}
                 >
                     <Container
                         maxW="container.xl"
