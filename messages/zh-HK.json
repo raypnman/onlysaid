@@ -522,7 +522,11 @@
     "unread_messages": "未讀訊息",
     "recent_messages": "最近訊息",
     "message_history_coming_soon": "訊息歷史即將推出",
-    "no_active_users": "沒有活躍用戶"
+    "no_active_users": "沒有活躍用戶",
+    "chat": "聊天",
+    "workbench": "工作台",
+    "knowledge_base": "知識庫",
+    "mcp": "MCP"
   },
   "Settings": {
     "settings": "設定",
@@ -629,7 +633,10 @@
     "api_url_placeholder": "輸入API網址",
     "source_type": "來源類型",
     "team": "團隊",
-    "danger": "危險區域"
+    "danger": "危險區域",
+    "loadingServers": "加載伺服器中...",
+    "kb_reinitialized": "知識庫已重新初始化",
+    "kb_reinitialized_description": "知識庫已成功重新初始化，可能需要一段時間才能完全可用"
   },
   "Loading": {
     "loading": "加載中...",

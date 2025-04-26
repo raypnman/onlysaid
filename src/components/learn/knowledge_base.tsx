@@ -89,20 +89,20 @@ export const KnowledgeBase = () => {
 
     // Add this inside the component (before the useState declarations)
     // Use Redux selector to get the current user
-    const { currentUser, isOwner } = useSelector((state: RootState) => state.user);
-
+    const { currentUser, isOwner, currentTeam } = useSelector((state: RootState) => state.user);
+    console.log("currentTeam", currentTeam);
     // Add this after the useState declarations
     // Get user's authorized knowledge bases from settings
     const authorizedKnowledgeBases = useMemo(() => {
-        if (!currentUser || !currentUser.settings) return [];
+        if (!currentUser || !currentTeam?.settings) return [];
 
         // Try different possible paths to the knowledge bases array
-        const kbSettings = currentUser.settings.knowledgeBase;
+        const kbSettings = currentTeam.settings.knowledgeBase;
         if (!kbSettings) return [];
 
         // Check if knowledgeBases is directly in the settings
         if (Array.isArray(kbSettings.knowledgeBases)) {
-            return kbSettings.knowledgeBases.map(kb => kb.id);
+            return kbSettings.knowledgeBases.map((kb: KnowledgeBaseItem) => kb.id);
         }
 
         // If it's not an array but an object with a knowledgeBases property
@@ -112,8 +112,8 @@ export const KnowledgeBase = () => {
         }
 
         // If we can't find it in the expected location, check if it's directly in the settings
-        if (Array.isArray(currentUser.settings.knowledgeBases)) {
-            return currentUser.settings.knowledgeBases.map(kb => kb.id);
+        if (Array.isArray(currentTeam?.settings?.knowledgeBases)) {
+            return currentTeam?.settings?.knowledgeBases.map((kb: KnowledgeBaseItem) => kb.id);
         }
 
         // Last resort - check if the entire knowledgeBase setting is an array
@@ -133,12 +133,8 @@ export const KnowledgeBase = () => {
             const response = await axios.get(url);
             const data = response.data;
 
-            // Filter data sources to only include those in user's settings
-            // Owner (seasonluke@gmail.com) or users with isOwner flag can see all knowledge bases
             const filteredDataSources = data.dataSources ? data.dataSources.filter((ds: DataSource) =>
-                // If user is owner, show all knowledge bases
                 isOwner ||
-                // Otherwise, only show knowledge bases in user's settings
                 authorizedKnowledgeBases.includes(ds.id)
             ) : [];
 

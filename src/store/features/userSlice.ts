@@ -14,6 +14,7 @@ interface UserState {
     expiresAt: number | null;
     trustMode: boolean;
     lastOpenedTeam: string | null;
+    currentTeam: Team | null;
 }
 
 const initialState: UserState = {
@@ -25,7 +26,8 @@ const initialState: UserState = {
     error: null,
     expiresAt: null,
     trustMode: false,
-    lastOpenedTeam: null
+    lastOpenedTeam: null,
+    currentTeam: null
 };
 
 // TTL duration in milliseconds (1 hour)
@@ -52,6 +54,7 @@ export const userSlice = createSlice({
             state.isAuthenticated = true && action.payload.teams && action.payload.teams.length > 0;
             state.isOwner = true; // TODO: make it dynamic
             state.error = null;
+            state.currentTeam = null;
             state.expiresAt = Date.now() + SESSION_TTL;
 
             // Set lastOpenedTeam if it exists in the user data
@@ -157,6 +160,38 @@ export const userSlice = createSlice({
         },
         resetOwner: (state) => {
             state.isOwner = false;
+        },
+        // New reducer to set the current team
+        setCurrentTeam: (state, action: PayloadAction<Team>) => {
+            state.currentTeam = action.payload;
+        },
+        // New reducer to reset/clear the current team
+        resetCurrentTeam: (state) => {
+            state.currentTeam = null;
+        },
+        // New reducer to update team settings
+        updateTeamSettings: (state, action: PayloadAction<{ key: string; value: any }>) => {
+            if (!state.currentTeam) return;
+
+            // Initialize team_settings if it doesn't exist
+            if (!state.currentTeam.settings) {
+                state.currentTeam.settings = {
+                    general: {
+                        theme: 'light'
+                    }
+                };
+            }
+
+            // Update the specific setting
+            const { key, value } = action.payload;
+            state.currentTeam.settings[key] = value;
+        },
+
+        // New reducer to replace all team settings at once
+        setTeamSettings: (state, action: PayloadAction<UserSettings>) => {
+            if (!state.currentTeam) return;
+
+            state.currentTeam.settings = action.payload;
         }
     }
 });
@@ -175,7 +210,11 @@ export const {
     setTrustMode,
     setLastOpenedTeam,
     updateOwner,
-    resetOwner
+    resetOwner,
+    setCurrentTeam,
+    resetCurrentTeam,
+    updateTeamSettings,
+    setTeamSettings
 } = userSlice.actions;
 
 // Create a persisted reducer

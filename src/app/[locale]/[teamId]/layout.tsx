@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { setLastOpenedTeam, updateOwner } from "@/store/features/userSlice";
+import { setCurrentTeam, setLastOpenedTeam, updateOwner } from "@/store/features/userSlice";
 import { useDispatch } from "react-redux";
 
 export default function LocaleLayout({
@@ -55,6 +55,7 @@ export default function LocaleLayout({
           const data = await response.json();
 
           // Update Redux store with team data
+          dispatch(setCurrentTeam(data.team));
           dispatch(setLastOpenedTeam(teamId));
           dispatch(updateOwner({ team: data.team }));
 

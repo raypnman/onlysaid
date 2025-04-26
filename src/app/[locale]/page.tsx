@@ -18,7 +18,7 @@ import { toaster } from "@/components/ui/toaster";
 import { GuestHomePage } from "@/components/home";
 import { GitHubIssue } from '@/types/github';
 import { Team } from "@/types/teams";
-import { setLastOpenedTeam, updateOwner, resetOwner } from "@/store/features/userSlice";
+import { setLastOpenedTeam, updateOwner, resetOwner, resetCurrentTeam } from "@/store/features/userSlice";
 
 const MotionBox = motion.create(Box);
 
@@ -226,6 +226,7 @@ export default function HomePage() {
   useEffect(() => {
     // Reset owner state when the home page loads
     dispatch(resetOwner());
+    dispatch(resetCurrentTeam());
   }, [dispatch]);
 
   if (isSigningOut) {
@@ -480,7 +481,7 @@ export default function HomePage() {
                       boxShadow: "md",
                       cursor: "pointer"
                     }}
-                    onClick={() => router.push(`/${locale}/create-team`)}
+                    onClick={() => router.push(`/${locale}/signup/new_team`)}
                     transition={{ duration: 0.2 }}
                     display="flex"
                     flexDirection="column"

@@ -29,18 +29,20 @@ import { v4 as uuidv4 } from 'uuid';
 import { useTranslations } from "next-intl";
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from "@/store/store";
-import { setUserSettings } from '@/store/features/userSlice';
+import { setTeamSettings } from '@/store/features/userSlice';
 import { toaster } from "@/components/ui/toaster";
 import { useColorModeValue } from "@/components/ui/color-mode";
 import { KnowledgeBaseSettings as KnowledgeBaseSettingsType, KnowledgeBaseItem } from "@/types/user";
 import { useSettingsColors } from "@/utils/colors";
+
 
 // Add a new type for KB status
 type KBStatus = 'not_found' | 'disabled' | 'initializing' | 'running' | 'error';
 
 export default function KnowledgeBasePage() {
     const t = useTranslations("Settings");
-    const userSettings = useSelector((state: RootState) => state.user.currentUser?.settings);
+    const currentTeam = useSelector((state: RootState) => state.user.currentTeam);
+    const teamSettings = currentTeam?.settings;
     const isOwner = useSelector((state: RootState) => state.user.isOwner);
     const dispatch = useDispatch();
     const textColor = useColorModeValue("gray.800", "gray.100");
@@ -85,25 +87,25 @@ export default function KnowledgeBasePage() {
 
     // Initialize settings
     useEffect(() => {
-        if (!userSettings) return;
+        if (!teamSettings) return;
 
         const newSettings = {
             // Knowledge base settings - use structured format if available
-            enableKnowledgeBase: userSettings?.knowledgeBase?.enableKnowledgeBase || false,
-            source: userSettings?.knowledgeBase?.source || "",
-            apiKey: userSettings?.knowledgeBase?.apiKey || "",
-            apiUrl: userSettings?.knowledgeBase?.apiUrl || "",
+            enableKnowledgeBase: teamSettings?.knowledgeBase?.enableKnowledgeBase || false,
+            source: teamSettings?.knowledgeBase?.source || "",
+            apiKey: teamSettings?.knowledgeBase?.apiKey || "",
+            apiUrl: teamSettings?.knowledgeBase?.apiUrl || "",
             // For backward compatibility, also check the flat structure
-            ...(userSettings?.source && {
-                source: userSettings.source,
-                apiKey: userSettings.apiKey,
-                apiUrl: userSettings.apiUrl,
-                enableKnowledgeBase: userSettings.enableKnowledgeBase || false,
+            ...(teamSettings?.source && {
+                source: teamSettings.source,
+                apiKey: teamSettings.apiKey,
+                apiUrl: teamSettings.apiUrl,
+                enableKnowledgeBase: teamSettings.enableKnowledgeBase || false,
             }),
             // Additional properties for the knowledge base UI
-            relevanceThreshold: userSettings?.knowledgeBase?.relevanceThreshold || 0.7,
-            maxResults: userSettings?.knowledgeBase?.maxResults || 5,
-            knowledgeBases: userSettings?.knowledgeBases || [],
+            relevanceThreshold: teamSettings?.knowledgeBase?.relevanceThreshold || 0.7,
+            maxResults: teamSettings?.knowledgeBase?.maxResults || 5,
+            knowledgeBases: teamSettings?.knowledgeBases || [],
         };
 
         setSettings(newSettings);
@@ -111,7 +113,7 @@ export default function KnowledgeBasePage() {
 
         // Set connection status based on settings
         updateConnectionStatus(newSettings);
-    }, [userSettings]);
+    }, [teamSettings]);
 
     // Update connection status when settings change
     const updateConnectionStatus = useCallback((config: KnowledgeBaseSettingsType) => {
@@ -214,9 +216,9 @@ export default function KnowledgeBasePage() {
                 }
             }
 
-            // Create a properly structured user settings object
-            const updatedUserSettings = {
-                ...userSettings,
+            // Create a properly structured team settings object
+            const updatedTeamSettings = {
+                ...teamSettings,
                 knowledgeBase: {
                     enableKnowledgeBase: settings.enableKnowledgeBase,
                     source: settings.source,
@@ -229,13 +231,16 @@ export default function KnowledgeBasePage() {
                 knowledgeBases: settings.knowledgeBases || [],
             };
 
-            // Save user settings to the database
-            const response = await fetch('/api/user/update_user', {
-                method: 'POST',
+            // Save team settings to the database
+            const response = await fetch('/api/team/update_team', {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ settings: updatedUserSettings }),
+                body: JSON.stringify({
+                    team_id: currentTeam?.id,
+                    settings: updatedTeamSettings
+                }),
             });
 
             if (!response.ok) {
@@ -400,7 +405,7 @@ export default function KnowledgeBasePage() {
             }
 
             // Update Redux store with properly structured settings
-            dispatch(setUserSettings(updatedUserSettings));
+            dispatch(setTeamSettings(updatedTeamSettings));
 
             // Update initial settings string to disable save button
             setInitialSettingsString(JSON.stringify(settings));

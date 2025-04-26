@@ -81,25 +81,6 @@ export default function SettingsLayout({
             ]
         },
         {
-            category: "team",
-            items: [
-                {
-                    icon: FiBookOpen,
-                    label: t("knowledge_base"),
-                    path: "/settings/knowledge_base",
-                    visible: isAuthenticated,
-                    color: undefined
-                },
-                {
-                    icon: FiServer,
-                    label: t("mcp"),
-                    path: "/settings/mcp",
-                    visible: isAuthenticated,
-                    color: undefined
-                }
-            ]
-        },
-        {
             category: "danger",
             items: [
                 {
