@@ -4,19 +4,21 @@ import React, { useEffect, useState } from "react";
 import { Box, Container, Flex, Heading, Icon, Text, Separator, Portal, Popover, CloseButton, Button, Link } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { FiHome, FiServer, FiBook, FiMessageSquare, FiBell, FiTool, FiPlus, FiArrowRight, FiLoader, FiAlertTriangle, FiRefreshCw } from "react-icons/fi";
-import { FaComments, FaComment } from "react-icons/fa";
+import { FaComments, FaComment, FaTools } from "react-icons/fa";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Loading from "@/components/loading";
 import { useColorModeValue } from "@/components/ui/color-mode";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
 // @ts-ignore
 import { debounce } from 'lodash';
 import { toaster } from "@/components/ui/toaster";
 import { GuestHomePage } from "@/components/home";
 import { GitHubIssue } from '@/types/github';
+import { Team } from "@/types/teams";
+import { setLastOpenedTeam, updateOwner, resetOwner } from "@/store/features/userSlice";
 
 const MotionBox = motion.create(Box);
 
@@ -40,11 +42,19 @@ interface GitHubRelease {
 export default function HomePage() {
   const t = useTranslations("Home");
   const { data: session } = useSession();
+  const params = useParams();
+  const teamId = params.teamId;
+  const locale = params.locale;
   console.log(session);
   const router = useRouter();
   const { currentUser, isAuthenticated, isLoading, isSigningOut } = useSelector(
     (state: RootState) => state.user
   );
+  // Add state for user teams
+  const [userTeams, setUserTeams] = useState<Team[]>([]);
+  const [isLoadingTeams, setIsLoadingTeams] = useState(false);
+  const [teamsError, setTeamsError] = useState(null);
+  const dispatch = useDispatch();
   // Update state for GitHub issues
   const [githubIssues, setGithubIssues] = useState<GitHubIssue[]>([]);
   // Add state for GitHub issue counts
@@ -53,6 +63,7 @@ export default function HomePage() {
     enhancements: { open: 0, closed: 0 },
     announcements: { open: 0, closed: 0 }
   });
+  const lastOpenedTeam = currentUser?.lastOpenedTeam;
   // Add state for GitHub releases
   const [githubReleases, setGithubReleases] = useState<GitHubRelease[]>([]);
   // Add these new state variables for loading states
@@ -82,6 +93,11 @@ export default function HomePage() {
   const grayBgLight = useColorModeValue("gray.100", "gray.700");
   const purpleHoverLight = useColorModeValue("purple.600", "purple.300");
   const whiteOrGray750 = useColorModeValue("white", "gray.750");
+  const user_locale = currentUser?.settings?.general?.language || locale;
+  // Add overlay colors for disabled cards
+  const overlayBgColor = useColorModeValue("rgba(255,255,255,0.7)", "rgba(0,0,0,0.7)");
+  const overlayTextColor = useColorModeValue("gray.800", "white");
+  const overlayTextBgColor = useColorModeValue("rgba(255,255,255,0.8)", "rgba(0,0,0,0.6)");
 
   const debouncedSetSigningOut = React.useCallback(
     debounce((value: boolean) => {
@@ -165,6 +181,53 @@ export default function HomePage() {
     }
   }, [isAuthenticated]);
 
+  // Add useEffect to fetch user teams
+  useEffect(() => {
+    const fetchUserTeams = async () => {
+      if (!currentUser?.id) return;
+
+      setIsLoadingTeams(true);
+      try {
+        const response = await fetch('/api/team/get_user_teams', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_id: currentUser.id
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch teams');
+        }
+
+        const data = await response.json();
+        setUserTeams(data.teams || []);
+      } catch (error: any) {
+        console.error('Error fetching teams:', error);
+        setTeamsError(error.message);
+        toaster.create({
+          title: "Failed to fetch teams",
+          description: "Please try again later",
+          type: "error"
+        });
+      } finally {
+        setIsLoadingTeams(false);
+      }
+    };
+
+    if (isAuthenticated && currentUser) {
+      fetchUserTeams();
+    }
+  }, [isAuthenticated, currentUser]);
+
+  // Add useEffect to reset owner state on component mount
+  useEffect(() => {
+    // Reset owner state when the home page loads
+    dispatch(resetOwner());
+  }, [dispatch]);
+
   if (isSigningOut) {
     return <Loading />;
   }
@@ -191,7 +254,7 @@ export default function HomePage() {
       description: t("chatroom_description") || "Chat with your team and AI agents to create executable plans",
       icon: FaComments,
       color: "pink.500",
-      path: "/chat",
+      path: `/${user_locale}/${teamId}/chat`, // no-effect
     },
     {
       id: "plans",
@@ -199,23 +262,15 @@ export default function HomePage() {
       description: t("plans_description"),
       icon: FiMessageSquare,
       color: "green.500",
-      path: "/plans",
+      path: `/${user_locale}/${teamId}/plans`, // no-effect
     },
     {
-      id: "learn",
-      title: t("learn_title"),
-      description: t("learn_description"),
-      icon: FiBook,
-      color: "blue.500",
-      path: "/workbench/learn",
-    },
-    {
-      id: "ai-assistant",
-      title: t("ai_assistant_title") || "AI Assistant",
-      description: t("ai_assistant_description") || "Answer questions based on growing knowledge, globally persisted across the app.",
-      icon: FaComment,
-      color: "teal.500",
-      path: null,
+      id: "workbench",
+      title: t("workbench_title") || "Workbench",
+      description: t("workbench_description") || "Access tools and resources to enhance your productivity",
+      icon: FaTools,
+      color: "orange.500",
+      path: `/${user_locale}/${teamId}/workbench`, // no-effect
     },
   ];
 
@@ -310,6 +365,139 @@ export default function HomePage() {
             </Text>
           </MotionBox>
 
+          {/* Teams Selection Section */}
+          {isAuthenticated && userTeams.length > 0 && (
+            <MotionBox
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.3 }}
+              mb={8}
+              p={6}
+              borderRadius="xl"
+              bg={cardBgColor}
+              border="1px solid"
+              borderColor={cardBorderColor}
+              boxShadow={cardShadow}
+            >
+              <Flex align="center" mb={4}>
+                <Icon
+                  as={FiServer}
+                  fontSize="2xl"
+                  color={accentColor}
+                  mr={3}
+                  p={1}
+                  bg={`${accentColor}15`}
+                  borderRadius="md"
+                />
+                <Heading as="h2" size="md" color={textColor} fontWeight="bold">
+                  {t("your_teams") || "Your Teams"}
+                </Heading>
+              </Flex>
+
+              {isLoadingTeams ? (
+                <Flex justify="center" align="center" py={4}>
+                  <SpinningLoader size="sm" />
+                </Flex>
+              ) : teamsError ? (
+                <Flex direction="column" align="center" py={4}>
+                  <Text color="red.500">{teamsError}</Text>
+                  <Button
+                    mt={2}
+                    size="sm"
+                    colorScheme="blue"
+                    onClick={() => {
+                      if (currentUser?.id) {
+                        setIsLoadingTeams(true);
+                        fetch('/api/team/get_user_teams', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            user_id: currentUser.id
+                          }),
+                        })
+                          .then(res => res.json())
+                          .then(data => {
+                            setUserTeams(data.teams || []);
+                            setTeamsError(null);
+                          })
+                          .catch(err => setTeamsError(err.message))
+                          .finally(() => setIsLoadingTeams(false));
+                      }
+                    }}
+                  >
+                    {t("retry") || "Retry"}
+                  </Button>
+                </Flex>
+              ) : (
+                <Box className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {userTeams.map(team => (
+                    <MotionBox
+                      key={team.id}
+                      p={4}
+                      borderRadius="lg"
+                      border="1px solid"
+                      borderColor={cardBorderColor}
+                      _hover={{
+                        borderColor: accentColor,
+                        transform: "translateY(-2px)",
+                        boxShadow: "md",
+                        cursor: "pointer"
+                      }}
+                      onClick={() => {
+                        router.push(`/${user_locale}/${team.id}`);
+                      }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Flex justify="space-between" align="center" mb={2}>
+                        <Text fontWeight="bold" color={textColor}>{team.name}</Text>
+                        {team.invite_code && (
+                          <Text fontSize="xs" color={textColorSecondary} bg={grayBgLight} px={2} py={1} borderRadius="md">
+                            {team.invite_code}
+                          </Text>
+                        )}
+                      </Flex>
+                      <Flex justify="space-between" mt={3}>
+                        <Text fontSize="sm" color={textColorSecondary}>
+                          {t("members") || "Members"}: {team.members?.length || 0}
+                        </Text>
+                        <Icon as={FiArrowRight} color={accentColor} />
+                      </Flex>
+                    </MotionBox>
+                  ))}
+
+                  {/* Create New Team Card */}
+                  <MotionBox
+                    p={4}
+                    borderRadius="lg"
+                    border="1px dashed"
+                    borderColor={cardBorderColor}
+                    bg={`${accentColor}05`}
+                    _hover={{
+                      borderColor: accentColor,
+                      transform: "translateY(-2px)",
+                      boxShadow: "md",
+                      cursor: "pointer"
+                    }}
+                    onClick={() => router.push(`/${locale}/create-team`)}
+                    transition={{ duration: 0.2 }}
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="center"
+                    alignItems="center"
+                    minHeight="100px"
+                  >
+                    <Icon as={FiPlus} fontSize="xl" color={accentColor} mb={2} />
+                    <Text fontWeight="medium" color={accentColor}>
+                      {t("create_new_team") || "Create New Team"}
+                    </Text>
+                  </MotionBox>
+                </Box>
+              )}
+            </MotionBox>
+          )}
+
           {/* Main Content Grid with Enhanced Spacing */}
           <Flex
             direction={{ base: "column", lg: "row" }}
@@ -324,23 +512,56 @@ export default function HomePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 * (index + 1), duration: 0.4 }}
-                    onClick={() => card.path && router.push(card.path)}
-                    cursor="pointer"
                     p={5}
                     borderRadius="xl"
                     bg={cardBgColor}
                     border="1px solid"
                     borderColor={cardBorderColor}
                     boxShadow={cardShadow}
-                    _hover={{
-                      transform: "translateY(-5px)",
-                      boxShadow: hoverCardShadow,
-                      borderColor: card.color,
-                      transition: "all 0.3s ease"
-                    }}
                     position="relative"
                     overflow="hidden"
+                    onClick={(e) => {
+                      // Prevent any click events
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    pointerEvents="none" // Disable pointer events on the card itself
                   >
+                    {/* Overlay for all cards regardless of team status */}
+                    <Flex
+                      position="absolute"
+                      top={0}
+                      left={0}
+                      right={0}
+                      bottom={0}
+                      bg={overlayBgColor}
+                      zIndex={10}
+                      justify="center"
+                      align="center"
+                      borderRadius="xl"
+                      backdropFilter="blur(3px)"
+                      pointerEvents="all" // Ensure overlay captures all clicks
+                      onClick={(e) => {
+                        // Explicitly prevent any click events
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                    >
+                      <Text
+                        color={overlayTextColor}
+                        fontWeight="bold"
+                        fontSize="md"
+                        textAlign="center"
+                        px={4}
+                        bg={overlayTextBgColor}
+                        py={2}
+                        borderRadius="md"
+                        boxShadow="md"
+                      >
+                        {t("join_team_to_use") || "Join a team to use"}
+                      </Text>
+                    </Flex>
+
                     {/* Subtle background gradient for cards */}
                     <Box
                       position="absolute"

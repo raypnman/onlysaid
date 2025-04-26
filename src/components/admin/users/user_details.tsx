@@ -62,7 +62,7 @@ const UserDetails: React.FC<UserDetailsProps> = ({
                     <Heading size="md" color={colors.textColorHeading}>{selectedUser.username}</Heading>
                     <Text color={colors.textColorMuted}>{selectedUser.email}</Text>
                     <Badge colorScheme={selectedUser.role === 'admin' ? 'red' : 'blue'} mt={1}>
-                        {selectedUser.role || 'User'}
+                        {selectedUser.role}
                     </Badge>
                 </Box>
             </Flex>

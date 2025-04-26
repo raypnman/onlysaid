@@ -4,7 +4,7 @@ import React from "react";
 import { Box, Container, Flex, Heading, Icon, Text, SimpleGrid, Image, Avatar } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { FiMessageSquare } from "react-icons/fi";
-import { FaBook, FaTasks, FaQuoteLeft } from "react-icons/fa";
+import { FaBook, FaTasks, FaQuoteLeft, FaTools as FaToolsIcon } from "react-icons/fa";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
@@ -55,18 +55,11 @@ export function GuestHomePage({
             color: "green.500",
         },
         {
-            id: "learn",
-            title: t("learn_title") || "Learn",
-            description: t("learn_description") || "Accessing resources and tutorials for skill development",
-            icon: FaBook,
-            color: "blue.500",
-        },
-        {
-            id: "ai-assistant",
-            title: t("ai_assistant_title") || "AI Assistant",
-            description: t("ai_assistant_description") || "Answer questions based on growing knowledge, globally persisted across the app",
-            icon: FaQuoteLeft,
-            color: "teal.500",
+            id: "workbench",
+            title: t("workbench_title") || "Workbench",
+            description: t("workbench_description") || "Access tools and resources to enhance your productivity",
+            icon: FaToolsIcon,
+            color: "orange.500",
         },
     ];
 
@@ -300,7 +293,7 @@ export function GuestHomePage({
                             {t("guest_features_title") || "Why Choose MCP?"}
                         </MotionHeading>
 
-                        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap={{ base: "28px", md: "36px" }}>
+                        <SimpleGrid columns={{ base: 1, md: 3 }} gap={{ base: "28px", md: "36px" }} maxWidth="1200px" mx="auto">
                             {featureCards.map((card, index) => (
                                 <MotionBox
                                     key={card.id}
@@ -361,117 +354,6 @@ export function GuestHomePage({
                             ))}
                         </SimpleGrid>
                     </Box>
-
-                    {/* Testimonials Section with Improved Design */}
-                    <MotionBox
-                        custom={8}
-                        variants={fadeInUp}
-                        initial="hidden"
-                        animate="visible"
-                        marginBottom={16}
-                    >
-                        <Heading
-                            as="h2"
-                            size={{ base: "lg", md: "xl" }}
-                            marginBottom={8}
-                            color="black"
-                            textAlign="center"
-                            fontWeight="bold"
-                        >
-                            {t("trusted_by") || "Trusted By Users"}
-                        </Heading>
-
-                        <Flex
-                            direction={{ base: "column", md: "row" }}
-                            gap={8}
-                            justifyContent="center"
-                            overflowX={{ base: "visible", md: "auto" }}
-                            pb={4}
-                            css={{
-                                "&::-webkit-scrollbar": {
-                                    height: "8px",
-                                },
-                                "&::-webkit-scrollbar-track": {
-                                    background: "transparent",
-                                },
-                                "&::-webkit-scrollbar-thumb": {
-                                    background: dividerColor,
-                                    borderRadius: "4px",
-                                },
-                            }}
-                        >
-                            {/* @ts-ignore */}
-                            {testimonials.map((testimonial, index) => (
-                                <MotionBox
-                                    key={testimonial.id}
-                                    custom={index + 9}
-                                    variants={fadeInUp}
-                                    initial="hidden"
-                                    animate="visible"
-                                    bg={cardBgColor}
-                                    p={8}
-                                    borderRadius="xl"
-                                    boxShadow="lg"
-                                    border="1px solid"
-                                    borderColor={cardBorderColor}
-                                    minWidth={{ base: "100%", md: "320px" }}
-                                    maxWidth={{ base: "100%", md: "380px" }}
-                                    flex="1"
-                                    position="relative"
-                                    whileHover={{
-                                        y: -8,
-                                        boxShadow: "xl",
-                                        borderColor: "purple.300",
-                                    }}
-                                >
-                                    <Icon
-                                        as={FaQuoteLeft}
-                                        position="absolute"
-                                        top={4}
-                                        right={4}
-                                        color="purple.200"
-                                        fontSize="2xl"
-                                    />
-
-                                    <Text
-                                        color={textColor}
-                                        fontSize="md"
-                                        fontStyle="italic"
-                                        mb={5}
-                                        lineHeight="1.7"
-                                    >
-                                        "{testimonial.content}"
-                                    </Text>
-
-                                    <Flex align="center">
-                                        {/* <Avatar
-                                            src={testimonial.avatar}
-                                            name={testimonial.name}
-                                            size="md"
-                                            mr={4}
-                                            border="2px solid"
-                                            borderColor="purple.300"
-                                        /> */}
-                                        <Box>
-                                            <Text
-                                                color={textColor}
-                                                fontWeight="bold"
-                                                fontSize="md"
-                                            >
-                                                {testimonial.name}
-                                            </Text>
-                                            <Text
-                                                color={textColorSecondary}
-                                                fontSize="sm"
-                                            >
-                                                {testimonial.role}, {testimonial.company}
-                                            </Text>
-                                        </Box>
-                                    </Flex>
-                                </MotionBox>
-                            ))}
-                        </Flex>
-                    </MotionBox>
 
                     {/* Footer info with animation - Made more compact */}
                     <MotionFlex

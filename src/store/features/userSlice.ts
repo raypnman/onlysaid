@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { User, UserSettings } from '@/types/user';
+import { Team } from '@/types/teams';
 
 interface UserState {
     currentUser: User | null;
@@ -48,8 +49,8 @@ export const userSlice = createSlice({
     reducers: {
         setUser: (state, action: PayloadAction<User>) => {
             state.currentUser = action.payload;
-            state.isAuthenticated = true && action.payload.teams.length > 0;
-            state.isOwner = action.payload.email === "seasonluke@gmail.com";
+            state.isAuthenticated = true && action.payload.teams && action.payload.teams.length > 0;
+            state.isOwner = true; // TODO: make it dynamic
             state.error = null;
             state.expiresAt = Date.now() + SESSION_TTL;
 
@@ -145,6 +146,17 @@ export const userSlice = createSlice({
             if (state.currentUser) {
                 state.currentUser.lastOpenedTeam = action.payload;
             }
+        },
+        // New reducer to update isOwner status
+        updateOwner: (state, action: PayloadAction<{ team: Team }>) => {
+            if (!state.currentUser) return;
+
+            const { team } = action.payload;
+            // Check if the current user's ID is in the team's owners array
+            state.isOwner = team.owners.includes(state.currentUser.id || "");
+        },
+        resetOwner: (state) => {
+            state.isOwner = false;
         }
     }
 });
@@ -161,7 +173,9 @@ export const {
     updateUserSettings,
     setUserSettings,
     setTrustMode,
-    setLastOpenedTeam
+    setLastOpenedTeam,
+    updateOwner,
+    resetOwner
 } = userSlice.actions;
 
 // Create a persisted reducer

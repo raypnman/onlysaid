@@ -4,6 +4,7 @@ export interface Team {
     updated_at: string;
     name: string;
     members: string[];
+    rooms: string[];
     owners: string[];
     invite_code: string;
     settings: any;

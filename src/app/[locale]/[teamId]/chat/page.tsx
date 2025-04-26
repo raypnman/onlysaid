@@ -280,13 +280,13 @@ const ChatPageContent = () => {
       const deepseekUser: User = users.find((user: User) => user.username === "deepseek") || {
         id: "deepseek-" + uuidv4(),
         username: "deepseek",
-        role: "agent", // Changed to "agent" to match your streaming middleware expectations
         email: "deepseek@ai.com",
         avatar: "",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         active_rooms: [],
         archived_rooms: [],
+        teams: [],
         settings: {} // Add the required settings property
       };
 

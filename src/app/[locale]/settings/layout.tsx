@@ -66,33 +66,51 @@ export default function SettingsLayout({
         visible: { opacity: 1, x: 0, transition: { duration: 0.3 } },
     };
 
-    // Navigation items
+    // Navigation items with categories
     const navItems = [
         {
-            icon: FaUserCircle,
-            label: t("general"),
-            path: "/settings",
-            visible: true
+            category: "general",
+            items: [
+                {
+                    icon: FaUserCircle,
+                    label: t("general"),
+                    path: "/settings",
+                    visible: true,
+                    color: undefined
+                }
+            ]
         },
         {
-            icon: FiBookOpen,
-            label: t("knowledge_base"),
-            path: "/settings/knowledge_base",
-            visible: isAuthenticated
+            category: "team",
+            items: [
+                {
+                    icon: FiBookOpen,
+                    label: t("knowledge_base"),
+                    path: "/settings/knowledge_base",
+                    visible: isAuthenticated,
+                    color: undefined
+                },
+                {
+                    icon: FiServer,
+                    label: t("mcp"),
+                    path: "/settings/mcp",
+                    visible: isAuthenticated,
+                    color: undefined
+                }
+            ]
         },
         {
-            icon: FiServer,
-            label: t("mcp"),
-            path: "/settings/mcp",
-            visible: isAuthenticated
-        },
-        {
-            icon: FaTrash,
-            label: t("danger_zone"),
-            path: "/settings/danger_zone",
-            visible: isAuthenticated && isOwner,
-            color: "red.500"
-        },
+            category: "danger",
+            items: [
+                {
+                    icon: FaTrash,
+                    label: t("danger_zone"),
+                    path: "/settings/danger_zone",
+                    visible: isAuthenticated && isOwner,
+                    color: "red.500"
+                }
+            ]
+        }
     ];
 
     return (
@@ -135,36 +153,67 @@ export default function SettingsLayout({
                         align="stretch"
                         height="fit-content"
                         variants={itemVariants}
+                        gap={4}
                     >
-                        {navItems.filter(item => item.visible).map((item) => (
-                            <motion.div key={item.path} variants={tabVariants}>
-                                <Link href={item.path} passHref>
+                        {navItems.map((category, idx) => (
+                            <Box key={category.category}>
+                                {/* Category title */}
+                                <Box
+                                    px={4}
+                                    mb={2}
+                                    fontWeight="bold"
+                                    fontSize="xs"
+                                    textTransform="uppercase"
+                                    color={useColorModeValue("gray.500", "gray.400")}
+                                >
+                                    {t(category.category)}
+                                </Box>
+
+                                {/* Category items */}
+                                <VStack align="stretch" gap={1}>
+                                    {category.items.filter(item => item.visible).map((item) => (
+                                        <motion.div key={item.path} variants={tabVariants}>
+                                            <Link href={item.path} passHref>
+                                                <Box
+                                                    py={3}
+                                                    px={4}
+                                                    borderRadius="md"
+                                                    bg={pathname === item.path ? activeHighlight : "transparent"}
+                                                    color={item.color || (pathname === item.path ? accentColor : textColor)}
+                                                    fontWeight={pathname === item.path ? "semibold" : "medium"}
+                                                    fontSize="sm"
+                                                    width="100%"
+                                                    textAlign="left"
+                                                    _hover={{ bg: hoverBg }}
+                                                    display="block"
+                                                    borderLeft={pathname === item.path ? "3px solid" : "none"}
+                                                    borderLeftColor={activeBorderColor}
+                                                >
+                                                    <Flex align="center">
+                                                        <Icon
+                                                            as={item.icon}
+                                                            color={item.color || (pathname === item.path ? accentColor : textColor)}
+                                                            mr={2}
+                                                        />
+                                                        {item.label}
+                                                    </Flex>
+                                                </Box>
+                                            </Link>
+                                        </motion.div>
+                                    ))}
+                                </VStack>
+
+                                {/* Add separator if not the last category */}
+                                {idx < navItems.length - 1 && (
                                     <Box
-                                        py={3}
-                                        px={4}
-                                        borderRadius="md"
-                                        bg={pathname === item.path ? activeHighlight : "transparent"}
-                                        color={item.color || (pathname === item.path ? accentColor : textColor)}
-                                        fontWeight={pathname === item.path ? "semibold" : "medium"}
-                                        fontSize="sm"
-                                        width="100%"
-                                        textAlign="left"
-                                        _hover={{ bg: hoverBg }}
-                                        display="block"
-                                        borderLeft={pathname === item.path ? "3px solid" : "none"}
-                                        borderLeftColor={activeBorderColor}
-                                    >
-                                        <Flex align="center">
-                                            <Icon
-                                                as={item.icon}
-                                                color={item.color || (pathname === item.path ? accentColor : textColor)}
-                                                mr={2}
-                                            />
-                                            {item.label}
-                                        </Flex>
-                                    </Box>
-                                </Link>
-                            </motion.div>
+                                        height="1px"
+                                        bg={borderColor}
+                                        my={3}
+                                        width="90%"
+                                        mx="auto"
+                                    />
+                                )}
+                            </Box>
                         ))}
                     </MotionVStack>
 

@@ -19,7 +19,6 @@ export async function POST(request: Request) {
             email: userData.email,
             username: userData.username,
             avatar: userData.avatar || null,
-            role: userData.role || null,
             created_at: userData.created_at || new Date(),
             updated_at: userData.updated_at || new Date(),
             active_rooms: userData.active_rooms || [],

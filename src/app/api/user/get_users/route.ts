@@ -8,8 +8,7 @@ export async function GET(request: Request) {
         const limit = parseInt(url.searchParams.get('limit') || '50');
         const offset = parseInt(url.searchParams.get('offset') || '0');
         const search = url.searchParams.get('search') || '';
-        const role = url.searchParams.get('role') || '';
-
+        const teamId = url.searchParams.get('teamId') || '';
         // Base query
         let query = db('users').select([
             "*"
@@ -24,9 +23,9 @@ export async function GET(request: Request) {
             });
         }
 
-        // Add role filtering if role parameter is provided
-        if (role) {
-            query = query.where('role', role);
+        // Add team filtering if teamId parameter is provided
+        if (teamId) {
+            query = query.where('teams', '@>', `{${teamId}}`);
         }
 
         // Get total count for pagination
@@ -40,8 +39,8 @@ export async function GET(request: Request) {
                             .orWhereILike('email', `%${search}%`);
                     });
                 }
-                if (role) {
-                    builder.where('role', role);
+                if (teamId) {
+                    builder.where('teams', '@>', `{${teamId}}`);
                 }
             });
 
@@ -79,19 +78,13 @@ export async function POST(request: Request) {
         const limit = body.limit || 50;
         const offset = body.offset || 0;
         const search = body.search || '';
-        const role = body.role || '';
         const userIds = body.ids || [];
         const roomId = body.room_id || '';
+        const teamId = body.team_id || '';
 
         // Base query
         let query = db('users').select([
-            'id',
-            'email',
-            'username',
-            'avatar',
-            'role',
-            'created_at',
-            'updated_at'
+            "*"
         ]);
 
         // Add search functionality if search parameter is provided
@@ -103,11 +96,6 @@ export async function POST(request: Request) {
             });
         }
 
-        // Add role filtering if role parameter is provided
-        if (role) {
-            query = query.where('role', role);
-        }
-
         // Add ids filtering if ids array is provided
         if (userIds.length > 0) {
             query = query.whereIn('id', userIds);
@@ -116,6 +104,11 @@ export async function POST(request: Request) {
         // Add room_id filtering if room_id is provided
         if (roomId) {
             query = query.where('active_rooms', '@>', `{${roomId}}`);
+        }
+
+        // Add team filtering if team_id is provided
+        if (teamId) {
+            query = query.where('teams', '@>', `{${teamId}}`);
         }
 
         // Get total count for pagination
@@ -129,14 +122,14 @@ export async function POST(request: Request) {
                             .orWhereILike('email', `%${search}%`);
                     });
                 }
-                if (role) {
-                    builder.where('role', role);
-                }
                 if (userIds.length > 0) {
                     builder.whereIn('id', userIds);
                 }
                 if (roomId) {
                     builder.where('active_rooms', '@>', `{${roomId}}`);
+                }
+                if (teamId) {
+                    builder.where('teams', '@>', `{${teamId}}`);
                 }
             });
 

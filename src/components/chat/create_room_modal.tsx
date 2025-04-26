@@ -36,6 +36,7 @@ export function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProps) {
     const t = useTranslations("Chat");
     const dispatch = useDispatch();
     const currentUser = useSelector((state: RootState) => state.user.currentUser);
+    const lastOpenedTeam = useSelector((state: RootState) => state.user.lastOpenedTeam);
 
     // Use the color utility function instead of individual useColorModeValue calls
     const colors = useChatPageColors();
@@ -120,6 +121,24 @@ export function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProps) {
                 roomId: roomId,
                 active_users: activeUsers
             });
+
+            // update the team to add the room
+            const teamResponse = await fetch('/api/team/update_team', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    teamId: lastOpenedTeam,
+                    roomId: roomId,
+                    action: 'add_room'
+                }),
+            });
+
+            if (!teamResponse.ok) {
+                console.error('Failed to update team with new room');
+                // Handle error appropriately
+            }
 
             const roomsResponse = await axios.get("/api/chat/get_rooms");
             dispatch(setRooms(roomsResponse.data));

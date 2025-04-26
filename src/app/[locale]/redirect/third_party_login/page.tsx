@@ -50,6 +50,7 @@ export default function ThirdPartyLoginRedirect() {
                 if (data.exists && data.user) {
                     // Store user in Redux
                     dispatch(setUser(data.user));
+                    const user_locale = data.user.settings?.general?.language || locale;
 
                     // Show success toast
                     toaster.create({
@@ -61,9 +62,9 @@ export default function ThirdPartyLoginRedirect() {
                     let teamId = null;
                     // Redirect users to join/ create a team
                     // user cannot login without a team
-                    const teams = data.user.teams;
-                    console.log("teams", teams, teams.length === 0);
-                    if (teams.length === 0) {
+                    console.log("data.user", data.user);
+                    const teams = data.user.teams || [];
+                    if (!teams || teams.length === 0) {
                         router.push(`/${locale}/signup/new_team`);
                         return;
                     } else {
@@ -80,7 +81,7 @@ export default function ThirdPartyLoginRedirect() {
                     }
 
                     // Redirect to dashboard or home with locale
-                    router.push(`/${locale}/${teamId}`);
+                    router.push(`/${user_locale || locale}/${teamId}`);
                 } else {
                     router.push(`/${locale}/signup/new_profile?email=${encodeURIComponent(email)}&avatarUrl=${avatarUrl}`);
                 }
@@ -88,7 +89,7 @@ export default function ThirdPartyLoginRedirect() {
                 setError((err as Error).message);
 
                 toaster.create({
-                    title: 'Authentication Error',
+                    title: 'Authentication Error.',
                     description: (err as Error).message
                 });
             } finally {

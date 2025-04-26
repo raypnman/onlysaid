@@ -65,14 +65,7 @@ export async function POST(request: Request) {
         // Fetch user information for the provided user IDs
         const users = await db('users')
             .select([
-                'id',
-                'id',
-                'email',
-                'username',
-                'avatar',
-                'role',
-                'created_at',
-                'updated_at'
+                "*"
             ])
             .whereIn('id', userIds);
 

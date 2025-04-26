@@ -1,3 +1,5 @@
+// team-view
+
 "use client";
 
 import React from "react";
@@ -7,15 +9,12 @@ import { useSelector } from "react-redux";
 import {
   FaTasks,
   FaComments,
-  FaBook,
-  FaChartLine,
   FaCog,
   FaSignOutAlt,
   FaSignInAlt,
   FaUserCog,
   FaTools,
 } from "react-icons/fa";
-import { useSession } from "next-auth/react";
 import { useColorModeValue } from "@/components/ui/color-mode";
 import { useParams } from "next/navigation";
 import { RootState } from "@/store/store";
@@ -219,16 +218,17 @@ const NavIconButton = ({
 
 const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: boolean }) => {
   const t = useTranslations("Navbar");
-  const { currentUser, isAuthenticated, isLoading, isSigningOut } = useSelector(
+  const { currentUser, isAuthenticated } = useSelector(
     (state: RootState) => state.user
   );
   const lastOpenedTeam = currentUser?.lastOpenedTeam;
-  const { data: session, status } = useSession();
-  const isLoggedIn = isAuthenticated;
   const logoBgColor = useColorModeValue("gray.100", "gray.700");
   const logoTextColor = useColorModeValue("gray.800", "gray.100");
   const logoShadow = useColorModeValue("shadow-sm", "shadow-none");
   const params = useParams();
+  const isLoggedIn = isAuthenticated;
+  const withATeam = params.teamId !== undefined;
+  const locale = currentUser?.settings?.general?.language || params.locale as string;
 
   return (
     <div className="flex flex-col items-center w-full h-full">
@@ -236,7 +236,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
       <div className="flex flex-col w-full items-center mt-4">
         {/* Logo section - always visible */}
         <NavIconButton
-          to={`/${params.locale}/${lastOpenedTeam}`}
+          to={`/${locale}/${lastOpenedTeam}`}
           icon={() => (
             <div
               className={`w-10 h-10 rounded-md flex items-center justify-center font-bold ${logoShadow} transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 border border-gray-300 dark:border-gray-600`}
@@ -256,7 +256,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
         {isLoggedIn && (
           <div className="flex flex-col w-full items-center">
             <NavIconButton
-              to={`/${params.locale}/${lastOpenedTeam}/chat`}
+              to={`/${locale}/${lastOpenedTeam}/chat`}
               icon={FaComments}
               label="Chat"
               tooltipContent={t("chat")}
@@ -265,7 +265,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
             />
 
             <NavIconButton
-              to={`/${params.locale}/${lastOpenedTeam}/plans`}
+              to={`/${locale}/${lastOpenedTeam}/plans`}
               icon={FaTasks}
               label="Plans"
               tooltipContent={t("plans")}
@@ -274,7 +274,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
             />
 
             <NavIconButton
-              to={`/${params.locale}/${lastOpenedTeam}/workbench`}
+              to={`/${locale}/${lastOpenedTeam}/workbench`}
               icon={FaTools}
               label="Workbench"
               tooltipContent={t("workbench")}
@@ -283,7 +283,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
             />
 
             <NavIconButton
-              to={`/${params.locale}/${lastOpenedTeam}/admin/panel`}
+              to={`/${locale}/${lastOpenedTeam}/admin/panel`}
               icon={FaUserCog}
               label="admin_panel"
               tooltipContent={t("admin_panel")}
@@ -298,7 +298,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
       <div className="flex flex-col w-full mt-auto mb-4 items-center">
         {/* Settings - visible to all users, whether logged in or not */}
         <NavIconButton
-          to={`/${params.locale}/settings`}
+          to={`/${locale}/settings`}
           icon={FaCog}
           label="Settings"
           tooltipContent={t("settings")}

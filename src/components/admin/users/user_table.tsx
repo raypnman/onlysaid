@@ -78,6 +78,7 @@ const UserTable: React.FC<UserTableProps> = ({
     t,
     colors
 }) => {
+    console.log("ABC", users);
     // Pagination helpers
     const totalPages = Math.ceil(pagination.total / pagination.limit);
     const currentPage = Math.floor(pagination.offset / pagination.limit) + 1;
@@ -213,7 +214,7 @@ const UserTable: React.FC<UserTableProps> = ({
                                         </Table.Cell>
                                         <Table.Cell fontSize={{ base: "xs", md: "sm" }} textAlign="center">
                                             <Badge colorScheme={user.role === 'admin' ? 'red' : 'blue'}>
-                                                {user.role || "User"}
+                                                {user.role}
                                             </Badge>
                                         </Table.Cell>
                                     </Table.Row>

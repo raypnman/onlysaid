@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
+import { useParams } from "next/navigation";
 import { useSelector } from 'react-redux';
 import { RootState } from "@/store/store";
 import { useColorModeValue } from "@/components/ui/color-mode";
@@ -26,6 +27,8 @@ export default function AdminPanelPage() {
   const { currentUser, isAuthenticated } = useSelector(
     (state: RootState) => state.user
   );
+
+  const { teamId } = useParams();
 
   // Add state for users data
   const [users, setUsers] = useState<User[]>([]);
@@ -68,8 +71,13 @@ export default function AdminPanelPage() {
       setLoading(true);
       const params = new URLSearchParams({
         limit: pagination.limit.toString(),
-        offset: pagination.offset.toString()
+        offset: pagination.offset.toString(),
+        teamId: teamId as string
       });
+
+      const team_response = await fetch(`/api/team/get_team?team_id=${teamId}`);
+      const team = await team_response.json()
+      const team_owners = team.team.owners;
 
       if (debouncedSearch) {
         params.append('search', debouncedSearch);
@@ -82,7 +90,15 @@ export default function AdminPanelPage() {
       }
 
       const data = await response.json();
-      setUsers(data.users);
+      console.log("ABC====>", data);
+
+      // Augment users with role information based on team_owners
+      const augmentedUsers = data.users.map((user: User) => ({
+        ...user,
+        role: team_owners.includes(user.id) ? 'owner' : 'member'
+      }));
+
+      setUsers(augmentedUsers);
       setPagination(data.pagination);
       setError(null);
     } catch (err) {

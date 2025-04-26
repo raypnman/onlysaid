@@ -53,8 +53,9 @@ export interface User {
     active_rooms: string[];
     archived_rooms: string[];
     avatar?: string;
-    role: string;
     settings: UserSettings;
     teams: string[];
     lastOpenedTeam?: string;
+
+    role?: string;
 }

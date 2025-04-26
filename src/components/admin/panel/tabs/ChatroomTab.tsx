@@ -6,6 +6,8 @@ import { FaSearch, FaSync, FaUsers, FaUserEdit, FaCommentDots } from "react-icon
 import { motion } from "framer-motion";
 import ResizableContainer from "../layout/ResizableContainer";
 import { toaster } from "@/components/ui/toaster";
+import { RootState } from "@/store/store";
+import { useSelector } from "react-redux";
 
 // Define the ChatRoom interface
 interface ChatRoom {
@@ -62,18 +64,31 @@ export default function ChatroomTab({ colors, t }: ChatroomTabProps) {
     const [activeUsers, setActiveUsers] = useState<User[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [isCreateChatroomModalOpen, setIsCreateChatroomModalOpen] = useState(false);
+    const currentUser = useSelector((state: RootState) => state.user.currentUser);
+    const lastOpenedTeam = useSelector((state: RootState) => state.user.lastOpenedTeam);
+
 
     // Fetch chatrooms
     const fetchChatrooms = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/chat/get_all_rooms');
+            const response = await fetch(`/api/team/get_team?team_id=${lastOpenedTeam}`);
 
             if (!response.ok) {
                 throw new Error(`Error: ${response.status}`);
             }
 
-            const data = await response.json();
+            const team_data = await response.json();
+            const team_rooms = team_data.team.rooms;
+
+            const roomResponse = await fetch('/api/chat/get_rooms_v2', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ roomIds: team_rooms }),
+            });
+            const data = await roomResponse.json();
             setChatrooms(data);
             setError(null);
         } catch (err) {
@@ -110,7 +125,22 @@ export default function ChatroomTab({ colors, t }: ChatroomTabProps) {
             }
 
             const data = await response.json();
-            setActiveUsers(data.users || []);
+
+            const teamResponse = await fetch(`/api/team/get_team?team_id=${lastOpenedTeam}`);
+
+            if (!teamResponse.ok) {
+                throw new Error(`Error: ${teamResponse.status}`);
+            }
+
+            const team_data = await teamResponse.json();
+            const team_owners = team_data.team.owners;
+
+            const augmentedUsers = data.users.map((user: User) => ({
+                ...user,
+                role: team_owners.includes(user.id) ? 'owner' : 'member'
+            }));
+
+            setActiveUsers(augmentedUsers || []);
         } catch (err) {
             toaster.create({
                 title: "Error fetching users",
@@ -121,6 +151,9 @@ export default function ChatroomTab({ colors, t }: ChatroomTabProps) {
             setLoadingUsers(false);
         }
     };
+
+    console.log("chatrooms", chatrooms);
+    console.log("users", activeUsers);
 
     // Initial fetch
     useEffect(() => {

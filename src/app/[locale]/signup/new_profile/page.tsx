@@ -121,7 +121,6 @@ export default function CreateProfilePage() {
                 id: uuidv4(),
                 email: formData.email,
                 avatar: formData.avatarUrl,
-                role: "user",
                 created_at: createAt.toISOString(),
                 updated_at: createAt.toISOString(),
                 active_rooms: [],

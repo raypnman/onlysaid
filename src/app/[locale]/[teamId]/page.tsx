@@ -4,19 +4,19 @@ import React, { useEffect, useState } from "react";
 import { Box, Container, Flex, Heading, Icon, Text, Separator, Portal, Popover, CloseButton, Button, Link } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { FiHome, FiServer, FiBook, FiMessageSquare, FiBell, FiTool, FiPlus, FiArrowRight, FiLoader, FiAlertTriangle, FiRefreshCw } from "react-icons/fi";
-import { FaComments, FaComment } from "react-icons/fa";
+import { FaComments, FaComment, FaTools } from "react-icons/fa";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Loading from "@/components/loading";
 import { useColorModeValue } from "@/components/ui/color-mode";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 // @ts-ignore
-import { debounce } from 'lodash';
 import { toaster } from "@/components/ui/toaster";
 import { GuestHomePage } from "@/components/home";
 import { GitHubIssue } from '@/types/github';
+import { Team } from '@/types/teams';
 
 const MotionBox = motion.create(Box);
 
@@ -40,11 +40,16 @@ interface GitHubRelease {
 export default function HomePage() {
   const t = useTranslations("Home");
   const { data: session } = useSession();
-  console.log(session);
   const router = useRouter();
-  const { currentUser, isAuthenticated, isLoading, isSigningOut } = useSelector(
+  const params = useParams();
+  const teamId = params.teamId;
+  const [team, setTeam] = useState<Team | null>(null);
+  const [teamLoading, setTeamLoading] = useState(true);
+  const [teamError, setTeamError] = useState(null);
+  const { currentUser, isAuthenticated, isLoading, isSigningOut, isOwner } = useSelector(
     (state: RootState) => state.user
   );
+  const user_locale = currentUser?.settings?.general?.language || params.locale;
   // Update state for GitHub issues
   const [githubIssues, setGithubIssues] = useState<GitHubIssue[]>([]);
   // Add state for GitHub issue counts
@@ -80,25 +85,38 @@ export default function HomePage() {
   const hoverCardShadow = useColorModeValue("0 8px 20px rgba(0,0,0,0.1)", "0 8px 20px rgba(0,0,0,0.4)");
   // Additional color values that might be used conditionally
   const grayBgLight = useColorModeValue("gray.100", "gray.700");
-  const purpleHoverLight = useColorModeValue("purple.600", "purple.300");
-  const whiteOrGray750 = useColorModeValue("white", "gray.750");
 
-  const debouncedSetSigningOut = React.useCallback(
-    debounce((value: boolean) => {
-      import('@/store/store').then(({ store }) => {
-        const { setSigningOut } = require('@/store/features/userSlice');
-        store.dispatch(setSigningOut(value));
-      });
-    }, 300),
-    []
-  );
-
-  // Handle sign out state
+  // Fetch team data when component mounts
   useEffect(() => {
-    if (!isAuthenticated && isSigningOut) {
-      debouncedSetSigningOut(false);
+    async function fetchTeam() {
+      try {
+        setTeamLoading(true);
+        const response = await fetch(`/api/team/get_team?team_id=${teamId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to fetch team');
+        }
+
+        const data = await response.json();
+        setTeam(data.team);
+      } catch (err: any) {
+        console.error('Error fetching team:', err);
+        setTeamError(err.message);
+      } finally {
+        setTeamLoading(false);
+      }
     }
-  }, [isAuthenticated, isSigningOut, debouncedSetSigningOut]);
+
+    if (teamId && isAuthenticated) {
+      fetchTeam();
+    }
+  }, [teamId, isAuthenticated]);
 
   // Update useEffect to fetch GitHub issues and counts
   useEffect(() => {
@@ -191,7 +209,7 @@ export default function HomePage() {
       description: t("chatroom_description") || "Chat with your team and AI agents to create executable plans",
       icon: FaComments,
       color: "pink.500",
-      path: "/chat",
+      path: `/${user_locale}/${teamId}/chat`,
     },
     {
       id: "plans",
@@ -199,23 +217,15 @@ export default function HomePage() {
       description: t("plans_description"),
       icon: FiMessageSquare,
       color: "green.500",
-      path: "/plans",
+      path: `/${user_locale}/${teamId}/plans`,
     },
     {
-      id: "learn",
-      title: t("learn_title"),
-      description: t("learn_description"),
-      icon: FiBook,
-      color: "blue.500",
-      path: "/workbench/learn",
-    },
-    {
-      id: "ai-assistant",
-      title: t("ai_assistant_title") || "AI Assistant",
-      description: t("ai_assistant_description") || "Answer questions based on growing knowledge, globally persisted across the app.",
-      icon: FaComment,
-      color: "teal.500",
-      path: null,
+      id: "workbench",
+      title: t("workbench_title") || "Workbench",
+      description: t("workbench_description") || "Access tools and resources to enhance your productivity",
+      icon: FaTools,
+      color: "orange.500",
+      path: `/${user_locale}/${teamId}/workbench`,
     },
   ];
 
@@ -298,16 +308,44 @@ export default function HomePage() {
               letterSpacing="tight"
             >
               <Icon as={FiHome} mr={3} color={accentColor} />
-              {t("welcome")}
+              {currentUser ? `${t("welcome")}, ${currentUser.username}` : t("welcome")}
             </Heading>
-            <Text
+            {/* <Text
               color={textColorSecondary}
               fontSize="lg"
               maxW="800px"
               lineHeight="1.6"
+              mb={team ? 2 : 0}
             >
               {t("welcome_message")}
-            </Text>
+            </Text> */}
+            {team && (
+              <Flex
+                align="center"
+                mt={2}
+                p={2}
+                borderRadius="md"
+                bg={`${accentColor}10`}
+              >
+                <Icon as={FiServer} mr={2} color={accentColor} />
+                <Text color={textColor} fontWeight="medium">
+                  Team: {team.name}
+                </Text>
+                {team.invite_code && (
+                  <Text
+                    ml={3}
+                    color={textColorSecondary}
+                    fontSize="sm"
+                    bg={grayBgLight}
+                    px={2}
+                    py={1}
+                    borderRadius="md"
+                  >
+                    Invite Code: {team.invite_code}
+                  </Text>
+                )}
+              </Flex>
+            )}
           </MotionBox>
 
           {/* Main Content Grid with Enhanced Spacing */}

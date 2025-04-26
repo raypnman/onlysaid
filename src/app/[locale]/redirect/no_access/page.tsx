@@ -57,7 +57,7 @@ export default function NoAccessPage() {
         if (countdown === 0) {
             // Use a timeout to ensure this happens after render
             const redirectTimeout = setTimeout(() => {
-                router.push(`/${currentUser?.lastOpenedTeam}`);
+                router.push(`/${currentUser?.lastOpenedTeam || ""}`);
             }, 100);
 
             return () => clearTimeout(redirectTimeout);

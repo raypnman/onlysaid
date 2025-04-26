@@ -3,7 +3,7 @@ import db from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-export async function GET() {
+export async function POST(request: Request) {
     try {
         // Get the current user session
         const session = await getServerSession(authOptions);
@@ -21,8 +21,18 @@ export async function GET() {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        // For admins, get all rooms
-        const rooms = await db('chat_rooms').select('*');
+        // Parse the request body to get the roomIds
+        const { roomIds } = await request.json();
+
+        // Validate roomIds
+        if (!roomIds || !Array.isArray(roomIds)) {
+            return NextResponse.json({ error: 'Invalid roomIds format' }, { status: 400 });
+        }
+
+        // Query rooms based on the provided roomIds
+        const rooms = await db('chat_rooms')
+            .whereIn('id', roomIds)
+            .select('*');
 
         // Format rooms to match IChatRoom interface
         const formattedRooms = rooms.map(room => ({
@@ -40,7 +50,7 @@ export async function GET() {
 
         return NextResponse.json(formattedRooms, { status: 200 });
     } catch (error) {
-        console.error('Error fetching all chat rooms:', error);
-        return NextResponse.json({ error: 'Failed to fetch all chat rooms' }, { status: 500 });
+        console.error('Error fetching chat rooms:', error);
+        return NextResponse.json({ error: 'Failed to fetch chat rooms' }, { status: 500 });
     }
 }

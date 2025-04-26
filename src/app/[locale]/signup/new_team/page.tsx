@@ -173,6 +173,13 @@ export default function CreateTeamPage() {
                 dispatch(setUser(updatedUser));
             }
 
+            // 3. update team
+            await axios.post("/api/team/update_team", {
+                teamId: teamId,
+                userId: currentUser?.id,
+                action: "add_member"
+            });
+
             toaster.create(
                 {
                     title: "Team created",
@@ -227,10 +234,23 @@ export default function CreateTeamPage() {
 
     // Handle backspace and arrow keys for better navigation
     const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Backspace' && !inviteCodeChars[index] && index > 0) {
-            // If current field is empty and backspace is pressed, focus previous field
-            const prevInput = document.getElementById(`invite-char-${index - 1}`);
-            if (prevInput) prevInput.focus();
+        if (e.key === 'Backspace') {
+            if (inviteCodeChars[index]) {
+                // If current field has content, clear it but stay in the same field
+                const newChars = [...inviteCodeChars];
+                newChars[index] = '';
+                setInviteCodeChars(newChars);
+                setInviteCode(newChars.join(''));
+            } else if (index > 0) {
+                // If current field is empty, move to previous field and clear it
+                const newChars = [...inviteCodeChars];
+                newChars[index - 1] = '';
+                setInviteCodeChars(newChars);
+                setInviteCode(newChars.join(''));
+
+                const prevInput = document.getElementById(`invite-char-${index - 1}`);
+                if (prevInput) prevInput.focus();
+            }
         } else if (e.key === 'ArrowLeft' && index > 0) {
             // Move to previous input on left arrow
             const prevInput = document.getElementById(`invite-char-${index - 1}`);
@@ -239,6 +259,12 @@ export default function CreateTeamPage() {
             // Move to next input on right arrow
             const nextInput = document.getElementById(`invite-char-${index + 1}`);
             if (nextInput) nextInput.focus();
+        } else if (e.key === 'Delete') {
+            // Clear current field on delete
+            const newChars = [...inviteCodeChars];
+            newChars[index] = '';
+            setInviteCodeChars(newChars);
+            setInviteCode(newChars.join(''));
         }
     };
 
@@ -284,10 +310,37 @@ export default function CreateTeamPage() {
         setIsJoining(true);
 
         try {
-            const response = await axios.post("/api/team/join_team", {
-                inviteCode: fullInviteCode,
-                email: session?.user?.email
+            // 1. get team by invite code
+            const team_response = await fetch(`/api/team/get_team?invite_code=${fullInviteCode}`);
+
+            if (!team_response.ok) {
+                throw new Error("Failed to fetch team");
+            }
+            const team = await team_response.json();
+            const team_id = team.team.id;
+            console.log("team_id", team_id);
+
+            // 2. update user
+            await axios.post("/api/user/update_user", {
+                teamId: team_id,
+                teamAction: "add"
             });
+
+            // 3. update team
+            await axios.post("/api/team/update_team", {
+                teamId: team_id,
+                userId: currentUser?.id,
+                action: "add_member"
+            });
+
+            if (currentUser) {
+                const updatedUser = {
+                    ...currentUser,
+                    teams: [...(currentUser.teams || []), team_id]
+                };
+
+                dispatch(setUser(updatedUser));
+            }
 
             toaster.create({
                 title: "Team joined",
@@ -295,7 +348,7 @@ export default function CreateTeamPage() {
                 type: "success"
             });
 
-            router.push(`/${locale}/dashboard`);
+            router.push(`/${locale}/`);
         } catch (error: any) {
             setInviteError(
                 error.response?.data?.message ||

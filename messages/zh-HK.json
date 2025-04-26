@@ -14,13 +14,13 @@
     "sign_in": "登入",
     "signout_success": "登出成功",
     "signout_success_description": "已成功登出",
-    "admin_panel": "管理面板",
+    "admin_panel": "團隊管理",
     "workbench": "工作台",
     "plans": "計劃",
     "trust_mode": "信任模式"
   },
   "Home": {
-    "welcome": "歡迎來到onlysaid",
+    "welcome": "歡迎",
     "learn_title": "學習",
     "learn_description": "探索知識庫，MCP工具，以及更多",
     "tasks_title": "任務",
@@ -51,7 +51,7 @@
     "powered_by": "搭載",
     "trusted_by": "用戶回饋",
     "plans_title": "計劃",
-    "plans_description": "查看, 管理，並利用MCP工具完成計劃",
+    "plans_description": "查看， 管理，並利用MCP工具完成計劃",
     "ai_assistant_title": "AI知識庫助手",
     "ai_assistant_description": "在應用任何一個地方都可以回答你的問題，並且會不斷學習新的知識。",
     "chatroom_title": "聊天室",
@@ -66,7 +66,15 @@
     "completed": "已完成",
     "view_all_issues": "查看所有問題",
     "view_all_releases": "查看所有",
-    "view_all_features": "查看所有"
+    "view_all_features": "查看所有",
+    "workbench_title": "工作台",
+    "workbench_description": "使用文件瀏覽器，工作流，知識庫，以及更多",
+    "your_teams": "您的團隊",
+    "members": "成員",
+    "create_new_team": "創建新團隊",
+    "join_team_to_use": "請加入團隊",
+    "failed_to_load": "加載失敗",
+    "retry": "重試"
   },
   "Signup": {
     "signup": "註冊",
@@ -105,7 +113,8 @@
     "join_existing_team": "加入現有團隊",
     "invite_code": "邀請碼",
     "invite_code_placeholder": "請輸入邀請碼",
-    "team_join_description": "使用邀請碼加入現有團隊"
+    "team_join_description": "使用邀請碼加入現有團隊",
+    "invalid_invite_code": "邀請碼無效"
   },
   "Signin": {
     "signin": "登入",
@@ -465,7 +474,7 @@
     "learn_description": "學習是個人成長的關鍵，我們提供多種學習資源和工具，幫助你提升技能和知識。"
   },
   "AdminPanel": {
-    "admin_panel": "管理面板",
+    "admin_panel": "團隊管理",
     "users": "用戶",
     "user_management": "用戶管理",
     "user_list": "用戶列表",
@@ -495,16 +504,25 @@
     "leave_blank_to_use_email_prefix": "留空使用電郵前綴",
     "create_new_user": "創建新用戶",
     "chatroom": "聊天室",
+    "chatroom_list": "聊天室列表",
     "name": "名稱",
     "select_chatroom_to_view_details": "選擇聊天室查看詳情",
     "select_chatroom_to_view_users": "選擇聊天室查看活動",
+    "select_chatroom_to_view_messages": "選擇聊天室查看訊息",
     "chatroom_management": "聊天室管理",
     "active_users": "成員",
     "last_updated": "最後更新",
     "refresh": "刷新",
     "search_chatrooms": "搜索聊天室",
     "members": "成員",
-    "id": "ID"
+    "messages": "訊息",
+    "no_chatrooms_found": "沒有找到聊天室",
+    "id": "ID",
+    "chatroom_id": "聊天室ID",
+    "unread_messages": "未讀訊息",
+    "recent_messages": "最近訊息",
+    "message_history_coming_soon": "訊息歷史即將推出",
+    "no_active_users": "沒有活躍用戶"
   },
   "Settings": {
     "settings": "設定",
@@ -609,7 +627,9 @@
     "api_key_placeholder": "輸入API密鑰",
     "optional": "選填",
     "api_url_placeholder": "輸入API網址",
-    "source_type": "來源類型"
+    "source_type": "來源類型",
+    "team": "團隊",
+    "danger": "危險區域"
   },
   "Loading": {
     "loading": "加載中...",
