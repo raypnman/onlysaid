@@ -222,6 +222,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
   const { currentUser, isAuthenticated, isLoading, isSigningOut } = useSelector(
     (state: RootState) => state.user
   );
+  const lastOpenedTeam = currentUser?.lastOpenedTeam;
   const { data: session, status } = useSession();
   const isLoggedIn = isAuthenticated;
   const logoBgColor = useColorModeValue("gray.100", "gray.700");
@@ -235,7 +236,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
       <div className="flex flex-col w-full items-center mt-4">
         {/* Logo section - always visible */}
         <NavIconButton
-          to="/"
+          to={`/${params.locale}/${lastOpenedTeam}`}
           icon={() => (
             <div
               className={`w-10 h-10 rounded-md flex items-center justify-center font-bold ${logoShadow} transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 border border-gray-300 dark:border-gray-600`}
@@ -255,7 +256,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
         {isLoggedIn && (
           <div className="flex flex-col w-full items-center">
             <NavIconButton
-              to="/chat"
+              to={`/${params.locale}/${lastOpenedTeam}/chat`}
               icon={FaComments}
               label="Chat"
               tooltipContent={t("chat")}
@@ -264,7 +265,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
             />
 
             <NavIconButton
-              to="/plans"
+              to={`/${params.locale}/${lastOpenedTeam}/plans`}
               icon={FaTasks}
               label="Plans"
               tooltipContent={t("plans")}
@@ -273,7 +274,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
             />
 
             <NavIconButton
-              to="/workbench"
+              to={`/${params.locale}/${lastOpenedTeam}/workbench`}
               icon={FaTools}
               label="Workbench"
               tooltipContent={t("workbench")}
@@ -282,7 +283,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
             />
 
             <NavIconButton
-              to="/admin/panel"
+              to={`/${params.locale}/${lastOpenedTeam}/admin/panel`}
               icon={FaUserCog}
               label="admin_panel"
               tooltipContent={t("admin_panel")}
@@ -297,7 +298,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
       <div className="flex flex-col w-full mt-auto mb-4 items-center">
         {/* Settings - visible to all users, whether logged in or not */}
         <NavIconButton
-          to="/settings"
+          to={`/${params.locale}/settings`}
           icon={FaCog}
           label="Settings"
           tooltipContent={t("settings")}
@@ -307,7 +308,7 @@ const MenuLinks = ({ isMobile, isExpanded }: { isMobile?: boolean; isExpanded?: 
 
         {/* Sign in/out button - always visible */}
         <NavIconButton
-          to={isLoggedIn ? `/${params.locale}/signout` : "/signin"}
+          to={isLoggedIn ? `/signout` : "/signin"}
           icon={isLoggedIn ? FaSignOutAlt : FaSignInAlt}
           label={isLoggedIn ? "Sign_Out" : "Sign_In"}
           color={isLoggedIn ? "red.500" : "blue.500"}

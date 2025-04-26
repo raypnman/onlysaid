@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS teams (
     name TEXT NOT NULL,
     members UUID[],
     owners UUID[],
+    rooms UUID[],
     invite_code TEXT,
     settings JSONB
 );

@@ -34,6 +34,7 @@ export default function AdminPanelLayout({
     const { currentUser, isAuthenticated, isLoading, isOwner } = useSelector(
         (state: RootState) => state.user
     );
+    const lastOpenedTeam = currentUser?.lastOpenedTeam;
 
     // Define custom colors using useColorModeValue for dark mode support
     const textColorHeading = useColorModeValue("gray.800", "gray.100");
@@ -46,8 +47,8 @@ export default function AdminPanelLayout({
 
     // Define the tab items
     const tabItems: TabItem[] = [
-        { icon: FaUsers, label: t("users"), id: 0, href: "/admin/panel" },
-        { icon: FaUsers, label: t("chatroom"), id: 1, href: "/admin/panel/chatroom" },
+        { icon: FaUsers, label: t("users"), id: 0, href: `/${lastOpenedTeam}/admin/panel` },
+        { icon: FaUsers, label: t("chatroom"), id: 1, href: `/${lastOpenedTeam}/admin/panel/chatroom` },
         // More tabs can be added here in the future
     ];
 

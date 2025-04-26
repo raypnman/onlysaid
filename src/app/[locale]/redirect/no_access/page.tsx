@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 import { Box, Heading, Icon, Container, Center, Text, VStack, Button, IconButton } from "@chakra-ui/react";
 import { FaExclamationTriangle, FaHome } from "react-icons/fa";
 import { useColorModeValue } from "@/components/ui/color-mode";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 const MotionBox = motion.create(Box);
 
@@ -16,6 +18,9 @@ export default function NoAccessPage() {
     const t = useTranslations("Errors");
     const reason = searchParams.get("reason") || t("default_no_access");
     const [countdown, setCountdown] = useState(5);
+
+    const { currentUser, isAuthenticated, isLoading, isOwner } = useSelector((state: RootState) => state.user);
+
 
     // Color mode values
     const textColorHeading = useColorModeValue("gray.800", "gray.100");
@@ -52,7 +57,7 @@ export default function NoAccessPage() {
         if (countdown === 0) {
             // Use a timeout to ensure this happens after render
             const redirectTimeout = setTimeout(() => {
-                router.push("/");
+                router.push(`/${currentUser?.lastOpenedTeam}`);
             }, 100);
 
             return () => clearTimeout(redirectTimeout);

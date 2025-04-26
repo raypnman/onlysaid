@@ -12,6 +12,7 @@ interface UserState {
     error: string | null;
     expiresAt: number | null;
     trustMode: boolean;
+    lastOpenedTeam: string | null;
 }
 
 const initialState: UserState = {
@@ -22,7 +23,8 @@ const initialState: UserState = {
     isSigningOut: false,
     error: null,
     expiresAt: null,
-    trustMode: false
+    trustMode: false,
+    lastOpenedTeam: null
 };
 
 // TTL duration in milliseconds (1 hour)
@@ -31,7 +33,13 @@ export const SESSION_TTL = 60 * 60 * 1000;
 const userPersistConfig = {
     key: 'user',
     storage,
-    whitelist: ['currentUser', 'isAuthenticated', 'expiresAt', 'trustMode']
+    whitelist: [
+        'currentUser',
+        'isAuthenticated',
+        'expiresAt',
+        'trustMode',
+        'lastOpenedTeam'
+    ]
 };
 
 export const userSlice = createSlice({
@@ -44,11 +52,17 @@ export const userSlice = createSlice({
             state.isOwner = action.payload.email === "seasonluke@gmail.com";
             state.error = null;
             state.expiresAt = Date.now() + SESSION_TTL;
+
+            // Set lastOpenedTeam if it exists in the user data
+            if (action.payload.lastOpenedTeam) {
+                state.lastOpenedTeam = action.payload.lastOpenedTeam;
+            }
         },
         clearUser: (state) => {
             state.currentUser = null;
             state.isAuthenticated = false;
             state.expiresAt = null;
+            state.lastOpenedTeam = null;
         },
         setLoading: (state, action: PayloadAction<boolean>) => {
             state.isLoading = action.payload;
@@ -123,6 +137,14 @@ export const userSlice = createSlice({
         },
         setTrustMode: (state, action: PayloadAction<boolean>) => {
             state.trustMode = action.payload;
+        },
+        setLastOpenedTeam: (state, action: PayloadAction<string>) => {
+            state.lastOpenedTeam = action.payload;
+
+            // Also update the user object if it exists
+            if (state.currentUser) {
+                state.currentUser.lastOpenedTeam = action.payload;
+            }
         }
     }
 });
@@ -138,7 +160,8 @@ export const {
     updateActiveRooms,
     updateUserSettings,
     setUserSettings,
-    setTrustMode
+    setTrustMode,
+    setLastOpenedTeam
 } = userSlice.actions;
 
 // Create a persisted reducer

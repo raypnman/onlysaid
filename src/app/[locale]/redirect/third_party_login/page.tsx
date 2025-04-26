@@ -7,7 +7,7 @@ Map 3rd party login to App Login.
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
-import { setUser } from '@/store/features/userSlice'; // Adjust import path as needed
+import { setUser, setLastOpenedTeam } from '@/store/features/userSlice'; // Adjust import path as needed
 import { useTranslations } from 'next-intl'; // If you're using next-intl for translations
 import { useParams } from 'next/navigation';
 import { toaster } from '@/components/ui/toaster';
@@ -48,7 +48,6 @@ export default function ThirdPartyLoginRedirect() {
                 }
 
                 if (data.exists && data.user) {
-
                     // Store user in Redux
                     dispatch(setUser(data.user));
 
@@ -59,7 +58,7 @@ export default function ThirdPartyLoginRedirect() {
                         type: "info"
                     });
 
-                    let joiningTeamId = null;
+                    let teamId = null;
                     // Redirect users to join/ create a team
                     // user cannot login without a team
                     const teams = data.user.teams;
@@ -67,10 +66,21 @@ export default function ThirdPartyLoginRedirect() {
                     if (teams.length === 0) {
                         router.push(`/${locale}/signup/new_team`);
                         return;
+                    } else {
+                        // Check if user has a lastOpenedTeam and it's in their teams list
+                        if (data.user.lastOpenedTeam && teams.includes(data.user.lastOpenedTeam)) {
+                            teamId = data.user.lastOpenedTeam;
+                        } else {
+                            // Otherwise use the first team
+                            teamId = teams[0];
+                        }
+
+                        // Store the selected teamId in Redux
+                        dispatch(setLastOpenedTeam(teamId));
                     }
 
                     // Redirect to dashboard or home with locale
-                    router.push(`/${locale}`);
+                    router.push(`/${locale}/${teamId}`);
                 } else {
                     router.push(`/${locale}/signup/new_profile?email=${encodeURIComponent(email)}&avatarUrl=${avatarUrl}`);
                 }

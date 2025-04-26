@@ -31,13 +31,14 @@ export default function WorkbenchLayout({
     children: React.ReactNode;
 }) {
     const t = useTranslations("Workbench");
-    const { isAuthenticated, isLoading, isOwner } = useSelector((state: RootState) => state.user);
+    const { currentUser, isAuthenticated, isLoading, isOwner } = useSelector((state: RootState) => state.user);
     const storedSidebarWidth = useSelector((state: RootState) =>
         state.workbench?.ui?.sidebarWidth || 300);
     const dispatch = useDispatch();
     const router = useRouter();
     const pathname = usePathname();
     const { data: session } = useSession();
+    const lastOpenedTeam = currentUser?.lastOpenedTeam;
 
     // Refs for resizable elements
     const sidebarRef = useRef<HTMLDivElement>(null);
@@ -70,22 +71,22 @@ export default function WorkbenchLayout({
         {
             icon: FaFolderTree,
             label: t("file_explorer"),
-            path: "/workbench/file_explorer",
+            path: `/${lastOpenedTeam}/workbench/file_explorer`,
         },
         {
             icon: FaDiagramProject,
             label: t("workflow"),
-            path: "/workbench/workflow",
+            path: `/${lastOpenedTeam}/workbench/workflow`,
         },
         {
             icon: FaBookOpen,
             label: t("learn"),
-            path: "/workbench/learn",
+            path: `/${lastOpenedTeam}/workbench/learn`,
         },
         {
             icon: FaCode,
             label: t("code_editor"),
-            path: "/workbench/editor",
+            path: `/${lastOpenedTeam}/workbench/editor`,
         },
     ];
 
@@ -146,14 +147,15 @@ export default function WorkbenchLayout({
         // }
     }, [isLoading, isOwner, router]);
 
+    useEffect(() => {
+        if (!isAuthenticated) {
+            router.push("/signin");
+        }
+    }, [isAuthenticated, router])
+
     // Show loading state while checking authentication
     if (isLoading || !session) {
         return <Loading />;
-    }
-
-    // Redirect if not authenticated
-    if (!isAuthenticated && !session) {
-        return <Loading />; // Show loading instead of direct navigation
     }
 
 

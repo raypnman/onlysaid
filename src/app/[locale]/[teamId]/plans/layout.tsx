@@ -52,6 +52,7 @@ export default function PlansLayout({ children }: { children: React.ReactNode })
         (state: RootState) => state.user
     );
 
+    const lastOpenedTeam = currentUser?.lastOpenedTeam;
     const colors = usePlansColors();
 
     // Add state for search, filter, and pagination
@@ -480,7 +481,7 @@ export default function PlansLayout({ children }: { children: React.ReactNode })
                                                         bg={planWithDateObjects.plan_id === currentPlanId ? `${colors.accentColor}15` : colors.cardBg}
                                                         _hover={{ bg: colors.hoverBg, borderColor: colors.accentColor }}
                                                         cursor="pointer"
-                                                        onClick={() => router.push(`/plans/${planWithDateObjects.id}`)}
+                                                        onClick={() => router.push(`/${lastOpenedTeam}/plans/${planWithDateObjects.id}`)}
                                                         transition="all 0.2s"
                                                     >
                                                         <Flex justify="space-between" align="center" mb={1}>

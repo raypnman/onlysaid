@@ -56,4 +56,5 @@ export interface User {
     role: string;
     settings: UserSettings;
     teams: string[];
+    lastOpenedTeam?: string;
 }
