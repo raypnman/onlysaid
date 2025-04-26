@@ -238,14 +238,9 @@ const FileTreeItem = ({
         onSelect(item);
     };
 
-    const FileIcon = isDirectory
-        ? (isOpen ? FaChevronDown : FaChevronRight)
-        : getFileIcon(item.extension);
-
     return (
         <Box>
             <Flex
-                pl={level > 1 ? (level - 1) * 16 + 20 : 0}
                 py={1}
                 px={2}
                 alignItems="center"
@@ -256,24 +251,34 @@ const FileTreeItem = ({
                 _hover={{ bg: isSelected ? colors.selectedItemBg : colors.hoverBg }}
                 onClick={handleSelect}
             >
+                <Box width={`${level * 16}px`} flexShrink={0} />
+
                 <Box
                     width="20px"
                     display="flex"
                     justifyContent="center"
                     alignItems="center"
                     flexShrink={0}
+                    onClick={isDirectory ? toggleOpen : undefined}
                 >
                     {isDirectory ? (
                         <Icon
-                            as={FileIcon}
-                            onClick={toggleOpen}
+                            as={isOpen ? FaChevronDown : FaChevronRight}
                             cursor="pointer"
                             fontSize="xs"
                             color={colors.textColor}
                         />
-                    ) : null}
+                    ) : (
+                        <Box width="16px" />
+                    )}
                 </Box>
-                <Icon as={getFileIcon(item.extension)} mr={2} color={isDirectory ? colors.folderIconColor : colors.fileIconColor} />
+
+                <Icon
+                    as={isDirectory ? (isOpen ? FaFolderOpen : FaFolder) : getFileIcon(item.extension)}
+                    mr={2}
+                    color={isDirectory ? colors.folderIconColor : colors.fileIconColor}
+                />
+
                 <Text fontSize="sm" lineClamp={1} color={colors.textColor}>{item.name}</Text>
                 {isLoading && <Spinner size="xs" ml={2} color={colors.loadingSpinnerColor} />}
             </Flex>

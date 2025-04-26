@@ -1,18 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FaUsers, FaComments } from "react-icons/fa";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { useSelector } from 'react-redux';
 import { RootState } from "@/store/store";
-import { useRouter } from "next/navigation";
-import Loading from "@/components/loading";
 import { useColorModeValue } from "@/components/ui/color-mode";
 import { toaster } from "@/components/ui/toaster";
-import AdminPanelLayout from "@/components/admin/panel/layout/AdminPanelLayout";
 import UserManagementTab from "@/components/admin/panel/tabs/UserManagementTab";
-import ChatroomTab from "@/components/admin/panel/tabs/ChatroomTab";
 
 // Define the User interface if it's not already defined in your types/user.d.ts
 interface User {
@@ -27,37 +22,10 @@ interface User {
 
 export default function AdminPanelPage() {
   const t = useTranslations("AdminPanel");
-  const router = useRouter();
-  const { currentUser, isAuthenticated, isLoading, isOwner } = useSelector(
-    (state: RootState) => state.user
-  );
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/signin');
-    } else if (currentUser && !isOwner) {
-      router.push('/redirect/no_access?reason=Access denied');
-    }
-  }, [currentUser, isOwner, router, isAuthenticated]);
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  return <AdminPanelContent />;
-}
-
-// The main AdminPanelContent component
-const AdminPanelContent = () => {
-  const t = useTranslations("AdminPanel");
   const { data: session } = useSession();
-  const router = useRouter();
-  const { currentUser, isAuthenticated, isLoading, isOwner } = useSelector(
+  const { currentUser, isAuthenticated } = useSelector(
     (state: RootState) => state.user
   );
-
-  // Keep tab state for future expansion
-  const [activeTab, setActiveTab] = useState(0);
 
   // Add state for users data
   const [users, setUsers] = useState<User[]>([]);
@@ -93,13 +61,6 @@ const AdminPanelContent = () => {
   const refreshButtonHoverBg = useColorModeValue("gray.100", "gray.600");
   const inputBgColor = useColorModeValue("white", "gray.700");
   const inputBorderHoverColor = useColorModeValue("gray.300", "gray.600");
-
-  // Define the tab items with proper typing
-  const tabItems = [
-    { icon: FaUsers, label: t("users"), id: 0 },
-    { icon: FaComments, label: t("chatroom"), id: 1 },
-    // More tabs can be added here in the future
-  ];
 
   // Fetch users function
   const fetchUsers = async () => {
@@ -147,10 +108,10 @@ const AdminPanelContent = () => {
 
   // Fetch users when search or pagination changes
   useEffect(() => {
-    if (isAuthenticated && activeTab === 0) {
+    if (isAuthenticated) {
       fetchUsers();
     }
-  }, [debouncedSearch, pagination.limit, pagination.offset, activeTab, isAuthenticated]);
+  }, [debouncedSearch, pagination.limit, pagination.offset, isAuthenticated]);
 
   // Format date helper
   const formatDate = (dateString: string | undefined) => {
@@ -169,80 +130,40 @@ const AdminPanelContent = () => {
     fetchUsers();
   };
 
-  // Show loading state while checking authentication
-  if (isLoading || !session) {
-    return <Loading />;
-  }
-
   return (
-    <AdminPanelLayout
-      title={t("admin_panel")}
-      titleIcon={FaUsers}
-      tabItems={tabItems}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      textColorHeading={textColorHeading}
-      textColor={textColor}
-      hoverBg={hoverBg}
-    >
-      {activeTab === 0 && (
-        <UserManagementTab
-          users={users}
-          loading={loading}
-          error={error}
-          search={search}
-          setSearch={setSearch}
-          pagination={pagination}
-          setPagination={setPagination}
-          formatDate={formatDate}
-          formatUserId={formatUserId}
-          t={t}
-          colors={{
-            textColor,
-            textColorHeading,
-            textColorStrong,
-            textColorMuted,
-            inputBgColor,
-            borderColor,
-            inputBorderHoverColor,
-            tableHeaderBg,
-            errorBg,
-            errorText,
-            emptyBg,
-            hoverBg,
-            paginationBg,
-            paginationDisabledBg,
-            paginationColor,
-            paginationDisabledColor,
-            refreshButtonHoverBg,
-            cardBg,
-            bgSubtle
-          }}
-          handleUserCreated={handleUserCreated}
-        />
-      )}
-      {activeTab === 1 && (
-        <ChatroomTab
-          colors={{
-            textColor,
-            textColorHeading,
-            textColorStrong,
-            textColorMuted,
-            cardBg,
-            borderColor,
-            bgSubtle,
-            inputBgColor: bgSubtle,
-            inputBorderHoverColor: borderColor,
-            tableHeaderBg: bgSubtle,
-            errorBg: "red.50",
-            errorText: "red.500",
-            emptyBg: bgSubtle,
-            hoverBg: "gray.50",
-            refreshButtonHoverBg: "gray.100"
-          }}
-          t={t}
-        />
-      )}
-    </AdminPanelLayout>
+    <UserManagementTab
+      users={users}
+      loading={loading}
+      error={error}
+      search={search}
+      setSearch={setSearch}
+      pagination={pagination}
+      setPagination={setPagination}
+      formatDate={formatDate}
+      formatUserId={formatUserId}
+      t={t}
+      colors={{
+        textColor,
+        textColorHeading,
+        textColorStrong,
+        textColorMuted,
+        inputBgColor,
+        borderColor,
+        inputBorderHoverColor,
+        tableHeaderBg,
+        errorBg,
+        errorText,
+        emptyBg,
+        hoverBg,
+        paginationBg,
+        paginationDisabledBg,
+        paginationColor,
+        paginationDisabledColor,
+        refreshButtonHoverBg,
+        cardBg,
+        bgSubtle
+      }}
+      handleUserCreated={handleUserCreated}
+    />
   );
 }

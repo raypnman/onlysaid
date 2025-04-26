@@ -93,9 +93,19 @@
     "password_must_be_at_least_8_characters": "密碼必須至少8個字符",
     "passwords_do_not_match": "密碼不匹配",
     "create_profile": "創建帳號",
-    "profile_creation_description": "創建帳號後，您可以登入並開始使用onlysaid",
+    "profile_creation_description": "創建帳號後，您可以創建團隊並開始使用onlysaid",
     "3rd_party_login_email": "您的電郵地址來自第三方登入，請使用該電郵地址創建帳號",
-    "complete_your_profile": "完成您的個人資料"
+    "complete_your_profile": "完成您的個人資料",
+    "create_team": "創建團隊",
+    "join_team": "加入團隊",
+    "create_new_team": "創建新團隊",
+    "team_name": "團隊名稱",
+    "team_name_placeholder": "請輸入團隊名稱",
+    "team_creation_description": "創建團隊後，您可以邀請其他成員加入",
+    "join_existing_team": "加入現有團隊",
+    "invite_code": "邀請碼",
+    "invite_code_placeholder": "請輸入邀請碼",
+    "team_join_description": "使用邀請碼加入現有團隊"
   },
   "Signin": {
     "signin": "登入",
@@ -493,7 +503,8 @@
     "last_updated": "最後更新",
     "refresh": "刷新",
     "search_chatrooms": "搜索聊天室",
-    "members": "成員"
+    "members": "成員",
+    "id": "ID"
   },
   "Settings": {
     "settings": "設定",

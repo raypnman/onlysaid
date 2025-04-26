@@ -14,7 +14,7 @@ def seek_approval_message(skill, log_id=None):
     
     # Add title with the action name
     action_name = skill.name.replace('_', ' ')
-    message_parts.append(f"🔔 I'd like to **{action_name}**.?\n")
+    message_parts.append(f"🔔 I'd like to **{action_name}**.\n")
     
     # Arguments section - first show descriptions in a table
     if skill.args:

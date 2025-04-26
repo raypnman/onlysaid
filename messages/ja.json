@@ -42,7 +42,7 @@
     "password_required": "パスワードは必須です",
     "password_must_be_at_least_8_characters": "パスワードは8文字以上でなければなりません",
     "passwords_do_not_match": "パスワードが一致しません",
-    "profile_creation_description": "アカウントを作成したら、onlysaid を使用できます",
+    "profile_creation_description": "アカウントを作成したら、チームを作成して onlysaid を使用できます",
     "3rd_party_login_email": "あなたのメールアドレスは第三者のログインから来ています。そのメールアドレスでアカウントを作成してください",
     "complete_your_profile": "あなたのプロフィールを完成させてください",
     "create_profile": "プロフィールを作成する"

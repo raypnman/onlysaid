@@ -51,7 +51,7 @@
     "password_required": "Password is required",
     "password_must_be_at_least_8_characters": "Password must be at least 8 characters",
     "passwords_do_not_match": "Passwords do not match",
-    "profile_creation_description": "After creating an account, you can use onlysaid",
+    "profile_creation_description": "After creating an account, you can create a team and start using onlysaid",
     "3rd_party_login_email": "Your email address is from a third-party login. Please create an account with that email address",
     "complete_your_profile": "Complete your profile",
     "create_profile": "Create Profile"

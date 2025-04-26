@@ -40,7 +40,7 @@ export const userSlice = createSlice({
     reducers: {
         setUser: (state, action: PayloadAction<User>) => {
             state.currentUser = action.payload;
-            state.isAuthenticated = true;
+            state.isAuthenticated = true && action.payload.teams.length > 0;
             state.isOwner = action.payload.email === "seasonluke@gmail.com";
             state.error = null;
             state.expiresAt = Date.now() + SESSION_TTL;

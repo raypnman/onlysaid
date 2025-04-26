@@ -93,7 +93,7 @@
     "password_must_be_at_least_8_characters": "Mật khẩu phải có ít nhất 8 ký tự",
     "passwords_do_not_match": "Mật khẩu không khớp",
     "create_profile": "Tạo hồ sơ",
-    "profile_creation_description": "Sau khi tạo hồ sơ, bạn có thể đăng nhập và bắt đầu sử dụng Nói mà không làm",
+    "profile_creation_description": "Sau khi tạo tài khoản, bạn có thể tạo đội và bắt đầu sử dụng Nói mà không làm",
     "3rd_party_login_email": "Địa chỉ email của bạn đến từ đăng nhập của bên thứ ba, vui lòng sử dụng địa chỉ email này để tạo tài khoản",
     "complete_your_profile": "Hoàn thành hồ sơ của bạn"
   },

@@ -39,9 +39,9 @@ def query_knowledge_base(query: str, knowledge_bases: List[str] = []) -> str:
         return f"An unexpected error occurred: {str(e)}"
 
 @mcp.tool()
-def retrieve_from_knowledge_base(query: str, knowledge_bases: List[str] = [], top_k: int = 5) -> str:
+def retrieve_from_knowledge_base(query: str, knowledge_bases: List[str]) -> str:
     """
-    Retrieve relevant documents from the knowledge base without generating an answer.
+    Retrieve relevant documents from the knowledge base.
     
     Args:
         query: The search query
@@ -53,8 +53,7 @@ def retrieve_from_knowledge_base(query: str, knowledge_bases: List[str] = [], to
     """
     retrieve_request = {
         "query": query,
-        "knowledge_bases": knowledge_bases if knowledge_bases else None,
-        "top_k": top_k
+        "knowledge_bases": None,
     }
     
     try:
@@ -68,46 +67,5 @@ def retrieve_from_knowledge_base(query: str, knowledge_bases: List[str] = [], to
     except Exception as e:
         return f"An unexpected error occurred during retrieval: {str(e)}"
 
-@mcp.tool()
-def list_knowledge_bases() -> Dict:
-    """
-    List all available knowledge bases and their statuses.
-    
-    Returns:
-        Dictionary containing information about all knowledge bases
-    """
-    try:
-        response = httpx.get(
-            f"{kb_url}/api/list_documents",
-            timeout=30.0
-        )
-        response.raise_for_status()
-        return response.json()
-    except Exception as e:
-        return {"error": f"An unexpected error occurred: {str(e)}"}
-
-@mcp.tool()
-def check_kb_statuses() -> Dict:
-    """
-    Check the status of all knowledge bases in the system.
-    
-    Returns:
-        Dictionary mapping knowledge base IDs to their statuses
-    """
-    try:
-        # First get all KB IDs from Redis
-        response = httpx.get(
-            f"{kb_url}/api/kb_statuses",
-            timeout=30.0
-        )
-        response.raise_for_status()
-        return response.json()
-    except Exception as e:
-        return {"error": f"An unexpected error occurred: {str(e)}"}
-
 if __name__ == "__main__":
-    # mcp.run(transport='stdio')
-    print(query_knowledge_base("What is the capital of France?", []))
-    print(retrieve_from_knowledge_base("what is aisc?", [], 5))
-    # print(list_knowledge_bases())
-    # print(check_kb_statuses())
+    mcp.run(transport='stdio')

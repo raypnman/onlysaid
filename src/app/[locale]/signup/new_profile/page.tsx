@@ -127,7 +127,8 @@ export default function CreateProfilePage() {
                 active_rooms: [],
                 archived_rooms: [],
                 username: "",
-                settings: {}
+                settings: {},
+                teams: []
             }
 
             await axios.post("/api/user/create_user", newUser);

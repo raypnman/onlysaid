@@ -14,13 +14,15 @@ export async function POST(request: Request) {
 
         // Parse the request body
         const body = await request.json();
-        const { roomId, action, userId, username, settings } = body;
+        const { roomId, action, userId, username, settings, teamId, teamAction } = body;
 
         console.log("roomId", roomId);
         console.log("action", action);
         console.log("userId", userId);
         console.log("username", username);
         console.log("settings", settings);
+        console.log("teamId", teamId);
+        console.log("teamAction", teamAction);
 
         // If settings is provided, update user settings
         if (settings) {
@@ -30,6 +32,44 @@ export async function POST(request: Request) {
                     settings: JSON.stringify(settings),
                     updated_at: new Date().toISOString()
                 });
+
+            return NextResponse.json({ success: true }, { status: 200 });
+        }
+
+        // Handle team updates
+        if (teamId && teamAction) {
+            // Determine how to query the user - by ID, username, or current session
+            let userQuery;
+
+            if (userId) {
+                userQuery = db('users').where('id', userId);
+            } else if (username) {
+                userQuery = db('users').where('username', username);
+            } else {
+                userQuery = db('users').where('email', session.user.email);
+            }
+
+            const user = await userQuery.first();
+
+            if (!user) {
+                return NextResponse.json({ error: 'User not found' }, { status: 404 });
+            }
+
+            // Initialize teams array if it doesn't exist
+            let teams = user.teams || [];
+
+            // Update teams based on the action
+            if (teamAction === 'add' && !teams.includes(teamId)) {
+                teams.push(teamId);
+            } else if (teamAction === 'remove') {
+                teams = teams.filter((id: string) => id !== teamId);
+            }
+
+            // Update the user in the database
+            await userQuery.update({
+                teams: teams,
+                updated_at: new Date().toISOString()
+            });
 
             return NextResponse.json({ success: true }, { status: 200 });
         }

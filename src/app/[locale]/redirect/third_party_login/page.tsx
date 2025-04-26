@@ -48,11 +48,9 @@ export default function ThirdPartyLoginRedirect() {
                 }
 
                 if (data.exists && data.user) {
+
                     // Store user in Redux
                     dispatch(setUser(data.user));
-
-                    // Log user settings
-                    console.log('User settings:', data.user.user_settings);
 
                     // Show success toast
                     toaster.create({
@@ -60,6 +58,16 @@ export default function ThirdPartyLoginRedirect() {
                         description: t('signin_success_description'),
                         type: "info"
                     });
+
+                    let joiningTeamId = null;
+                    // Redirect users to join/ create a team
+                    // user cannot login without a team
+                    const teams = data.user.teams;
+                    console.log("teams", teams, teams.length === 0);
+                    if (teams.length === 0) {
+                        router.push(`/${locale}/signup/new_team`);
+                        return;
+                    }
 
                     // Redirect to dashboard or home with locale
                     router.push(`/${locale}`);

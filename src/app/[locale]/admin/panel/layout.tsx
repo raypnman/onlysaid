@@ -4,6 +4,13 @@ import React from "react";
 import { Box, Heading, Flex, Icon, Container } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { IconType } from "react-icons";
+import { FaUsers } from "react-icons/fa";
+import { useTranslations } from "next-intl";
+import { useSelector } from 'react-redux';
+import { RootState } from "@/store/store";
+import { useRouter } from "next/navigation";
+import Loading from "@/components/loading";
+import { useColorModeValue } from "@/components/ui/color-mode";
 
 // Create motion components
 const MotionBox = motion.create(Box);
@@ -14,31 +21,41 @@ interface TabItem {
     icon: IconType;
     label: string;
     id: number;
-}
-
-interface AdminPanelLayoutProps {
-    title: string;
-    titleIcon: IconType;
-    tabItems: TabItem[];
-    activeTab: number;
-    setActiveTab: (id: number) => void;
-    children: React.ReactNode;
-    textColorHeading: string;
-    textColor: string;
-    hoverBg: string;
+    href: string;
 }
 
 export default function AdminPanelLayout({
-    title,
-    titleIcon,
-    tabItems,
-    activeTab,
-    setActiveTab,
-    children,
-    textColorHeading,
-    textColor,
-    hoverBg,
-}: AdminPanelLayoutProps) {
+    children
+}: {
+    children: React.ReactNode
+}) {
+    const t = useTranslations("AdminPanel");
+    const router = useRouter();
+    const { currentUser, isAuthenticated, isLoading, isOwner } = useSelector(
+        (state: RootState) => state.user
+    );
+
+    // Define custom colors using useColorModeValue for dark mode support
+    const textColorHeading = useColorModeValue("gray.800", "gray.100");
+    const textColor = useColorModeValue("gray.800", "gray.100");
+    const hoverBg = useColorModeValue("gray.50", "gray.700");
+
+    // Determine active tab based on current path
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    const activeTabId = pathname.includes('/chatroom') ? 1 : 0;
+
+    // Define the tab items
+    const tabItems: TabItem[] = [
+        { icon: FaUsers, label: t("users"), id: 0, href: "/admin/panel" },
+        { icon: FaUsers, label: t("chatroom"), id: 1, href: "/admin/panel/chatroom" },
+        // More tabs can be added here in the future
+    ];
+
+    // Handle tab navigation
+    const handleTabClick = (href: string) => {
+        router.push(href);
+    };
+
     // Animation variants
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -62,6 +79,25 @@ export default function AdminPanelLayout({
         visible: { opacity: 1, x: 0, transition: { duration: 0.3 } },
     };
 
+    // Check authentication and permissions
+    React.useEffect(() => {
+        if (!isAuthenticated && !isLoading) {
+            router.push('/signin');
+        } else if (currentUser && !isOwner && !isLoading) {
+            router.push('/redirect/no_access?reason=Access denied');
+        }
+    }, [currentUser, isOwner, router, isAuthenticated, isLoading]);
+
+    // Show loading state while checking authentication
+    if (isLoading) {
+        return <Loading />;
+    }
+
+    // Only render content if authenticated and is owner
+    if (!isAuthenticated || (currentUser && !isOwner)) {
+        return null;
+    }
+
     return (
         <Container
             maxW="1400px"
@@ -84,8 +120,8 @@ export default function AdminPanelLayout({
             >
                 <MotionBox variants={itemVariants}>
                     <Heading size="lg" mb={6} display="flex" alignItems="center" color={textColorHeading}>
-                        <Icon as={titleIcon} mr={3} color="blue.500" />
-                        {title}
+                        <Icon as={FaUsers} mr={3} color="blue.500" />
+                        {t("admin_panel")}
                     </Heading>
                 </MotionBox>
 
@@ -111,15 +147,15 @@ export default function AdminPanelLayout({
                                     py={3}
                                     px={4}
                                     borderRadius="md"
-                                    bg={activeTab === item.id ? hoverBg : "transparent"}
+                                    bg={activeTabId === item.id ? hoverBg : "transparent"}
                                     color={textColor}
                                     fontWeight="medium"
                                     fontSize="sm"
                                     width="100%"
                                     textAlign="left"
                                     _hover={{ bg: hoverBg }}
-                                    _active={{ bg: activeTab === item.id ? hoverBg : "gray.100" }}
-                                    onClick={() => setActiveTab(item.id)}
+                                    _active={{ bg: activeTabId === item.id ? hoverBg : "gray.100" }}
+                                    onClick={() => handleTabClick(item.href)}
                                 >
                                     <Flex align="center">
                                         <Icon as={item.icon} color={textColor} mr={2} />
@@ -138,4 +174,4 @@ export default function AdminPanelLayout({
             </MotionBox>
         </Container>
     );
-} 
+}

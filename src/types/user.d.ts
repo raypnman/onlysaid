@@ -55,4 +55,5 @@ export interface User {
     avatar?: string;
     role: string;
     settings: UserSettings;
+    teams: string[];
 }

@@ -12,13 +12,7 @@ export async function GET(request: Request) {
 
         // Base query
         let query = db('users').select([
-            'id',
-            'email',
-            'username',
-            'avatar',
-            'role',
-            'created_at',
-            'updated_at'
+            "*"
         ]);
 
         // Add search functionality if search parameter is provided
