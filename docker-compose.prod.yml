@@ -227,6 +227,15 @@ services:
     networks:
       - onlysaid-network
     restart: always
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
 
   onlysaid-n8n:
     image: docker.n8n.io/n8nio/n8n
