@@ -636,7 +636,12 @@
     "danger": "危險區域",
     "loadingServers": "加載伺服器中...",
     "kb_reinitialized": "知識庫已重新初始化",
-    "kb_reinitialized_description": "知識庫已成功重新初始化，可能需要一段時間才能完全可用"
+    "kb_reinitialized_description": "知識庫已成功重新初始化，可能需要一段時間才能完全可用",
+    
+    "kb_added": "知識庫已添加",
+    "save_to_apply_changes": "保存以應用更改",
+    "settings_saved": "設定已保存",
+    "settings_saved_description": "您的設定已成功保存"
   },
   "Loading": {
     "loading": "加載中...",

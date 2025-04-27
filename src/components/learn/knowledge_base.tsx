@@ -124,6 +124,8 @@ export const KnowledgeBase = () => {
         return [];
     }, [currentUser]);
 
+    console.log("authorizedKnowledgeBases", authorizedKnowledgeBases);
+
     // Fetch knowledge base data
     const fetchKnowledgeBase = async () => {
         try {
@@ -134,9 +136,10 @@ export const KnowledgeBase = () => {
             const data = response.data;
 
             const filteredDataSources = data.dataSources ? data.dataSources.filter((ds: DataSource) =>
-                isOwner ||
                 authorizedKnowledgeBases.includes(ds.id)
             ) : [];
+
+            console.log("filteredDataSources", filteredDataSources);
 
             setDataSources(filteredDataSources);
 
@@ -212,6 +215,8 @@ export const KnowledgeBase = () => {
 
         return matchesSearch && matchesFolder;
     });
+
+    console.log("filteredDocuments", filteredDocuments);
 
     // Calculate pagination
     const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);

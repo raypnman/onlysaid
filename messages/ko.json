@@ -53,7 +53,18 @@
       "profile_creation_description": "계정을 만든 후, 팀을 만들고 카카시를 사용할 수 있습니다",
       "3rd_party_login_email": "이메일은 제3자 로그인에서 왔습니다. 해당 이메일로 계정을 만들어주세요",
       "complete_your_profile": "프로필을 완성해주세요",
-      "create_profile": "프로필 만들기"
+      "create_profile": "프로필 만들기",
+      "create_team": "팀 만들기",
+      "join_team": "팀 가입하기",
+      "create_new_team": "새 팀 만들기",
+      "team_name": "팀 이름",
+      "team_name_placeholder": "팀 이름을 입력하세요",
+      "team_creation_description": "팀을 만든 후 다른 멤버를 초대할 수 있습니다",
+      "join_existing_team": "기존 팀에 가입하기",
+      "invite_code": "초대 코드",
+      "invite_code_placeholder": "초대 코드를 입력하세요",
+      "team_join_description": "초대 코드를 사용하여 기존 팀에 가입하세요",
+      "invalid_invite_code": "유효하지 않은 초대 코드"
     },
     "Signin": {
       "signin": "로그인",
@@ -119,7 +130,15 @@
       "completed": "완료됨",
       "view_all_issues": "모든 문제 보기",
       "view_all_releases": "모두 보기",
-      "view_all_features": "모두 보기"
+      "view_all_features": "모두 보기",
+      "workbench_title": "워크벤치",
+      "workbench_description": "파일 탐색기, 워크플로우, 지식 베이스 등 사용",
+      "your_teams": "내 팀",
+      "members": "멤버",
+      "create_new_team": "새 팀 만들기",
+      "join_team_to_use": "팀에 가입하세요",
+      "failed_to_load": "로드 실패",
+      "retry": "다시 시도"
     },
     "Footer": {
       "privacy_policy": "개인정보 처리방침",
@@ -233,7 +252,10 @@
       "log_type_plan_approved": "플랜 승인됨",
       "log_type_plan_terminated": "플랜 종료됨",
       "skills": "스킬",
-      "skill_executed": "스킬 실행됨"
+      "skill_executed": "스킬 실행됨",
+      "log_type_plan_denied": "거부됨",
+      "no_tasks_available": "사용 가능한 태스크 없음",
+      "trust_mode": "신뢰 모드"
     },
     "Tasks": {
       "tasks": "태스크",
@@ -372,7 +394,21 @@
       "last_updated": "마지막 업데이트",
       "refresh": "새로고침",
       "search_chatrooms": "채팅방 검색",
-      "members": "멤버"
+      "members": "멤버",
+      "chatroom_list": "채팅방 목록",
+      "select_chatroom_to_view_messages": "메시지를 볼 채팅방 선택",
+      "messages": "메시지",
+      "no_chatrooms_found": "채팅방을 찾을 수 없습니다",
+      "id": "ID",
+      "chatroom_id": "채팅방 ID",
+      "unread_messages": "읽지 않은 메시지",
+      "recent_messages": "최근 메시지",
+      "message_history_coming_soon": "메시지 기록 곧 제공 예정",
+      "no_active_users": "활성 사용자 없음",
+      "chat": "채팅",
+      "workbench": "워크벤치",
+      "knowledge_base": "지식 베이스",
+      "mcp": "MCP"
     },
     "Settings": {
       "settings": "설정",
@@ -477,7 +513,16 @@
       "optional": "선택 사항",
       "api_url_placeholder": "API URL 입력",
       "source_type": "출처 유형",
-      "configure_knowledge_base": "지식 베이스 구성"
+      "configure_knowledge_base": "지식 베이스 구성",
+      "team": "팀",
+      "danger": "위험 영역",
+      "loadingServers": "서버 로딩 중...",
+      "kb_reinitialized": "지식 베이스가 재초기화되었습니다",
+      "kb_reinitialized_description": "지식 베이스가 성공적으로 재초기화되었습니다. 완전히 사용 가능해지기까지 시간이 걸릴 수 있습니다",
+      "kb_added": "지식 베이스가 추가되었습니다",
+      "save_to_apply_changes": "변경사항을 적용하려면 저장하세요",
+      "settings_saved": "설정이 저장되었습니다",
+      "settings_saved_description": "설정이 성공적으로 저장되었습니다"
     },
     "Loading": {
       "loading": "로딩 중...",
@@ -601,7 +646,24 @@
       "task_id": "태스크 ID",
       "skills": "스킬",
       "edit": "편집",
-      "edit_plan_in_graph": "그래프에서 플랜 편집"
+      "edit_plan_in_graph": "그래프에서 플랜 편집",
+      "related_task": "관련 태스크",
+      "loading_task_details": "태스크 세부 정보 로딩 중...",
+      "explanation": "설명",
+      "edit_skill": "스킬 편집",
+      "skill_name": "스킬 이름",
+      "enter_skill_name": "스킬 이름 입력",
+      "skill_explanation": "스킬 설명",
+      "enter_skill_explanation": "스킬 설명 입력",
+      "save": "저장",
+      "name": "이름",
+      "enter_name": "이름 입력",
+      "skill_executed": "스킬 실행됨",
+      "log_content": "로그 내용",
+      "plan_approved": "플랜 승인됨",
+      "no_tasks_available": "사용 가능한 태스크 없음",
+      "drag_and_drop_disabled_message": "드래그 앤 드롭 일시적으로 비활성화됨",
+      "plan_completed": "플랜 완료됨"
     },
     "Notification": {
       "notifications": "알림",

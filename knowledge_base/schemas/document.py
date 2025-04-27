@@ -56,6 +56,7 @@ class KnowledgeBaseRegistration(BaseModel):
     """Schema for registering a new knowledge base"""
     id: str
     name: str
+    team_id: str
     description: Optional[str] = ""
     source_type: str
     url: str

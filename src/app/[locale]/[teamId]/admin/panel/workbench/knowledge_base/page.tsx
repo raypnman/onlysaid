@@ -270,7 +270,8 @@ export default function KnowledgeBasePage() {
                                 },
                                 body: JSON.stringify({
                                     id: kb.id,
-                                    enabled: kb.enabled
+                                    enabled: kb.enabled,
+                                    team_id: currentTeam?.id || ""
                                 })
                             });
 
@@ -383,7 +384,8 @@ export default function KnowledgeBasePage() {
                                 },
                                 body: JSON.stringify({
                                     id: kb.id,
-                                    enabled: kb.enabled
+                                    enabled: kb.enabled,
+                                    team_id: currentTeam?.id || ""
                                 })
                             });
 
@@ -521,6 +523,7 @@ export default function KnowledgeBasePage() {
                 },
                 body: JSON.stringify({
                     id: kbItem.id,
+                    team_id: currentTeam?.id || "",
                     name: kbItem.name,
                     description: kbItem.description || "",
                     source_type: kbItem.sourceType,
@@ -563,7 +566,7 @@ export default function KnowledgeBasePage() {
 
         const checkStatus = async () => {
             try {
-                const response = await fetch(`/api/kb/kb_status/${kbId}`);
+                const response = await fetch(`/api/kb/kb_status/${currentTeam?.id}/${kbId}`);
                 if (!response.ok) {
                     throw new Error('Failed to check knowledge base status');
                 }
@@ -758,6 +761,7 @@ export default function KnowledgeBasePage() {
                 throw new Error('Knowledge base not found');
             }
 
+            console.log("Registering KB:", kbItem, currentTeam?.id);
             // Use the existing register_kb endpoint
             const response = await fetch('/api/kb/register_kb', {
                 method: 'POST',
@@ -766,6 +770,7 @@ export default function KnowledgeBasePage() {
                 },
                 body: JSON.stringify({
                     id: kbId,
+                    team_id: currentTeam?.id || "",
                     name: kbItem.name,
                     description: kbItem.description || "",
                     source_type: kbItem.sourceType,

@@ -14,7 +14,7 @@
     "sign_in": "登录",
     "signout_success": "登出成功",
     "signout_success_description": "已成功登出",
-    "admin_panel": "管理面板",
+    "admin_panel": "团队管理",
     "plans": "计划",
     "workbench": "工作台",
     "trust_mode": "信任模式"
@@ -66,7 +66,15 @@
     "completed": "已完成",
     "view_all_issues": "查看所有问题",
     "view_all_releases": "查看所有",
-    "view_all_features": "查看所有"
+    "view_all_features": "查看所有",
+    "workbench_title": "工作台",
+    "workbench_description": "使用文件浏览器，工作流，知识库，以及更多",
+    "your_teams": "您的团队",
+    "members": "成员",
+    "create_new_team": "创建新团队",
+    "join_team_to_use": "请加入团队",
+    "failed_to_load": "加载失败",
+    "retry": "重试"
   },
   "Signup": {
     "signup": "注册",
@@ -105,7 +113,8 @@
     "join_existing_team": "加入现有团队",
     "invite_code": "邀请码",
     "invite_code_placeholder": "请输入邀请码",
-    "team_join_description": "使用邀请码加入已有的团队"
+    "team_join_description": "使用邀请码加入现有团队",
+    "invalid_invite_code": "邀请码无效"
   },
   "Signin": {
     "signin": "登录",
@@ -250,7 +259,14 @@
     "trust_mode": "信任模式",
     "select_room_or_create_new": "选择聊天室或创建新聊天室",
     "members": "成员",
-    "log_type_plan_approved": "计划已批准"
+    "log_type_plan_approved": "计划已批准",
+    "skill_executed": "技能已执行",
+    "log_type_task_created": "任务已创建",
+    "log_type_task_completed": "任务已完成",
+    "log_type_plan_failed": "计划失败",
+    "log_type_approved": "已批准",
+    "log_type_denied": "已拒绝",
+    "log_type_ask_for_plan_approval": "请求计划批准"
   },
   "Plans": {
     "plans": "计划",
@@ -467,7 +483,11 @@
     "active_users": "成员",
     "last_updated": "最后更新",
     "refresh": "刷新",
-    "search_chatrooms": "搜索聊天室"
+    "search_chatrooms": "搜索聊天室",
+    "knowledge_base": "知识库",
+    "mcp": "MCP",
+    "chat": "聊天",
+    "workbench": "工作台"
   },
   "Settings": {
     "settings": "设置",
@@ -566,7 +586,29 @@
     "confirm_reinitialize": "确认重新初始化",
     "confirm_reinitialize_description": "这将重新初始化知识库，可能需要一些时间完成",
     "reinitialize": "重新初始化",
-    "error": "错误"
+    "error": "错误",
+    "team": "团队",
+    "danger": "危险区域",
+    "loadingServers": "加载服务器中...",
+    "kb_reinitialized": "知识库已重新初始化",
+    "kb_reinitialized_description": "知识库已成功重新初始化，可能需要一段时间才能完全可用",
+    "kb_added": "知识库已添加",
+    "save_to_apply_changes": "保存以应用更改",
+    "settings_saved": "设置已保存",
+    "settings_saved_description": "您的设置已成功保存",
+    "kb_path": "路径",
+    "kb_path_placeholder": "输入文件或目录路径",
+    "kb_path_help": "指定知识库文件或目录的路径",
+    "kb_disabled": "已停用",
+    "kb_running": "运行中",
+    "deleting": "删除中",
+    "name": "名称",
+    "kb_deleted": "知识库已删除",
+    "kb_deleted_description": "知识库已成功删除",
+    "delete_kb": "删除知识库",
+    "delete_kb_confirmation": "确定要删除此知识库吗？此操作无法撤销。",
+    "delete": "删除",
+    "confirm_delete": "确认删除"
   },
   "Loading": {
     "loading": "加载中...",
@@ -646,6 +688,7 @@
     "word_document_preview": "Word 文档预览",
     "download_for_full_view": "下载以查看完整内容",
     "currently_only_file_browsing": "目前仅支持文件浏览",
-    "learn": "学习"
+    "learn": "学习",
+    "learn_description": "学习是个人成长的关键，我们提供多种学习资源和工具，帮助你提升技能和知识。"
   }
 } 

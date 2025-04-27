@@ -16,7 +16,8 @@
     "signout_success_description": "正常にログアウトしました",
     "admin_panel": "管理パネル",
     "workbench": "ワークベンチ",
-    "trust_mode": "トラストモード"
+    "trust_mode": "トラストモード",
+    "tasks": "タスク"
   },
   "Signup": {
     "signup": "サインアップ",
@@ -45,7 +46,18 @@
     "profile_creation_description": "アカウントを作成したら、チームを作成して onlysaid を使用できます",
     "3rd_party_login_email": "あなたのメールアドレスは第三者のログインから来ています。そのメールアドレスでアカウントを作成してください",
     "complete_your_profile": "あなたのプロフィールを完成させてください",
-    "create_profile": "プロフィールを作成する"
+    "create_profile": "プロフィールを作成する",
+    "create_team": "チームを作成",
+    "join_team": "チームに参加",
+    "create_new_team": "新しいチームを作成",
+    "team_name": "チーム名",
+    "team_name_placeholder": "チーム名を入力してください",
+    "team_creation_description": "チームを作成した後、他のメンバーを招待できます",
+    "join_existing_team": "既存のチームに参加",
+    "invite_code": "招待コード",
+    "invite_code_placeholder": "招待コードを入力してください",
+    "team_join_description": "招待コードを使用して既存のチームに参加",
+    "invalid_invite_code": "無効な招待コード"
   },
   "Signin": {
     "signin": "ログイン",
@@ -112,7 +124,15 @@
     "completed": "完了",
     "view_all_issues": "すべての問題を表示",
     "view_all_releases": "すべて表示",
-    "view_all_features": "すべて表示"
+    "view_all_features": "すべて表示",
+    "workbench_title": "ワークベンチ",
+    "workbench_description": "ファイルブラウザ、ワークフロー、知識ベースなどを使用",
+    "your_teams": "あなたのチーム",
+    "members": "メンバー",
+    "create_new_team": "新しいチームを作成",
+    "join_team_to_use": "チームに参加してください",
+    "failed_to_load": "読み込みに失敗しました",
+    "retry": "再試行"
   },
   "Footer": {
     "privacy_policy": "プライバシーポリシー",
@@ -220,7 +240,32 @@
     "skills": "スキル",
     "trust_mode": "トラストモード",
     "log_type_plan_completed": "プラン完了",
-    "log_content": "ログ内容"
+    "log_content": "ログ内容",
+    "no_skill_action": "スキルアクションなし",
+    "message_too_old_to_delete": "このメッセージは古すぎて削除できません",
+    "select_chatroom_to_view_messages": "メッセージを表示するチャットルームを選択",
+    "messages": "メッセージ",
+    "no_chatrooms_found": "チャットルームが見つかりません",
+    "id": "ID",
+    "chatroom_id": "チャットルームID",
+    "unread_messages": "未読メッセージ",
+    "recent_messages": "最近のメッセージ",
+    "message_history_coming_soon": "メッセージ履歴は近日公開予定",
+    "content": "内容",
+    "related_task": "関連タスク",
+    "loading_task_details": "タスク詳細を読み込み中...",
+    "explanation": "説明",
+    "plan_created": "プラン作成済み",
+    "task": "タスク",
+    "edit_skill": "スキルを編集",
+    "skill_name": "スキル名",
+    "enter_skill_name": "スキル名を入力してください",
+    "skill_explanation": "スキルの説明",
+    "enter_skill_explanation": "スキルの説明を入力してください",
+    "save": "保存",
+    "no_skills_found": "スキルが見つかりません",
+    "no_tasks_available": "タスクがありません",
+    "no_plans_available": "プランがありません"
   },
   "Plans": {
     "plans": "プラン",
@@ -295,7 +340,6 @@
     "plan_status_updated": "プランのステータスが更新されました",
     "room": "チャットルーム",
     "moved_to": "に移動しました",
-    "no_plans_available": "利用可能なプランはありません",
     "drop_tasks_here": "タスクをここにドロップ",
     "no_plan_selected": "プランが選択されていません",
     "select_plan_from_sidebar": "サイドバーからプランを選択してください",
@@ -317,11 +361,19 @@
     "open_plan": "プランを開く",
     "plan": "プラン",
     "approval_requested": "承認リクエスト",
-    "plan_created": "プラン作成済み",
     "task_id": "タスクID",
     "skill_executed": "スキル実行済み",
     "plan_completed": "プラン完了",
-    "edit_plan_in_graph": "グラフでプランを編集"
+    "edit_plan_in_graph": "グラフでプランを編集",
+    "task": "タスク",
+    "plan_created": "プラン作成済み",
+    "content": "内容",
+    "related_task": "関連タスク",
+    "explanation": "説明",
+    "name": "名前",
+    "enter_name": "名前を入力してください",
+    "no_tasks_available": "タスクがありません",
+    "drag_and_drop_disabled_message": "ドラッグ＆ドロップは一時的に無効です"
   },
   "Learn": {
     "learn": "学ぶ",
@@ -498,7 +550,21 @@
     "reinitialize": "再初期化",
     "deleting": "削除中",
     "confirm_reinitialize": "知識ベースを再初期化してもよろしいですか？",
-    "confirm_reinitialize_description": "知識ベースをリセットすると既存の知識ベースが削除され、再初期化されます。使用可能になるまでしばらくお待ちください。"
+    "confirm_reinitialize_description": "知識ベースをリセットすると既存の知識ベースが削除され、再初期化されます。使用可能になるまでしばらくお待ちください。",
+    "team": "チーム",
+    "loadingServers": "サーバーを読み込み中...",
+    "kb_reinitialized": "知識ベースが再初期化されました",
+    "kb_reinitialized_description": "知識ベースが正常に再初期化されました。完全に利用可能になるまで時間がかかる場合があります",
+    "kb_added": "知識ベースが追加されました",
+    "save_to_apply_changes": "変更を適用するには保存してください",
+    "settings_saved": "設定が保存されました",
+    "settings_saved_description": "設定が正常に保存されました",
+    "configure_knowledge_base": "知識ベースを設定",
+    "source_placeholder": "ソースURLまたはパスを入力してください",
+    "api_key_placeholder": "APIキーを入力してください",
+    "optional": "オプション",
+    "api_url_placeholder": "API URLを入力してください",
+    "source_type": "ソースタイプ"
   },
   "Loading": {
     "loading": "読み込み中...",
@@ -597,6 +663,7 @@
     "workflow_iframe_error": "ワークフローフレームの読み込みに失敗しました",
     "open_workflow_tool": "ワークフローツールを開く",
     "currently_only_file_browsing": "現在はファイル閲覧のみ対応しています",
-    "learn": "学ぶ"
+    "learn": "学ぶ",
+    "learn_description": "学習は個人の成長の鍵です。私たちはスキルと知識を向上させるための様々な学習リソースとツールを提供しています。"
   }
 }

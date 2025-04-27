@@ -43,5 +43,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=35430,
         workers=1,  # Use multiple worker processes
-        reload=False,  # Enable reload in development
+        reload=True,  # Enable reload in development
     )

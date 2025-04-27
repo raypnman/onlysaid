@@ -25,7 +25,8 @@
     "signout_success_description": "You have successfully signed out",
     "admin_panel": "Admin Panel",
     "plans": "Plans",
-    "workbench": "Workbench"
+    "workbench": "Workbench",
+    "trust_mode": "TRUST MODE"
   },
   "Signup": {
     "signup": "Sign Up",
@@ -54,7 +55,18 @@
     "profile_creation_description": "After creating an account, you can create a team and start using onlysaid",
     "3rd_party_login_email": "Your email address is from a third-party login. Please create an account with that email address",
     "complete_your_profile": "Complete your profile",
-    "create_profile": "Create Profile"
+    "create_profile": "Create Profile",
+    "create_team": "Create Team",
+    "join_team": "Join Team",
+    "create_new_team": "Create New Team",
+    "team_name": "Team Name",
+    "team_name_placeholder": "Please enter team name",
+    "team_creation_description": "After creating a team, you can invite other members to join",
+    "join_existing_team": "Join Existing Team",
+    "invite_code": "Invite Code",
+    "invite_code_placeholder": "Please enter invite code",
+    "team_join_description": "Use an invite code to join an existing team",
+    "invalid_invite_code": "Invalid invite code"
   },
   "Signin": {
     "signin": "Sign In",
@@ -76,7 +88,7 @@
   "Home": {
     "welcome": "Welcome to onlysaid",
     "learn_title": "Learn",
-    "learn_description": "Explore onlysaid's learning features",
+    "learn_description": "Explore knowledge base, MCP tools, and more",
     "tasks_title": "Tasks",
     "tasks_description": "Check and complete tasks",
     "mcp_title": "MCP",
@@ -105,8 +117,8 @@
     "powered_by": "Powered by",
     "trusted_by": "Trusted by",
     "plans_title": "Plans",
-    "plans_description": "View and utilize MCP tools to complete plans",
-    "ai_assistant_title": "AI Assistant",
+    "plans_description": "View, manage, and utilize MCP tools to complete plans",
+    "ai_assistant_title": "AI Knowledge Base Assistant",
     "ai_assistant_description": "Answers your questions anywhere in the app and continuously learns new knowledge.",
     "chatroom_title": "Chat Room",
     "chatroom_description": "Chat with your team and AI agents to create actionable plans",
@@ -120,7 +132,13 @@
     "completed": "Completed",
     "view_all_issues": "View All Issues",
     "view_all_releases": "View All",
-    "view_all_features": "View All"
+    "view_all_features": "View All",
+    "workbench_title": "Workbench",
+    "workbench_description": "Use file browser, workflows, knowledge base, and more",
+    "your_teams": "Your Teams",
+    "members": "Members",
+    "failed_to_load": "Failed to load",
+    "retry": "Retry"
   },
   "Footer": {
     "privacy_policy": "Privacy Policy",
@@ -475,7 +493,16 @@
     "optional": "Optional",
     "api_url_placeholder": "Enter API URL",
     "source_type": "Source Type",
-    "deleting": "Deleting"
+    "deleting": "Deleting",
+    "team": "Team",
+    "danger": "Danger Zone",
+    "loadingServers": "Loading servers...",
+    "kb_reinitialized": "Knowledge Base Reinitialized",
+    "kb_reinitialized_description": "Knowledge base has been successfully reinitialized, it may take some time before it's fully available",
+    "kb_added": "Knowledge Base Added",
+    "save_to_apply_changes": "Save to apply changes",
+    "settings_saved": "Settings Saved",
+    "settings_saved_description": "Your settings have been successfully saved"
   },
   "Loading": {
     "loading": "Loading, please wait...",
@@ -683,6 +710,18 @@
     "available_tools": "Available Tools",
     "workflow_description": "Create and manage automated workflows",
     "code_editor": "Code Editor",
-    "code_editor_description": "Write and execute code"
+    "code_editor_description": "Write and execute code",
+    "workflow_management": "Workflow Management",
+    "workflow_iframe_error": "Unable to load workflow frame",
+    "open_workflow_tool": "Open Workflow Tool",
+    "excel_file_with_sheets": "Excel file with sheets",
+    "showing_first_rows": "Showing first rows",
+    "powerpoint_file": "PowerPoint file",
+    "download_to_view": "Download to view",
+    "word_document_preview": "Word document preview",
+    "download_for_full_view": "Download for full view",
+    "currently_only_file_browsing": "Currently only file browsing is supported",
+    "learn": "Learn",
+    "learn_description": "Learning is key to personal growth, we provide various learning resources and tools to help you improve your skills and knowledge."
   }
 }

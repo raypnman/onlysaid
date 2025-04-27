@@ -37,16 +37,6 @@ export function CreateUserModal({ isOpen, onClose, onUserCreated }: CreateUserMo
     const textColorStrong = useColorModeValue("gray.700", "gray.300");
     const textColor = useColorModeValue("gray.600", "gray.400");
 
-    // Add role options collection
-    const roleOptions = createListCollection({
-        items: [
-            { label: "User", value: "user" },
-            { label: "Agent", value: "agent" },
-            { label: "Admin", value: "admin" },
-            { label: "Super Admin", value: "super_admin" },
-        ],
-    });
-
     const validateForm = () => {
         const newErrors: { email?: string; username?: string } = {};
 
@@ -190,10 +180,9 @@ export function CreateUserModal({ isOpen, onClose, onUserCreated }: CreateUserMo
                                                 minHeight: '2.5rem'
                                             }}
                                         >
-                                            <option value="user">User</option>
+                                            <option value="member">Member</option>
+                                            <option value="owner">Owner</option>
                                             <option value="agent">Agent</option>
-                                            <option value="admin">Admin</option>
-                                            <option value="super_admin">Super Admin</option>
                                         </select>
                                         <Box
                                             position="absolute"

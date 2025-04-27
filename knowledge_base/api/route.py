@@ -49,13 +49,13 @@ async def register_kb(request: Request, kb_item: KnowledgeBaseRegistration) -> D
     result = kb_manager.register_knowledge_base(kb_item)
     return result
 
-@router.get("/api/kb_status/{kb_id}")
-async def kb_status(request: Request, kb_id: str) -> KnowledgeBaseStatus:
+@router.get("/api/kb_status/{team_id}/{kb_id}")
+async def kb_status(request: Request, team_id: str, kb_id: str) -> KnowledgeBaseStatus:
     """
     Check the status of a knowledge base
     """
     kb_manager = request.app.state.kb_manager
-    status = kb_manager.get_kb_status(kb_id)
+    status = kb_manager.get_kb_status(kb_id, team_id)
     
     return KnowledgeBaseStatus(
         id=kb_id,
@@ -174,11 +174,12 @@ async def update_kb_status(request: Request, kb_data: dict) -> Dict[str, Any]:
     kb_manager = request.app.state.kb_manager
     kb_id = kb_data.get("id")
     enabled = kb_data.get("enabled")
+    team_id = kb_data.get("team_id")
     
     if not kb_id:
         return {"status": "error", "message": "Knowledge base ID is required"}
     
-    result = kb_manager.update_kb_status(kb_id, enabled)
+    result = kb_manager.update_kb_status(kb_id, enabled, team_id)
     return result
 
 @router.post("/api/delete_kb")

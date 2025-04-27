@@ -95,7 +95,18 @@
     "create_profile": "สร้างโปรไฟล์",
     "profile_creation_description": "หลังจากสร้างบัญชี คุณสามารถสร้างทีมและเริ่มใช้งานพูดอย่างเดียวไม่ทำ",
     "3rd_party_login_email": "อีเมลของคุณมาจากการเข้าสู่ระบบของบุคคลที่สาม กรุณาใช้อีเมลนี้เพื่อสร้างบัญชี",
-    "complete_your_profile": "กรอกข้อมูลโปรไฟล์ของคุณให้ครบถ้วน"
+    "complete_your_profile": "กรอกข้อมูลโปรไฟล์ของคุณให้ครบถ้วน",
+    "create_team": "สร้างทีม",
+    "join_team": "เข้าร่วมทีม",
+    "create_new_team": "สร้างทีมใหม่",
+    "team_name": "ชื่อทีม",
+    "team_name_placeholder": "กรุณาใส่ชื่อทีม",
+    "team_creation_description": "หลังจากสร้างทีม คุณสามารถเชิญสมาชิกคนอื่นเข้าร่วมได้",
+    "join_existing_team": "เข้าร่วมทีมที่มีอยู่",
+    "invite_code": "รหัสเชิญ",
+    "invite_code_placeholder": "กรุณาใส่รหัสเชิญ",
+    "team_join_description": "ใช้รหัสเชิญเพื่อเข้าร่วมทีมที่มีอยู่",
+    "invalid_invite_code": "รหัสเชิญไม่ถูกต้อง"
   },
   "Signin": {
     "signin": "เข้าสู่ระบบ",
@@ -220,7 +231,7 @@
     "open_plan": "เปิดแผน",
     "needs_confirmation": "ต้องการการยืนยัน",
     "plan_created": "สร้างแผนแล้ว",
-    "ask_for_plan_approval": "ขอการยืนยันการดำเนินการ",
+    "ask_for_plan_approval": "ขอการอนุมัติการดำเนินการ",
     "select_room_to_see_plans": "เลือกห้องแชทเพื่อดูแผนที่เกี่ยวข้อง",
     "pending": "รอดำเนินการ",
     "latest_skills": "ทักษะ",
@@ -236,7 +247,20 @@
     "plan_was_created": "แผนถูกสร้างแล้ว",
     "log_type_performing_skill": "กำลังดำเนินการทักษะ",
     "log_type_skill_executed": "ดำเนินการทักษะแล้ว",
-    "trust_mode": "โหมดความเชื่อถือ"
+    "trust_mode": "โหมดความเชื่อถือ",
+    "select_room_or_create_new": "เลือกห้องแชทหรือสร้างห้องแชทใหม่",
+    "no_skill_action": "ไม่มีการดำเนินการทักษะ",
+    "log_type_task_created": "สร้างงานแล้ว",
+    "log_type_task_completed": "งานเสร็จสมบูรณ์แล้ว",
+    "log_type_plan_completed": "แผนเสร็จสมบูรณ์แล้ว",
+    "log_type_plan_failed": "แผนล้มเหลว",
+    "log_type_approved": "อนุมัติแล้ว",
+    "log_type_denied": "ปฏิเสธแล้ว",
+    "log_type_ask_for_plan_approval": "ขอการอนุมัติแผน",
+    "log_type_plan_approved": "แผนได้รับการอนุมัติแล้ว",
+    "log_type_plan_denied": "แผนถูกปฏิเสธ",
+    "no_tasks_available": "ไม่มีงาน",
+    "no_plans_available": "ไม่มีแผน"
   },
   "Plans": {
     "plans": "แผน",
@@ -314,7 +338,6 @@
     "content": "เนื้อหา",
     "plan_log_details": "รายละเอียดบันทึกแผน",
     "no_log_selected": "ไม่ได้เลือกบันทึก",
-    "ask_for_plan_approval": "ขอการอนุมัติแผน",
     "approval_request": "คำขออนุมัติ",
     "plan_requires_approval": "แผนต้องการการอนุมัติ",
     "description": "คำอธิบาย",
@@ -345,8 +368,9 @@
     "log_type_plan_created": "สร้างแผนแล้ว",
     "no_plan_selected": "ยังไม่ได้เลือกแผน",
     "select_plan_from_sidebar": "เลือกแผนจากแถบด้านข้าง",
-    "edit_plan_in_graph": "แก้ไขแผนในกราฟ",
-    "step": "ขั้นตอน"
+    "edit_plan_in_graph": "แก้ไขแผนในแผนภาพ",
+    "step": "ขั้นตอน",
+    "plan_completed": "แผนเสร็จสมบูรณ์แล้ว"
   },
   "Learn": {
     "learn": "เรียนรู้",
@@ -528,7 +552,16 @@
     "confirm_reinitialize": "ยืนยันการเริ่มต้นใหม่",
     "confirm_reinitialize_description": "การดำเนินการนี้จะเริ่มต้นฐานความรู้ใหม่ ซึ่งอาจใช้เวลาสักครู่",
     "reinitialize": "เริ่มต้นใหม่",
-    "error": "ข้อผิดพลาด"
+    "error": "ข้อผิดพลาด",
+    "team": "ทีม",
+    "danger": "พื้นที่อันตราย",
+    "loadingServers": "กำลังโหลดเซิร์ฟเวอร์...",
+    "kb_reinitialized": "เริ่มต้นฐานความรู้ใหม่แล้ว",
+    "kb_reinitialized_description": "ฐานความรู้ได้รับการเริ่มต้นใหม่เรียบร้อยแล้ว อาจต้องใช้เวลาสักครู่ก่อนที่จะพร้อมใช้งานอย่างเต็มที่",
+    "kb_added": "เพิ่มฐานความรู้แล้ว",
+    "save_to_apply_changes": "บันทึกเพื่อใช้การเปลี่ยนแปลง",
+    "settings_saved": "บันทึกการตั้งค่าแล้ว",
+    "settings_saved_description": "บันทึกการตั้งค่าของคุณเรียบร้อยแล้ว"
   },
   "Loading": {
     "loading": "กำลังโหลด...",
@@ -597,6 +630,9 @@
     "available_tools": "เครื่องมือที่มี",
     "workflow_description": "สร้างและจัดการเวิร์กโฟลว์อัตโนมัติ",
     "code_editor": "ตัวแก้ไขโค้ด",
-    "code_editor_description": "เขียนและรันโค้ด"
+    "code_editor_description": "เขียนและรันโค้ด",
+    "workflow_management": "การจัดการเวิร์กโฟลว์",
+    "workflow_iframe_error": "ไม่สามารถโหลดกรอบเวิร์กโฟลว์ได้",
+    "open_workflow_tool": "เปิดเครื่องมือเวิร์กโฟลว์"
   }
 } 
