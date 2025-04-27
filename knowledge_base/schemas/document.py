@@ -44,13 +44,14 @@ class DataSource(BaseModel):
 
 
 class QueryRequest(BaseModel):
+    team_id: str
+    knowledge_bases: Optional[List[str]] = None
     query: Union[str, List[str]]  # Can be a single string or list of strings
     conversation_history: Union[str, List[str]] = ""
     streaming: bool = False
     top_k: int = 5
     preferred_language: str = "en"
     message_id: Optional[str] = None
-    knowledge_bases: Optional[List[str]] = None
 
 class KnowledgeBaseRegistration(BaseModel):
     """Schema for registering a new knowledge base"""

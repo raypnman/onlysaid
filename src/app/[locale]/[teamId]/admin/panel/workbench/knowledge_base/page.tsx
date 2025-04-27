@@ -303,7 +303,7 @@ export default function KnowledgeBasePage() {
                                 headers: {
                                     'Content-Type': 'application/json',
                                 },
-                                body: JSON.stringify({ id: initialKB.id })
+                                body: JSON.stringify({ id: initialKB.id, team_id: currentTeam?.id || "" })
                             });
 
                             if (deleteResponse.ok) {
@@ -343,7 +343,7 @@ export default function KnowledgeBasePage() {
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({ id: oldId })
+                            body: JSON.stringify({ id: oldId, team_id: currentTeam?.id || "" })
                         });
 
                         if (deleteResponse.ok) {

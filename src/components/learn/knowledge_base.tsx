@@ -131,40 +131,18 @@ export const KnowledgeBase = () => {
         try {
             setIsLoading(true);
             // Use a relative path that will be routed by Nginx
-            const url = `/api/kb/list_documents`;
+            const url = `/api/kb/list_documents/${currentTeam?.id}`;
             const response = await axios.get(url);
             const data = response.data;
 
-            const filteredDataSources = data.dataSources ? data.dataSources.filter((ds: DataSource) =>
-                authorizedKnowledgeBases.includes(ds.id)
-            ) : [];
-
-            console.log("filteredDataSources", filteredDataSources);
-
-            setDataSources(filteredDataSources);
-
-            // Only include folder structures and documents for authorized knowledge bases
-            const filteredFolderStructures = {};
-            const filteredDocuments = {};
-
-            filteredDataSources.forEach((ds: DataSource) => {
-                if (data.folderStructures && data.folderStructures[ds.id]) {
-                    // @ts-ignore
-                    filteredFolderStructures[ds.id] = data.folderStructures[ds.id];
-                }
-
-                if (data.documents && data.documents[ds.id]) {
-                    // @ts-ignore
-                    filteredDocuments[ds.id] = data.documents[ds.id];
-                }
-            });
-
-            setFolderStructures(filteredFolderStructures);
-            setDocuments(filteredDocuments);
+            // No filtering needed anymore
+            setDataSources(data.dataSources || []);
+            setFolderStructures(data.folderStructures || {});
+            setDocuments(data.documents || {});
 
             // Select the first data source by default if available and none is selected
-            if (filteredDataSources.length > 0 && !selectedSource) {
-                setSelectedSource(filteredDataSources[0].id);
+            if (data.dataSources && data.dataSources.length > 0 && !selectedSource) {
+                setSelectedSource(data.dataSources[0].id);
             }
 
             setIsLoading(false);

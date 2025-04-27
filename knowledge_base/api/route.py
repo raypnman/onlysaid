@@ -16,13 +16,13 @@ router = APIRouter()
 def get_kb_manager(request: Request):
     return request.app.state.kb_manager
 
-@router.get("/api/list_documents")
-async def list_documents(request: Request) -> Dict[str, Any]:
+@router.get("/api/list_documents/{team_id}")
+async def list_documents(request: Request, team_id: str) -> Dict[str, Any]:
     """
     List all available knowledge base sources, folder structures, and documents.
     """
     kb_manager = request.app.state.kb_manager
-    data_sources = kb_manager.get_data_sources()
+    data_sources = kb_manager.get_data_sources(team_id)
     logger.info(data_sources)
     
     # Prepare response structure compatible with the frontend
@@ -35,7 +35,7 @@ async def list_documents(request: Request) -> Dict[str, Any]:
     # Add folder structures and documents for each source
     for source in data_sources:
         source_id = source["id"]
-        response["folderStructures"][source_id] = kb_manager.get_folder_structure(source_id)
+        response["folderStructures"][source_id] = kb_manager.get_folder_structure(source_id, team_id)
         response["documents"][source_id] = kb_manager.get_documents(source_id)
     
     return response
@@ -89,32 +89,6 @@ async def kb_sync(request: Request) -> Dict[str, Any]:
                 kb_manager._kb_status[kb_id] = "error"
     
     return {"status": "success", "message": "Knowledge base synchronized"}
-
-@router.post("/api/query")
-async def query_knowledge_base(request: Request, query: QueryRequest):
-    kb_manager = request.app.state.kb_manager
-    logger.info(f"Query received: {query}")
-    if query.streaming:
-        # Generate a unique ID for this streaming session
-        session_id = f"stream_{os.urandom(8).hex()}"
-        
-        # Store the query parameters for potential reconnection
-        kb_manager.store_message(session_id, {
-            "query": query.dict(),
-            "current_content": "",
-            "is_complete": False
-        })
-        
-        # Return a streaming response with cleanup task
-        return StreamingResponse(
-            stream_tokens(kb_manager, query, session_id),
-            media_type="text/event-stream",
-            background=BackgroundTask(cleanup_session, kb_manager, session_id)
-        )
-    else:
-        # Return a regular JSON response
-        answer = kb_manager.answer_with_context(query)
-        return {"status": "success", "results": answer}
 
 async def cleanup_session(kb_manager, session_id):
     """Clean up session data after streaming ends"""
@@ -189,12 +163,41 @@ async def delete_kb(request: Request, kb_data: dict) -> Dict[str, Any]:
     """
     kb_manager = request.app.state.kb_manager
     kb_id = kb_data.get("id")
+    team_id = kb_data.get("team_id")
     
     if not kb_id:
         return {"status": "error", "message": "Knowledge base ID is required"}
     
-    result = kb_manager.delete_knowledge_base(kb_id)
+    result = kb_manager.delete_knowledge_base(kb_id, team_id)
     return result
+
+
+@router.post("/api/query")
+async def query_knowledge_base(request: Request, query: QueryRequest):
+    kb_manager = request.app.state.kb_manager
+    logger.info(f"Query received: {query}")
+    if query.streaming:
+        # Generate a unique ID for this streaming session
+        session_id = f"stream_{os.urandom(8).hex()}"
+        
+        # Store the query parameters for potential reconnection
+        kb_manager.store_message(session_id, {
+            "query": query.dict(),
+            "current_content": "",
+            "is_complete": False
+        })
+        
+        # Return a streaming response with cleanup task
+        return StreamingResponse(
+            stream_tokens(kb_manager, query, session_id),
+            media_type="text/event-stream",
+            background=BackgroundTask(cleanup_session, kb_manager, session_id)
+        )
+    else:
+        # Return a regular JSON response
+        answer = kb_manager.answer_with_context(query)
+        return {"status": "success", "results": answer}
+
 
 @router.post("/api/retrieve")
 async def retrieve_from_knowledge_base(request: Request, query_data: dict) -> Dict[str, Any]:
@@ -212,13 +215,22 @@ async def retrieve_from_knowledge_base(request: Request, query_data: dict) -> Di
     query_text = query_data.get("query")
     knowledge_bases = query_data.get("knowledge_bases")
     top_k = query_data.get("top_k", 5)
+    team_id = query_data.get("team_id")
+    
+    logger.info(f"Retrieving from knowledge base for team {team_id} with query: {query_text}")
+    logger.info(f"Knowledge bases: {knowledge_bases}")
     
     if not query_text:
         return {"status": "error", "message": "Query text is required"}
     
     try:
         # Use the existing query_knowledge_base method to retrieve documents
-        results = kb_manager.query_knowledge_base(query_text, knowledge_bases, top_k)
+        results = kb_manager.query_knowledge_base(
+            team_id,
+            query_text,
+            knowledge_bases,
+            top_k
+        )
         
         # Format the results for the API response
         formatted_results = []

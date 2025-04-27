@@ -8,6 +8,8 @@ from pathlib import Path
 # TODO: this should be a variable
 kb_url = "http://onlysaid-kb:35430"
 mcp = FastMCP("rag")
+# TODO: replace teamid with env
+team_id = "277635ea-372b-4cf4-a609-4ef3efeb6485"
 
 @mcp.tool()
 def query_knowledge_base(query: str, knowledge_bases: List[str] = []) -> str:
@@ -23,7 +25,9 @@ def query_knowledge_base(query: str, knowledge_bases: List[str] = []) -> str:
     """
     query_request = {
         "query": query,
-        "knowledge_bases": knowledge_bases if knowledge_bases else None
+        "knowledge_bases": knowledge_bases if knowledge_bases else None,
+        "team_id": team_id,
+        "streaming": True
     }
     
     try:
@@ -53,7 +57,8 @@ def retrieve_from_knowledge_base(query: str, knowledge_bases: List[str]) -> str:
     """
     retrieve_request = {
         "query": query,
-        "knowledge_bases": None,
+        "knowledge_bases": knowledge_bases,
+        "team_id": team_id
     }
     
     try:

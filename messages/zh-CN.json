@@ -404,6 +404,7 @@
     "learn": "学习",
     "mcp_explorer": "MCP 探索器",
     "knowledge_base": "知识库",
+    "error_loading_servers": "加载服务器错误",
     "mcp": {
       "servers": "服务器",
       "search_servers_and_tools": "搜索服务器和工具",
@@ -487,7 +488,8 @@
     "knowledge_base": "知识库",
     "mcp": "MCP",
     "chat": "聊天",
-    "workbench": "工作台"
+    "workbench": "工作台",
+    "id": "ID"
   },
   "Settings": {
     "settings": "设置",
