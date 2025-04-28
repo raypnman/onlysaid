@@ -503,6 +503,8 @@ export default function FileExplorer() {
         formData.append('teamId', teamId);
 
         try {
+            setIsLoading(true); // Show loading state immediately
+
             const response = await fetch('/api/agent_home/upload', {
                 method: 'POST',
                 body: formData,
@@ -515,10 +517,39 @@ export default function FileExplorer() {
                     description: errorData.error || 'Failed to upload file',
                     duration: 5000,
                 });
+                return; // Exit early on error
             }
 
-            // Refresh the current directory
-            refreshCurrentDirectory();
+            // Force a complete refresh of the file structure
+            // First refresh the root directory
+            const rootResult = await fetchFileStructure(teamId);
+            if (rootResult) {
+                // Sort children
+                if (rootResult.children) {
+                    rootResult.children = [...rootResult.children].sort((a, b) => {
+                        if (a.type !== b.type) return a.type === 'directory' ? -1 : 1;
+                        return a.name.localeCompare(b.name);
+                    });
+                }
+
+                // Update the root directory in Redux
+                dispatch(setRootDirectory(rootResult));
+            }
+
+            // Then refresh the current directory
+            const currentDirResult = await fetchFileStructure(teamId, currentPath);
+            if (currentDirResult) {
+                // Sort children
+                if (currentDirResult.children) {
+                    currentDirResult.children = [...currentDirResult.children].sort((a, b) => {
+                        if (a.type !== b.type) return a.type === 'directory' ? -1 : 1;
+                        return a.name.localeCompare(b.name);
+                    });
+                }
+
+                // Update the selected item in Redux
+                dispatch(setSelectedItem(currentDirResult));
+            }
 
             toaster.create({
                 title: t("success"),
@@ -532,47 +563,61 @@ export default function FileExplorer() {
                 description: t("failed_to_upload"),
                 duration: 5000,
             });
-        }
+        } finally {
+            setIsLoading(false);
 
-        // Reset the file input
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+            // Reset the file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
         }
     };
 
-    // Refresh current directory
+    // Completely revise the refresh function to be more thorough
     const refreshCurrentDirectory = async () => {
         if (!teamId) return;
 
         setIsLoading(true);
         try {
-            const result = await fetchFileStructure(teamId, currentPath);
+            // First, refresh the root directory to update the entire tree
+            const rootResult = await fetchFileStructure(teamId);
 
-            // Create a new result object with sorted children
-            let updatedResult = result;
-            if (result.children) {
-                const sortedChildren = [...result.children].sort((a, b) => {
-                    // If types are different, directories come first
-                    if (a.type !== b.type) {
-                        return a.type === 'directory' ? -1 : 1;
-                    }
-                    // If types are the same, sort alphabetically
+            if (rootResult && rootResult.children) {
+                // Sort children
+                const sortedRootChildren = [...rootResult.children].sort((a, b) => {
+                    if (a.type !== b.type) return a.type === 'directory' ? -1 : 1;
                     return a.name.localeCompare(b.name);
                 });
 
-                updatedResult = {
-                    ...result,
+                const updatedRootResult = {
+                    ...rootResult,
+                    children: sortedRootChildren
+                };
+
+                // Update the root directory in Redux
+                dispatch(setRootDirectory(updatedRootResult));
+            }
+
+            // Then refresh the current directory
+            const currentDirResult = await fetchFileStructure(teamId, currentPath);
+
+            if (currentDirResult && currentDirResult.children) {
+                // Sort children
+                const sortedChildren = [...currentDirResult.children].sort((a, b) => {
+                    if (a.type !== b.type) return a.type === 'directory' ? -1 : 1;
+                    return a.name.localeCompare(b.name);
+                });
+
+                const updatedResult = {
+                    ...currentDirResult,
                     children: sortedChildren
                 };
-            }
 
-            dispatch(setSelectedItem(updatedResult));
-
-            // If we're at the root, update the root directory
-            if (currentPath === teamHomePath) {
-                dispatch(setRootDirectory(updatedResult));
+                // Update the selected item in Redux
+                dispatch(setSelectedItem(updatedResult));
             }
         } catch (error) {
+            console.error('Error refreshing directories:', error);
             toaster.create({
                 title: t("error"),
                 description: t("failed_to_refresh"),
