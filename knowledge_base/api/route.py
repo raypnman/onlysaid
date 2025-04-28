@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import os
 from starlette.background import BackgroundTask
 from fastapi import Request, Depends, Response, HTTPException
@@ -105,6 +105,7 @@ async def stream_tokens(kb_manager, query, session_id):
     try:
         # Use the async streaming method
         async for chunk in gen:
+            logger.info(f"Chunk received: {chunk}")
             # Extract the text from the CompletionResponse object
             if hasattr(chunk, 'delta'):
                 token = chunk.delta
@@ -171,7 +172,6 @@ async def delete_kb(request: Request, kb_data: dict) -> Dict[str, Any]:
     result = kb_manager.delete_knowledge_base(kb_id, team_id)
     return result
 
-
 @router.post("/api/query")
 async def query_knowledge_base(request: Request, query: QueryRequest):
     kb_manager = request.app.state.kb_manager
@@ -198,6 +198,47 @@ async def query_knowledge_base(request: Request, query: QueryRequest):
         answer = kb_manager.answer_with_context(query)
         return {"status": "success", "results": answer}
 
+@router.get("/api/stream")
+async def stream_knowledge_base(
+    request: Request,
+    team_id: str,
+    query: str,
+    message_id: Optional[str] = None,
+    conversation_history: Optional[str] = "",
+    preferred_language: str = "en",
+    top_k: int = 5
+):
+    kb_manager = request.app.state.kb_manager
+    
+    # Create a QueryRequest object from the GET parameters
+    query_request = QueryRequest(
+        team_id=team_id,
+        query=query,
+        conversation_history=conversation_history,
+        streaming=True,
+        top_k=top_k,
+        preferred_language=preferred_language,
+        message_id=message_id
+    )
+    
+    logger.info(f"Stream request received: {query_request}")
+    
+    # Generate a unique ID for this streaming session
+    session_id = f"stream_{os.urandom(8).hex()}"
+    
+    # Store the query parameters for potential reconnection
+    kb_manager.store_message(session_id, {
+        "query": query_request.dict(),
+        "current_content": "",
+        "is_complete": False
+    })
+    
+    # Return a streaming response with cleanup task
+    return StreamingResponse(
+        stream_tokens(kb_manager, query_request, session_id),
+        media_type="text/event-stream",
+        background=BackgroundTask(cleanup_session, kb_manager, session_id)
+    )
 
 @router.post("/api/retrieve")
 async def retrieve_from_knowledge_base(request: Request, query_data: dict) -> Dict[str, Any]:

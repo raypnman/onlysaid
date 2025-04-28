@@ -154,6 +154,8 @@
     "no_knowledge_bases": "沒有知識庫配置, 查詢需要特定知識的問題可能會較不有效"
   },
   "Chat": {
+    "add_rag_ai_assistant": "邀請RAG AI助手",
+    "empty_message": "這個消息是空的",
     "chat": "聊天",
     "rooms": "聊天室",
     "new_room": "新聊天室",

@@ -59,6 +59,7 @@ import { setStreamingState } from '@/store/features/assistantSlice';
 import { useAgentAPI } from "@/hooks/chat/agent";
 // import { useDeepseekAPI } from "@/hooks/chat/deepseek";
 import { useLoadMoreMessages } from "@/hooks/chat/load_more_messages";
+import { useParams } from "next/navigation";
 
 const MESSAGE_LIMIT = 30;
 const openai = new OpenAI({
@@ -90,22 +91,24 @@ const ChatPageContent = () => {
   const { data: session } = useSession();
   const dispatch = useDispatch();
   const colors = useChatPageColors();
+  const params = useParams();
+  const locale = params.locale as string;
 
   // Get chat state from Redux - use individual selectors for better performance
   const rooms = useSelector((state: RootState) => state.chat.rooms);
   const selectedRoomId = useSelector((state: RootState) => state.chat.selectedRoomId);
   const messages = useSelector((state: RootState) => state.chat.messages);
-  const unreadCounts = useSelector((state: RootState) => state.chat.unreadCounts);
   const isLoadingRooms = useSelector((state: RootState) => state.chat.isLoadingRooms);
   const isLoadingMessages = useSelector((state: RootState) => state.chat.isLoadingMessages);
-  const messagesLoaded = useSelector((state: RootState) => state.chat.messagesLoaded);
   const isSocketConnected = useSelector((state: RootState) => state.chat.isSocketConnected);
   const isStreaming = useSelector((state: RootState) => state.assistant.isStreaming);
   const streamingMessageId = useSelector((state: RootState) => state.assistant.streamingMessageId);
-  const planSectionWidth = useSelector((state: RootState) => state.chat.planSectionWidth);
 
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
-  const isOwner = useSelector((state: RootState) => state.user.isOwner);
+  const currentTeam = useSelector((state: RootState) => state.user.currentTeam);
+  const currentTeamId = currentTeam?.id;
+  const teamKnowledgeBases = currentTeam?.settings?.knowledgeBases;
+  const teamKnowledgeBasesIds = teamKnowledgeBases?.map((kb: any) => kb.id);
 
   // Get messages for the selected room
   const currentMessages = selectedRoomId ? messages[selectedRoomId] || [] : [];
@@ -121,15 +124,6 @@ const ChatPageContent = () => {
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
   // Use the centralized colors instead of direct useColorModeValue calls
-  const bgSubtle = colors.bgSubtle;
-  const textColor = colors.textColor;
-  const textColorHeading = colors.textColorHeading;
-  const borderColor = colors.borderColor;
-
-  // Add new color variables for message list consistency
-  const messageListBg = bgSubtle;
-  const messageTextColor = colors.messageTextColor || textColor;
-
   // Add these state variables
   const [isRoomDetailsOpen, setIsRoomDetailsOpen] = useState<boolean>(false);
   const [isInvitingUsers, setIsInvitingUsers] = useState<boolean>(false);
@@ -206,7 +200,7 @@ const ChatPageContent = () => {
   }, [session]);
 
   // Add this function to handle deepseek API calls with streaming
-  const triggerOpenAI = async (message: string, roomId: string) => {
+  const handleStreamAPI = async (message: string, roomId: string, isKnowledgeBase: boolean = false) => {
     // Guard against re-entry
     if (isProcessingRef.current) {
       console.log("Already processing a request, skipping");
@@ -219,30 +213,43 @@ const ChatPageContent = () => {
       // Create a temporary message ID for the streaming response
       const tempMessageId = uuidv4();
 
-      // Find the deepseek user or create a fallback if not found
-      const deepseekUser: User = users.find((user: User) => user.username === "deepseek") || {
-        id: "deepseek-" + uuidv4(),
-        username: "deepseek",
-        email: "deepseek@ai.com",
-        avatar: "",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        active_rooms: [],
-        archived_rooms: [],
-        teams: [],
-        settings: {} // Add the required settings property
-      };
+      // Find the appropriate AI user based on the type of request
+      const aiUser: User = isKnowledgeBase
+        ? (users.find((user: User) => user.username === "rag-agent") || {
+          id: "rag-agent-" + uuidv4(),
+          username: "rag-agent",
+          email: "rag-agent@ai.com",
+          avatar: "",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          active_rooms: [],
+          archived_rooms: [],
+          teams: [],
+          settings: {}
+        })
+        : (users.find((user: User) => user.username === "deepseek") || {
+          id: "deepseek-" + uuidv4(),
+          username: "deepseek",
+          email: "deepseek@ai.com",
+          avatar: "",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          active_rooms: [],
+          archived_rooms: [],
+          teams: [],
+          settings: {}
+        });
 
       // Create an initial empty message to show the streaming effect
       const initialMessage: IMessage = {
         id: tempMessageId,
         room_id: roomId,
-        sender: deepseekUser,
+        sender: aiUser,
         content: "", // Empty content that will be streamed
         created_at: new Date().toISOString(),
         mentions: [],
         isStreaming: true, // Mark as streaming
-        avatar: deepseekUser.avatar || ""
+        avatar: aiUser.avatar || ""
       };
 
       // Add a small delay before dispatching the initial empty message
@@ -252,8 +259,10 @@ const ChatPageContent = () => {
       // Dispatch the initial empty message to show the bubble
       dispatch(addMessage({ roomId, message: initialMessage }));
 
-      // Extract the actual query (remove the @deepseek mention)
-      const query = message.replace(/@deepseek/gi, "").trim();
+      // Extract the actual query (remove the mention)
+      const query = isKnowledgeBase
+        ? message.replace(/@rag-agent/gi, "").trim()
+        : message.replace(/@deepseek/gi, "").trim();
 
       // Get the last 10 messages from the conversation for context
       const currentMessages = messages[roomId] || [];
@@ -279,106 +288,242 @@ const ChatPageContent = () => {
         { role: "user" as const, content: query }
       ];
 
+      // Set streaming state to true at the start
+      dispatch(setStreamingState({ isStreaming: true, messageId: tempMessageId }));
+
       // Use a throttled update approach to prevent too many renders
       let fullContent = "";
       let lastUpdateTime = Date.now();
       let updateTimer: NodeJS.Timeout | null = null;
 
-      // Set streaming state to true at the start
-      dispatch(setStreamingState({ isStreaming: true, messageId: tempMessageId }));
+      if (isKnowledgeBase) {
+        try {
+          // Format conversation history for the knowledge base API
+          const conversationHistory = lastMessages.map(msg =>
+            `${msg.role}: ${msg.content}`
+          ).join("\n");
 
-      try {
-        // Start streaming with OpenAI
-        const stream = await openai.chat.completions.create({
-          model: "deepseek-chat",
-          messages: apiMessages,
-          stream: true
-        });
+          // URL encode all parameters for the GET request
+          const params = new URLSearchParams({
+            team_id: currentTeamId || '',
+            query: query,
+            message_id: tempMessageId,
+            conversation_history: conversationHistory,
+            preferred_language: locale || 'en'
+          });
 
-        // Process the stream
-        for await (const chunk of stream) {
-          // Get the content delta
-          const content = chunk.choices[0]?.delta?.content || "";
+          // Create the EventSource connection for knowledge base using GET
+          const eventSource = new EventSource(`/api/kb/stream?${params.toString()}`, {
+            withCredentials: true,
+          });
 
-          // Append to the full content
-          fullContent += content;
+          // Handle the streaming events
+          eventSource.addEventListener('token', (event) => {
+            try {
+              const data = JSON.parse(event.data);
+              const token = data.token || "";
 
-          // Throttle UI updates to prevent too many renders
-          const currentTime = Date.now();
-          if (currentTime - lastUpdateTime > 100) {
-            // Update the message with the accumulated content
+              // Append to the full content
+              fullContent += token;
+
+              // Throttle UI updates to prevent too many renders
+              const currentTime = Date.now();
+              if (currentTime - lastUpdateTime > 100) {
+                // Update the message with the accumulated content
+                dispatch(updateMessage({
+                  roomId,
+                  messageId: tempMessageId,
+                  content: fullContent,
+                  isStreaming: true
+                }));
+                lastUpdateTime = currentTime;
+              } else if (updateTimer === null) {
+                // Schedule an update if we haven't already
+                updateTimer = setTimeout(() => {
+                  dispatch(updateMessage({
+                    roomId,
+                    messageId: tempMessageId,
+                    content: fullContent,
+                    isStreaming: true
+                  }));
+                  lastUpdateTime = Date.now();
+                  updateTimer = null;
+                }, 100);
+              }
+            } catch (error) {
+              console.error("Error processing token:", error);
+            }
+          });
+
+          eventSource.addEventListener('end', () => {
+            // Clear any pending updates
+            if (updateTimer) {
+              clearTimeout(updateTimer);
+              updateTimer = null;
+            }
+
+            // Final update with complete content
             dispatch(updateMessage({
               roomId,
               messageId: tempMessageId,
               content: fullContent,
-              isStreaming: true
+              isStreaming: false
             }));
-            lastUpdateTime = currentTime;
-          } else if (updateTimer === null) {
-            // Schedule an update if we haven't already
-            updateTimer = setTimeout(() => {
+
+            // Also dispatch the final message to ensure it's properly saved in chat history
+            dispatch({
+              type: 'chat/sendMessage',
+              payload: {
+                message: {
+                  id: tempMessageId,
+                  room_id: roomId,
+                  sender: aiUser,
+                  content: fullContent,
+                  created_at: new Date().toISOString(),
+                  mentions: [],
+                  isStreaming: false,
+                  avatar: aiUser.avatar || ""
+                }
+              }
+            });
+
+            // Set streaming state to false when done
+            dispatch(setStreamingState({ isStreaming: false, messageId: null }));
+
+            // Close the connection when streaming is complete
+            eventSource.close();
+          });
+
+          eventSource.onerror = (error) => {
+            console.error("EventSource error:", error);
+
+            // Clear any pending updates
+            if (updateTimer) {
+              clearTimeout(updateTimer);
+              updateTimer = null;
+            }
+
+            // Update the message to show the error
+            dispatch(updateMessage({
+              roomId,
+              messageId: tempMessageId,
+              content: fullContent + "\n\nError: Connection lost. Please try again.",
+              isStreaming: false
+            }));
+
+            // Set streaming state to false on error
+            dispatch(setStreamingState({ isStreaming: false, messageId: null }));
+
+            // Close the connection
+            eventSource.close();
+          };
+        } catch (streamError) {
+          console.error("Knowledge base streaming error:", streamError);
+
+          // Update the message to show the error
+          dispatch(updateMessage({
+            roomId,
+            messageId: tempMessageId,
+            content: "Sorry, I encountered an error while processing your request.",
+            isStreaming: false
+          }));
+
+          // Set streaming state to false on error
+          dispatch(setStreamingState({ isStreaming: false, messageId: null }));
+        }
+      } else {
+        try {
+          // Start streaming with OpenAI
+          const stream = await openai.chat.completions.create({
+            model: "deepseek-chat",
+            messages: apiMessages,
+            stream: true
+          });
+
+          // Process the stream
+          for await (const chunk of stream) {
+            // Get the content delta
+            const content = chunk.choices[0]?.delta?.content || "";
+
+            // Append to the full content
+            fullContent += content;
+
+            // Throttle UI updates to prevent too many renders
+            const currentTime = Date.now();
+            if (currentTime - lastUpdateTime > 100) {
+              // Update the message with the accumulated content
               dispatch(updateMessage({
                 roomId,
                 messageId: tempMessageId,
                 content: fullContent,
                 isStreaming: true
               }));
-              lastUpdateTime = Date.now();
-              updateTimer = null;
-            }, 100);
-          }
-        }
-
-        // Clear any pending updates
-        if (updateTimer) {
-          clearTimeout(updateTimer);
-          updateTimer = null;
-        }
-
-        // Final update with complete content
-        dispatch(updateMessage({
-          roomId,
-          messageId: tempMessageId,
-          content: fullContent,
-          isStreaming: false
-        }));
-
-        // Also dispatch the final message to ensure it's properly saved in chat history
-        dispatch({
-          type: 'chat/sendMessage',
-          payload: {
-            message: {
-              id: tempMessageId,
-              room_id: roomId,
-              sender: deepseekUser,
-              content: fullContent,
-              created_at: new Date().toISOString(),
-              mentions: [],
-              isStreaming: false,
-              avatar: deepseekUser.avatar || ""
+              lastUpdateTime = currentTime;
+            } else if (updateTimer === null) {
+              // Schedule an update if we haven't already
+              updateTimer = setTimeout(() => {
+                dispatch(updateMessage({
+                  roomId,
+                  messageId: tempMessageId,
+                  content: fullContent,
+                  isStreaming: true
+                }));
+                lastUpdateTime = Date.now();
+                updateTimer = null;
+              }, 100);
             }
           }
-        });
 
-        // Set streaming state to false when done
-        dispatch(setStreamingState({ isStreaming: false, messageId: null }));
+          // Clear any pending updates
+          if (updateTimer) {
+            clearTimeout(updateTimer);
+            updateTimer = null;
+          }
 
-      } catch (streamError) {
-        console.error("Streaming error:", streamError);
+          // Final update with complete content
+          dispatch(updateMessage({
+            roomId,
+            messageId: tempMessageId,
+            content: fullContent,
+            isStreaming: false
+          }));
 
-        // Update the message to show the error
-        dispatch(updateMessage({
-          roomId,
-          messageId: tempMessageId,
-          content: "Sorry, I encountered an error while processing your request.",
-          isStreaming: false
-        }));
+          // Also dispatch the final message to ensure it's properly saved in chat history
+          dispatch({
+            type: 'chat/sendMessage',
+            payload: {
+              message: {
+                id: tempMessageId,
+                room_id: roomId,
+                sender: aiUser,
+                content: fullContent,
+                created_at: new Date().toISOString(),
+                mentions: [],
+                isStreaming: false,
+                avatar: aiUser.avatar || ""
+              }
+            }
+          });
 
-        // Set streaming state to false on error
-        dispatch(setStreamingState({ isStreaming: false, messageId: null }));
+          // Set streaming state to false when done
+          dispatch(setStreamingState({ isStreaming: false, messageId: null }));
+        } catch (streamError) {
+          console.error("Streaming error:", streamError);
+
+          // Update the message to show the error
+          dispatch(updateMessage({
+            roomId,
+            messageId: tempMessageId,
+            content: "Sorry, I encountered an error while processing your request.",
+            isStreaming: false
+          }));
+
+          // Set streaming state to false on error
+          dispatch(setStreamingState({ isStreaming: false, messageId: null }));
+        }
       }
     } catch (error) {
-      console.error("Error calling Deepseek API:", error);
+      console.error("Error calling API:", error);
 
       // Log more detailed error information
       if (error instanceof Error) {
@@ -390,7 +535,7 @@ const ChatPageContent = () => {
       // Use English fallback messages for errors to avoid translation issues
       toaster.create({
         title: "Error",
-        description: "Error processing your request with Deepseek",
+        description: "Error processing your request",
         type: "error"
       });
 
@@ -632,12 +777,19 @@ const ChatPageContent = () => {
         // Check for @deepseek mentions
         if (newMessage.content.toLowerCase().includes('@deepseek')) {
           // Call the deepseek API with streaming
-          triggerOpenAI(newMessage.content, selectedRoomId);
+          handleStreamAPI(newMessage.content, selectedRoomId);
         }
         // Check for agent mentions
         // else if (newMessage.mentions?.some(user => user.role === "agent")) {
         else if (newMessage.content.toLowerCase().includes('@agent')) {
           triggerAgentAPI(newMessage.content, selectedRoomId, users, currentUser);
+        }
+        else if (newMessage.content.toLowerCase().includes('@rag-agent')) {
+          handleStreamAPI(
+            newMessage.content,
+            selectedRoomId,
+            true // Set isKnowledgeBase to true
+          );
         }
 
         if (newMessage.mentions?.some(user => user.role === "user")) {
@@ -675,7 +827,7 @@ const ChatPageContent = () => {
         owner_message: newMessage.content
       });
     }
-  }, [dispatch, selectedRoomId, setMessageInput, triggerAgentAPI, triggerOpenAI, messagesEndRef]);
+  }, [dispatch, selectedRoomId, setMessageInput, triggerAgentAPI, handleStreamAPI, messagesEndRef]);
 
   // Memoize the ChatInput props to prevent unnecessary re-renders
   const chatInputProps = useMemo(() => ({
