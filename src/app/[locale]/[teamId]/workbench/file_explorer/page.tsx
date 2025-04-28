@@ -70,9 +70,9 @@ import { useSettingsColors, useKnowledgeBaseColors, useCodeSyntaxHighlightColors
 const MotionBox = motion(Box);
 
 // Function to fetch files from the API
-const fetchFileStructure = async (path = ''): Promise<FileNode> => {
+const fetchFileStructure = async (teamId: string, path = ''): Promise<FileNode> => {
     try {
-        const response = await fetch(`/api/agent_home/get_files?path=${encodeURIComponent(path)}`);
+        const response = await fetch(`/api/agent_home/get_files?teamId=${encodeURIComponent(teamId)}&path=${encodeURIComponent(path)}`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -93,9 +93,9 @@ const fetchFileStructure = async (path = ''): Promise<FileNode> => {
 };
 
 // Function to fetch file content
-const fetchFileContent = async (path: string): Promise<FileContentResponse | null> => {
+const fetchFileContent = async (teamId: string, path: string): Promise<FileContentResponse | null> => {
     try {
-        const response = await fetch(`/api/agent_home/file_content?path=${encodeURIComponent(path)}`);
+        const response = await fetch(`/api/agent_home/file_content?teamId=${encodeURIComponent(teamId)}&path=${encodeURIComponent(path)}`);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -166,13 +166,15 @@ const FileTreeItem = ({
     level = 0,
     onSelect,
     selectedPath,
-    onRefresh
+    onRefresh,
+    teamId
 }: {
     item: FileNode;
     level?: number;
     onSelect: (item: FileNode) => void;
     selectedPath: string | null;
     onRefresh: () => Promise<void>;
+    teamId: string;
 }) => {
     const dispatch = useDispatch();
     const expandedPaths = useSelector((state: RootState) =>
@@ -202,9 +204,18 @@ const FileTreeItem = ({
             if (isDirectory && isOpen && (!children || children.length === 0)) {
                 setIsLoading(true);
                 try {
-                    const result = await fetchFileStructure(item.path);
+                    const result = await fetchFileStructure(teamId, item.path);
                     if (result.children) {
-                        setChildren(result.children);
+                        // Sort children: directories first, then files
+                        const sortedChildren = [...result.children].sort((a, b) => {
+                            // If types are different, directories come first
+                            if (a.type !== b.type) {
+                                return a.type === 'directory' ? -1 : 1;
+                            }
+                            // If types are the same, sort alphabetically
+                            return a.name.localeCompare(b.name);
+                        });
+                        setChildren(sortedChildren);
                     }
                 } catch (error) {
                     toaster.create({
@@ -219,7 +230,7 @@ const FileTreeItem = ({
         };
 
         loadChildren();
-    }, [isOpen, isDirectory, item.path, children]);
+    }, [isOpen, isDirectory, item.path, children, teamId]);
 
     const toggleOpen = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -293,6 +304,7 @@ const FileTreeItem = ({
                             onSelect={onSelect}
                             selectedPath={selectedPath}
                             onRefresh={onRefresh}
+                            teamId={teamId}
                         />
                     ))}
                 </Box>
@@ -314,6 +326,8 @@ export default function FileExplorer() {
         searchQuery,
         fileContent
     } = useSelector((state: RootState) => state.workbench.fileExplorer);
+    const { currentTeam } = useSelector((state: RootState) => state.user);
+    const teamId = currentTeam?.id;
 
     const [isLoading, setIsLoading] = useState(true);
     const [isContentLoading, setIsContentLoading] = useState(false);
@@ -321,6 +335,7 @@ export default function FileExplorer() {
     const [isNewFileOpen, setIsNewFileOpen] = useState(false);
     const [newItemName, setNewItemName] = useState('');
     const agentHomePath = process.env.NEXT_PUBLIC_AGENT_HOME_PATH || '/app/agent_home';
+    const teamHomePath = teamId ? `${agentHomePath}/${teamId}` : agentHomePath;
     const newItemInputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const t = useTranslations("Workbench");
@@ -333,10 +348,31 @@ export default function FileExplorer() {
     // Load root directory on component mount
     useEffect(() => {
         const loadRootDirectory = async () => {
+            if (!teamId) return;
+
             setIsLoading(true);
             try {
-                const result = await fetchFileStructure();
-                dispatch(setRootDirectory(result));
+                const result = await fetchFileStructure(teamId);
+
+                // Create a new result object with sorted children
+                let updatedResult = result;
+                if (result.children) {
+                    const sortedChildren = [...result.children].sort((a, b) => {
+                        // If types are different, directories come first
+                        if (a.type !== b.type) {
+                            return a.type === 'directory' ? -1 : 1;
+                        }
+                        // If types are the same, sort alphabetically
+                        return a.name.localeCompare(b.name);
+                    });
+
+                    updatedResult = {
+                        ...result,
+                        children: sortedChildren
+                    };
+                }
+
+                dispatch(setRootDirectory(updatedResult));
             } catch (error) {
                 toaster.create({
                     title: t("error"),
@@ -348,24 +384,56 @@ export default function FileExplorer() {
             }
         };
 
-        if (session) {
+        if (session && teamId) {
             loadRootDirectory();
         }
-    }, [session, dispatch, t]);
+    }, [session, dispatch, t, teamId]);
 
     // Handle item selection
     const handleSelectItem = async (item: FileNode) => {
-        dispatch(setSelectedItem(item));
+        if (!teamId) return;
 
-        // Update breadcrumbs
+        // If it's a directory, create a new item with sorted children
+        if (item.type === 'directory' && item.children) {
+            const sortedChildren = [...item.children].sort((a, b) => {
+                // If types are different, directories come first
+                if (a.type !== b.type) {
+                    return a.type === 'directory' ? -1 : 1;
+                }
+                // If types are the same, sort alphabetically
+                return a.name.localeCompare(b.name);
+            });
+
+            // Create a new item with sorted children
+            const sortedItem = {
+                ...item,
+                children: sortedChildren
+            };
+
+            dispatch(setSelectedItem(sortedItem));
+        } else {
+            dispatch(setSelectedItem(item));
+        }
+
+        // Update breadcrumbs - trust the path parts but format them nicely
         const pathParts = item.path.split('/').filter(Boolean);
-        const newBreadcrumbs = [{ name: 'agent_home', path: agentHomePath }];
-        let currentPathBuilder = agentHomePath;
+        console.log("pathParts", pathParts);
 
-        for (let i = 1; i < pathParts.length; i++) {
-            currentPathBuilder += `/${pathParts[i]}`;
+        // Create breadcrumbs based on the actual path parts
+        const newBreadcrumbs = [];
+        let currentPathBuilder = '';
+
+        for (let i = 0; i < pathParts.length; i++) {
+            const part = pathParts[i];
+
+            // Build the path progressively
+            currentPathBuilder += `/${part}`;
+
+            // For the first part (agent_home), show as "Home"
+            const displayName = i === 0 ? 'Home' : part;
+
             newBreadcrumbs.push({
-                name: pathParts[i],
+                name: displayName,
                 path: currentPathBuilder
             });
         }
@@ -379,7 +447,7 @@ export default function FileExplorer() {
             dispatch(setFileContent(null));
 
             try {
-                const content = await fetchFileContent(item.path);
+                const content = await fetchFileContent(teamId, item.path);
                 dispatch(setFileContent(content));
             } catch (error) {
                 console.error('Failed to load file content:', error);
@@ -392,9 +460,11 @@ export default function FileExplorer() {
 
     // Handle breadcrumb navigation
     const handleBreadcrumbClick = async (path: string) => {
+        if (!teamId) return;
+
         setIsLoading(true);
         try {
-            const result = await fetchFileStructure(path);
+            const result = await fetchFileStructure(teamId, path);
             handleSelectItem(result);
         } catch (error) {
             toaster.create({
@@ -409,7 +479,8 @@ export default function FileExplorer() {
 
     // Handle file download
     const handleDownload = (file: FileNode) => {
-        window.open(`/api/agent_home/download?path=${encodeURIComponent(file.path)}`, '_blank');
+        if (!teamId) return;
+        window.open(`/api/agent_home/download?teamId=${encodeURIComponent(teamId)}&path=${encodeURIComponent(file.path)}`, '_blank');
     };
 
     // Handle file upload
@@ -420,6 +491,8 @@ export default function FileExplorer() {
     };
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!teamId) return;
+
         const files = e.target.files;
         if (!files || files.length === 0) return;
 
@@ -427,6 +500,7 @@ export default function FileExplorer() {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('path', currentPath);
+        formData.append('teamId', teamId);
 
         try {
             const response = await fetch('/api/agent_home/upload', {
@@ -468,14 +542,35 @@ export default function FileExplorer() {
 
     // Refresh current directory
     const refreshCurrentDirectory = async () => {
+        if (!teamId) return;
+
         setIsLoading(true);
         try {
-            const result = await fetchFileStructure(currentPath);
-            dispatch(setSelectedItem(result));
+            const result = await fetchFileStructure(teamId, currentPath);
+
+            // Create a new result object with sorted children
+            let updatedResult = result;
+            if (result.children) {
+                const sortedChildren = [...result.children].sort((a, b) => {
+                    // If types are different, directories come first
+                    if (a.type !== b.type) {
+                        return a.type === 'directory' ? -1 : 1;
+                    }
+                    // If types are the same, sort alphabetically
+                    return a.name.localeCompare(b.name);
+                });
+
+                updatedResult = {
+                    ...result,
+                    children: sortedChildren
+                };
+            }
+
+            dispatch(setSelectedItem(updatedResult));
 
             // If we're at the root, update the root directory
-            if (currentPath === '/agent_home') {
-                dispatch(setRootDirectory(result));
+            if (currentPath === teamHomePath) {
+                dispatch(setRootDirectory(updatedResult));
             }
         } catch (error) {
             toaster.create({
@@ -618,6 +713,7 @@ export default function FileExplorer() {
                                 onSelect={handleSelectItem}
                                 selectedPath={selectedItem?.path || null}
                                 onRefresh={refreshCurrentDirectory}
+                                teamId={teamId || ''}
                             />
                         </VStack>
                     ) : (

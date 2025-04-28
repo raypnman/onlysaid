@@ -57,6 +57,7 @@ export async function GET(req: NextRequest) {
 
         // Resolve the full path, ensuring it stays within the agent_home directory
         const fullPath = path.resolve(agentHomePath, filePath);
+        console.log("fullPath", fullPath);
 
         // Security check: ensure the path is within the agent_home directory
         if (!fullPath.startsWith(agentHomePath)) {

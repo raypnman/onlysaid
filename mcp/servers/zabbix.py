@@ -165,7 +165,6 @@ async def get_zabbix_host_memory_utilization(
     logger.info(f"Time to: {time_to}")
     # Set default time range (past 1 hour to now) if not provided
     current_time = int(datetime.now().timestamp())
-    one_hour_ago = current_time - 3600  # 3600 seconds = 1 hour
     
     # Use provided values or defaults
     actual_time_from = time_from if time_from is not None else one_hour_ago

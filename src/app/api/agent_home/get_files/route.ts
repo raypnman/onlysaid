@@ -16,9 +16,27 @@ interface FileNode {
 /**
  * Recursively reads a directory and builds a file tree structure
  */
-const readDirectoryRecursive = (dirPath: string, basePath: string = '/agent_home'): FileNode => {
-    const relativePath = path.join(basePath, path.relative(process.env.AGENT_HOME_PATH || '/agent_home', dirPath));
+const readDirectoryRecursive = (dirPath: string, teamId: string, basePath: string = '/agent_home'): FileNode => {
+    // Get the name of the current directory/file
     const name = path.basename(dirPath);
+
+    // Construct the relative path correctly
+    // First, get the path relative to the agent home directory
+    const agentHomePath = process.env.AGENT_HOME_PATH || '/agent_home';
+    const teamBasePath = path.join(agentHomePath, teamId);
+
+    // Calculate the path relative to the team's directory
+    let relativePath;
+    if (dirPath.startsWith(teamBasePath)) {
+        // If the path is already within the team directory, create a clean path
+        relativePath = `/agent_home/${teamId}/${path.relative(teamBasePath, dirPath)}`;
+    } else {
+        // Fallback for unexpected paths
+        relativePath = path.join(basePath, path.relative(agentHomePath, dirPath));
+    }
+
+    // Clean up the path (remove any double slashes)
+    relativePath = relativePath.replace(/\/+/g, '/');
 
     const stats = fs.statSync(dirPath);
 
@@ -37,7 +55,7 @@ const readDirectoryRecursive = (dirPath: string, basePath: string = '/agent_home
             const items = fs.readdirSync(dirPath);
             const children = items.map(item => {
                 const itemPath = path.join(dirPath, item);
-                return readDirectoryRecursive(itemPath, basePath);
+                return readDirectoryRecursive(itemPath, teamId, basePath);
             });
 
             return {
@@ -73,9 +91,15 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Get the requested path from query parameters
+        // Get the requested path and teamId from query parameters
         const { searchParams } = new URL(req.url);
         const requestedPath = searchParams.get('path') || '';
+        const teamId = searchParams.get('teamId');
+
+        // Ensure teamId is provided
+        if (!teamId) {
+            return NextResponse.json({ error: 'Team ID is required' }, { status: 400 });
+        }
 
         // Ensure the agent home path is set in environment variables
         const agentHomePath = process.env.AGENT_HOME_PATH;
@@ -83,11 +107,29 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'AGENT_HOME_PATH not configured' }, { status: 500 });
         }
 
-        // Resolve the full path, ensuring it stays within the agent_home directory
-        const fullPath = path.resolve(agentHomePath, requestedPath);
+        // Create the team-specific path
+        const teamBasePath = path.join(agentHomePath, teamId);
 
-        // Security check: ensure the path is within the agent_home directory
-        if (!fullPath.startsWith(agentHomePath)) {
+        // Create the directory if it doesn't exist
+        if (!fs.existsSync(teamBasePath)) {
+            try {
+                fs.mkdirSync(teamBasePath, { recursive: true });
+            } catch (error) {
+                console.error(`Error creating team directory ${teamBasePath}:`, error);
+                return NextResponse.json({ error: 'Failed to create team directory' }, { status: 500 });
+            }
+        }
+
+        // Resolve the full path, ensuring it stays within the team's directory
+        let fullPath;
+        if (requestedPath) {
+            fullPath = path.resolve(teamBasePath, requestedPath.replace(/^\/agent_home\/[^/]+/, ''));
+        } else {
+            fullPath = teamBasePath;
+        }
+
+        // Security check: ensure the path is within the team's directory
+        if (!fullPath.startsWith(teamBasePath)) {
             return NextResponse.json({ error: 'Access denied: Path outside of allowed directory' }, { status: 403 });
         }
 
@@ -102,12 +144,12 @@ export async function GET(req: NextRequest) {
         let result;
         if (stats.isDirectory()) {
             // Read directory structure
-            result = readDirectoryRecursive(fullPath);
+            result = readDirectoryRecursive(fullPath, teamId, `/agent_home/${teamId}`);
         } else {
             // Return file info
             const name = path.basename(fullPath);
             const extension = path.extname(fullPath).slice(1);
-            const relativePath = path.join('/agent_home', path.relative(agentHomePath, fullPath));
+            const relativePath = `/agent_home/${teamId}/${path.relative(teamBasePath, fullPath)}`;
 
             result = {
                 name,
