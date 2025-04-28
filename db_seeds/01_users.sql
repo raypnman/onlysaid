@@ -15,4 +15,4 @@ CREATE TABLE IF NOT EXISTS users (
 
 INSERT INTO users (username, email, settings, avatar) VALUES ('agent', 'agent@agent.com', '{"theme": "light"}', 'https://static.vecteezy.com/system/resources/thumbnails/046/435/654/small/illustration-of-a-cute-little-girl-with-a-smile-on-her-face-png.png');
 INSERT INTO users (username, email, settings, avatar) VALUES ('deepseek', 'deepseek@llm.com', '{"theme": "light"}', 'https://diplo-media.s3.eu-central-1.amazonaws.com/2025/01/deepseek-italy-ban-garante.png');
-INSERT INTO users (username, email, settings, avatar) VALUES ('agent-rag', 'agent-rag@agent-rag.com', '{"theme": "light"}', 'https://static.vecteezy.com/system/resources/thumbnails/046/435/654/small/illustration-of-a-cute-little-girl-with-a-smile-on-her-face-png.png');
+INSERT INTO users (username, email, settings, avatar) VALUES ('rag-agent', 'rag-agent@rag-agent.com', '{"theme": "light"}', 'https://static.vecteezy.com/system/resources/thumbnails/046/435/654/small/illustration-of-a-cute-little-girl-with-a-smile-on-her-face-png.png');

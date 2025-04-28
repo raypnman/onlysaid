@@ -92,6 +92,8 @@ export function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProps) {
                             agentUsername = 'agent';
                         } else if (agentType === 'deepseek') {
                             agentUsername = 'deepseek';
+                        } else if (agentType === 'rag_agent') {
+                            agentUsername = 'rag-agent';
                         }
 
                         if (agentUsername) {
@@ -179,6 +181,11 @@ export function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProps) {
             title: "DeepSeek Agent",
             description: t("add_deepseek_ai_assistant")
         },
+        {
+            value: "rag_agent",
+            title: "RAG Agent",
+            description: t("add_rag_ai_assistant")
+        },
     ];
 
     return (
@@ -222,9 +229,9 @@ export function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProps) {
                                     <Text textStyle="sm" fontWeight="medium" color={colors.textColorHeading} mb={2}>
                                         {t("add_ai_assistants")}
                                     </Text>
-                                    <Flex gap="2" flexWrap="wrap">
+                                    <Flex gap="2" flexDirection="column" width="100%">
                                         {agentOptions.map((item) => (
-                                            <CheckboxCard.Root key={item.value} value={item.value}>
+                                            <CheckboxCard.Root key={item.value} value={item.value} width="100%">
                                                 <CheckboxCard.HiddenInput />
                                                 <CheckboxCard.Control>
                                                     <CheckboxCard.Content>

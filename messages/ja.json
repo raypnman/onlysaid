@@ -205,6 +205,7 @@
     "today": "今日",
     "yesterday": "昨日",
     "room_name": "チャットルーム名",
+    "room_name_required": "チャットルーム名は必須です",
     "edit": "編集",
     "create_new_room": "新しいチャットルームを作成",
     "select_room_or_create_new": "チャットルームを選択または新規作成",
@@ -266,7 +267,8 @@
     "no_skills_found": "スキルが見つかりません",
     "no_tasks_available": "タスクがありません",
     "no_plans_available": "プランがありません",
-    "coming_soon": "近日公開予定"
+    "coming_soon": "近日公開予定",
+    "add_rag_ai_assistant": "RAG AIアシスタントを追加"
   },
   "Plans": {
     "plans": "プラン",
@@ -460,7 +462,8 @@
     "workbench": "ワークベンチ",
     "chatroom_list": "チャットルーム一覧",
     "messages": "メッセージ",
-    "select_chatroom_to_view_messages": "メッセージを表示するチャットルームを選択"
+    "select_chatroom_to_view_messages": "メッセージを表示するチャットルームを選択",
+    "id": "ID"
   },
   "Settings": {
     "settings": "設定",
