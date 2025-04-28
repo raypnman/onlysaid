@@ -350,13 +350,6 @@ export const ChatBubble = React.memo(({
     }
   }, []);
 
-  // Add function to navigate to plan page
-  const handleOpenPlan = useCallback((planId: string) => {
-    if (planId) {
-      router.push(`/${locale}/plans/${planId}`);
-    }
-  }, [router, locale]);
-
   // Pre-process the message content
   const processedContent = useMemo(() => {
     if (!message.content) return "";
