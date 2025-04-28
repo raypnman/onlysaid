@@ -32,6 +32,8 @@ import { useColorModeValue } from "@/components/ui/color-mode";
 import { FiChevronUp, FiChevronDown } from "react-icons/fi";
 import { usePlansColors } from "@/utils/colors";
 import { PlanLog } from "@/types/plan";
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
 
 
 interface PlanLogModalProps {
@@ -68,6 +70,7 @@ export default function PlanLogModal({
     const t = useTranslations("Plans");
     const params = useParams();
     const locale = params.locale as string || 'en';
+    const currentTeam = useSelector((state: RootState) => state.user.currentTeam);
 
     // Use the plans colors hook for consistent styling
     const plansColors = usePlansColors();
@@ -894,7 +897,7 @@ export default function PlanLogModal({
                                                             {log.plan_id && (
                                                                 <Link
                                                                     as={NextLink}
-                                                                    href={`/${locale}/plans/${log.plan_id}`}
+                                                                    href={`/${locale}/${currentTeam?.id}/plans/${log.plan_id}`}
                                                                     _hover={{ textDecoration: 'none' }}
                                                                 >
                                                                     <Badge

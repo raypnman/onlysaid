@@ -34,11 +34,6 @@
             "description": "/servers/description/msft_office_professional.md",
             "path": "/servers/msft_office_professional.py",
             "metadata": {}
-        },
-        "rag": {
-            "description": "/servers/description/rag.md",
-            "path": "/servers/rag.py",
-            "metadata": {}
         }
     }
 }
