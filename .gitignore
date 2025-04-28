@@ -2,6 +2,8 @@
 
 # TODO: remove later
 mcp/servers/*
+stt/results/*
+stt/*
 
 # Python cache files
 *.pyc

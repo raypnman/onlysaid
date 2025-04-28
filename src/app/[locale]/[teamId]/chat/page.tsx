@@ -5,7 +5,6 @@ import {
   Text,
   Flex,
   Icon,
-  Container,
   Button,
   CloseButton,
   Drawer,
@@ -44,9 +43,7 @@ import {
   setUnreadCount,
   addMessage,
   updateMessage,
-  setPlanSectionWidth
 } from '@/store/features/chatSlice';
-import { updateActiveRooms } from '@/store/features/userSlice';
 import React from "react";
 import { ChatMessageList } from "@/components/chat/message_list";
 import { ChatInput } from "@/components/chat/chat_input";
@@ -59,7 +56,9 @@ import { useRouter } from "next/navigation";
 import OpenAI from "openai";
 import { v4 as uuidv4 } from "uuid";
 import { setStreamingState } from '@/store/features/assistantSlice';
-import PlanSection from "@/components/chat/plan_section";
+import { useAgentAPI } from "@/hooks/chat/agent";
+// import { useDeepseekAPI } from "@/hooks/chat/deepseek";
+import { useLoadMoreMessages } from "@/hooks/chat/load_more_messages";
 
 const MESSAGE_LIMIT = 30;
 const openai = new OpenAI({
@@ -132,13 +131,14 @@ const ChatPageContent = () => {
   const messageTextColor = colors.messageTextColor || textColor;
 
   // Add these state variables
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [isRoomDetailsOpen, setIsRoomDetailsOpen] = useState<boolean>(false);
   const [isInvitingUsers, setIsInvitingUsers] = useState<boolean>(false);
   const [roomUsers, setRoomUsers] = useState<User[]>([]);
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
   const [isUpdatingName, setIsUpdatingName] = useState<boolean>(false);
+
+  // Add this with your other state variables
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
 
   // Get the current room
   const currentRoom = useMemo(() => {
@@ -147,6 +147,9 @@ const ChatPageContent = () => {
 
   // Add this at the top of your component
   const isProcessingRef = useRef(false);
+
+  // Use the hook
+  const { triggerAgentAPI } = useAgentAPI();
 
   // Fetch rooms
   useEffect(() => {
@@ -202,68 +205,8 @@ const ChatPageContent = () => {
     }
   }, [session]);
 
-  // Add this new function to handle the agent API call
-  const triggerAgentAPI = async (message: string, roomId: string) => {
-    try {
-      // Extract the mentioned agent username
-      let assigneeId = null;
-      const mentionMatch = message.match(/@([a-zA-Z0-9_]+)/);
-
-      if (mentionMatch && mentionMatch[1]) {
-        const mentionedUsername = mentionMatch[1];
-
-        // Look for the mentioned user in all users
-        const mentionedUser = users.find(user =>
-          user.username === mentionedUsername ||
-          (mentionedUsername === "agent" && user.role === "agent")
-        );
-
-        if (mentionedUser) {
-          assigneeId = mentionedUser.id;
-        }
-      }
-
-      // Create payload with assignee field always included
-      const payload = {
-        summoner: currentUser?.email,
-        query: message,
-        room_id: roomId,
-        assigner: currentUser?.id,
-        created_at: new Date().toISOString(),
-        assignee: assigneeId, // Always include this field, even if null
-      };
-
-      const response = await axios.post(`/api/mcp/create_plan`, payload);
-
-      dispatch(joinRoom(roomId));
-
-      // Add the room to the user's active_rooms
-      await axios.post("/api/user/update_user", {
-        roomId: roomId,
-        action: "add"
-      });
-
-      // Update the Redux state to match the database
-      dispatch(updateActiveRooms({ roomId, action: "add" }));
-    }
-    catch (error) {
-      console.error("Error calling agent API:", error);
-      // Log more detailed error information
-      if (axios.isAxiosError(error) && error.response) {
-        console.error("Response status:", error.response.status);
-        console.error("Response data:", error.response.data);
-      }
-
-      toaster.create({
-        title: t("error"),
-        description: t("error_calling_agent_api"),
-        type: "error"
-      });
-    }
-  };
-
   // Add this function to handle deepseek API calls with streaming
-  const triggerDeepseekAPI = async (message: string, roomId: string) => {
+  const triggerOpenAI = async (message: string, roomId: string) => {
     // Guard against re-entry
     if (isProcessingRef.current) {
       console.log("Already processing a request, skipping");
@@ -316,7 +259,7 @@ const ChatPageContent = () => {
       const currentMessages = messages[roomId] || [];
 
       // Add null checks and default values for message properties
-      const lastMessages = currentMessages.slice(-10).map(msg => {
+      const lastMessages = currentMessages.slice(-MESSAGE_LIMIT).map(msg => {
         // Ensure sender exists and has a role property
         const sender = msg.sender || { role: "user" };
         const role = (sender && typeof sender === 'object' && sender.role) ?
@@ -671,6 +614,7 @@ const ChatPageContent = () => {
     }
   }, [rooms, selectedRoomId, dispatch]);
 
+  // Then you can use triggerAgentAPI in your component
   const handleSendMessage = useCallback(async (newMessage: IMessage) => {
     console.log("Sending message:", newMessage);
 
@@ -688,11 +632,12 @@ const ChatPageContent = () => {
         // Check for @deepseek mentions
         if (newMessage.content.toLowerCase().includes('@deepseek')) {
           // Call the deepseek API with streaming
-          triggerDeepseekAPI(newMessage.content, selectedRoomId);
+          triggerOpenAI(newMessage.content, selectedRoomId);
         }
         // Check for agent mentions
-        else if (newMessage.mentions?.some(user => user.role === "agent")) {
-          triggerAgentAPI(newMessage.content, selectedRoomId);
+        // else if (newMessage.mentions?.some(user => user.role === "agent")) {
+        else if (newMessage.content.toLowerCase().includes('@agent')) {
+          triggerAgentAPI(newMessage.content, selectedRoomId, users, currentUser);
         }
 
         if (newMessage.mentions?.some(user => user.role === "user")) {
@@ -730,7 +675,7 @@ const ChatPageContent = () => {
         owner_message: newMessage.content
       });
     }
-  }, [dispatch, selectedRoomId, setMessageInput, triggerAgentAPI, triggerDeepseekAPI, messagesEndRef]);
+  }, [dispatch, selectedRoomId, setMessageInput, triggerAgentAPI, triggerOpenAI, messagesEndRef]);
 
   // Memoize the ChatInput props to prevent unnecessary re-renders
   const chatInputProps = useMemo(() => ({
@@ -757,178 +702,16 @@ const ChatPageContent = () => {
     isSocketConnected
   ]);
 
-  // Optimize loadMoreMessages function
-  const loadMoreMessages = async () => {
-    if (!selectedRoomId || isLoadingMore || !hasMoreMessages) return;
-
-    try {
-      setIsLoadingMore(true);
-
-      // Get the oldest message ID in the current messages
-      const oldestMessage = currentMessages[0];
-      const oldestMessageId = oldestMessage?.id;
-
-      // Fetch older messages
-      const response = await axios.get(`/api/chat/get_messages`, {
-        params: {
-          roomId: selectedRoomId,
-          before: oldestMessageId,
-          limit: MESSAGE_LIMIT
-        }
-      });
-
-      const serverMessages = response.data;
-
-      // If we got fewer messages than the limit, there are no more to load
-      setHasMoreMessages(serverMessages.length >= MESSAGE_LIMIT);
-
-      // Only proceed if we have messages to process
-      if (serverMessages.length > 0) {
-        // Use a more efficient approach to process messages
-        const userIds = [...new Set(serverMessages.map((msg: any) =>
-          typeof msg.sender === 'string' ? msg.sender : msg.sender?.id
-        ))].filter(Boolean);
-
-        // Fetch all user data in a single request
-        const usersResponse = await axios.post('/api/user/get_users', {
-          ids: userIds
-        });
-
-        // Create a map for faster lookups
-        const userMap = new Map();
-        if (usersResponse.data && usersResponse.data.users) {
-          usersResponse.data.users.forEach((user: User) => {
-            userMap.set(user.id, user);
-          });
-        }
-
-        // Transform messages efficiently
-        const transformedMessages = serverMessages.map((msg: any) => {
-          if (typeof msg.sender === 'string') {
-            const user = userMap.get(msg.sender);
-            return {
-              ...msg,
-              sender: user || {
-                id: msg.sender,
-                username: 'Unknown User',
-                email: '',
-                role: 'user',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-                active_rooms: [],
-                archived_rooms: []
-              }
-            };
-          }
-          return msg;
-        });
-
-        // Add the older messages to the Redux store
-        dispatch(setMessages({
-          roomId: selectedRoomId,
-          messages: [...transformedMessages, ...currentMessages]
-        }));
-      }
-    } catch (error) {
-      console.error("Error loading more messages:", error);
-      toaster.create({
-        title: t("error"),
-        description: t("error_loading_more_messages"),
-        type: "error"
-      });
-    } finally {
-      setIsLoadingMore(false);
-    }
-  };
-
-  // Optimize the loadMessages function
-  const loadMessages = useCallback(async (roomId: string) => {
-    try {
-      console.log("Loading messages for room:", roomId);
-      dispatch(setLoadingMessages(true));
-
-      const response = await axios.get(`/api/chat/get_messages?roomId=${roomId}&limit=${MESSAGE_LIMIT}`);
-
-      if (response.data && Array.isArray(response.data)) {
-        const serverMessages = response.data;
-
-        // Set hasMoreMessages based on the number of messages received
-        setHasMoreMessages(serverMessages.length >= MESSAGE_LIMIT);
-
-        // Process messages efficiently
-        const userIds = [...new Set(serverMessages.map((msg: any) =>
-          typeof msg.sender === 'string' ? msg.sender : msg.sender?.id
-        ))].filter(Boolean);
-
-        if (userIds.length > 0) {
-          const usersResponse = await axios.post('/api/user/get_users', {
-            ids: userIds
-          });
-
-          const userMap = new Map();
-          if (usersResponse.data && usersResponse.data.users) {
-            usersResponse.data.users.forEach((user: User) => {
-              userMap.set(user.id, user);
-            });
-          }
-
-          const transformedMessages = serverMessages.map((msg: any) => {
-            if (typeof msg.sender === 'string') {
-              const user = userMap.get(msg.sender);
-              return {
-                ...msg,
-                sender: user || {
-                  id: msg.sender,
-                  username: 'Unknown User',
-                  email: '',
-                  role: 'user',
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
-                  active_rooms: [],
-                  archived_rooms: []
-                }
-              };
-            }
-            return msg;
-          });
-
-          dispatch(setMessages({ roomId, messages: transformedMessages }));
-        } else {
-          dispatch(setMessages({ roomId, messages: serverMessages }));
-        }
-
-        dispatch(markRoomMessagesLoaded(roomId));
-      }
-    } catch (error) {
-      console.error("Error loading messages:", error);
-      toaster.create({
-        title: t("error"),
-        description: t("error_loading_messages"),
-        type: "error"
-      });
-    } finally {
-      dispatch(setLoadingMessages(false));
-    }
-  }, [dispatch, t]);
-
-  // Then update the handleRoomSelect function
-  const handleRoomSelect = useCallback((roomId: string) => {
-    console.log("Selecting room:", roomId);
-
-    // First join the room via socket
-    dispatch({ type: 'chat/joinRoom', payload: roomId });
-
-    // Then set it as selected in Redux
-    dispatch(setSelectedRoom(roomId));
-
-    // Reset unread count for this room
-    dispatch(setUnreadCount({ roomId, count: 0 }));
-
-    // Load messages if not already loaded
-    if (!messagesLoaded[roomId]) {
-      loadMessages(roomId);
-    }
-  }, [dispatch, messagesLoaded, loadMessages]);
+  // Use the hook
+  const { isLoadingMore, loadMoreMessages } = useLoadMoreMessages({
+    selectedRoomId,
+    currentMessages,
+    hasMoreMessages,
+    setHasMoreMessages,
+    MESSAGE_LIMIT,
+    t,
+    toaster
+  });
 
   // Add this useEffect to your ChatPageContent component
   useEffect(() => {

@@ -265,7 +265,8 @@
     "save": "保存",
     "no_skills_found": "スキルが見つかりません",
     "no_tasks_available": "タスクがありません",
-    "no_plans_available": "プランがありません"
+    "no_plans_available": "プランがありません",
+    "coming_soon": "近日公開予定"
   },
   "Plans": {
     "plans": "プラン",
@@ -373,7 +374,8 @@
     "name": "名前",
     "enter_name": "名前を入力してください",
     "no_tasks_available": "タスクがありません",
-    "drag_and_drop_disabled_message": "ドラッグ＆ドロップは一時的に無効です"
+    "drag_and_drop_disabled_message": "ドラッグ＆ドロップは一時的に無効です",
+    "log_content": "ログ内容"
   },
   "Learn": {
     "learn": "学ぶ",
@@ -451,7 +453,14 @@
     "last_updated": "最終更新",
     "refresh": "更新",
     "search_chatrooms": "チャットルーム検索",
-    "members": "メンバー"
+    "members": "メンバー",
+    "knowledge_base": "知識ベース",
+    "mcp": "MCP",
+    "chat": "チャット",
+    "workbench": "ワークベンチ",
+    "chatroom_list": "チャットルーム一覧",
+    "messages": "メッセージ",
+    "select_chatroom_to_view_messages": "メッセージを表示するチャットルームを選択"
   },
   "Settings": {
     "settings": "設定",

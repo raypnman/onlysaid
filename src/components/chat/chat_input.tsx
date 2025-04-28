@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { Flex, Textarea, Box, Icon, Button } from "@chakra-ui/react";
-import { FaPaperPlane, FaArrowRight, FaPaperclip } from "react-icons/fa";
+import { FaPaperPlane, FaArrowRight, FaPaperclip, FaMicrophone } from "react-icons/fa";
 import { useColorModeValue } from "@/components/ui/color-mode";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
@@ -296,8 +296,8 @@ export const ChatInput = React.memo(({
                 updated_at: currentUser?.updated_at || new Date().toISOString(),
                 active_rooms: currentUser?.active_rooms || [],
                 archived_rooms: currentUser?.archived_rooms || [],
+                teams: currentUser?.teams || [],
                 avatar: currentUser?.avatar || '',
-                role: currentUser?.role || 'user',
                 settings: currentUser?.settings || {}
             },
             content,
@@ -440,7 +440,7 @@ export const ChatInput = React.memo(({
                         pl="12px"
                     />
 
-                    {/* Button group: Trust Mode, File Upload, Send */}
+                    {/* Button group: Trust Mode, Microphone, File Upload, Send */}
                     <Flex
                         position="absolute"
                         bottom="8px"
@@ -480,7 +480,46 @@ export const ChatInput = React.memo(({
                             _hover={{ color: "gray.600", bg: "transparent" }}
                             _active={{ color: "gray.700", bg: "transparent" }}
                             p={0}
-                            onClick={() => alert("File upload clicked!")}
+                            // onClick={() => alert("Voice input clicked!")}
+                            opacity={0.5}
+                            cursor="not-allowed"
+                            title={t("coming_soon")}
+                            _disabled={{
+                                opacity: 0.5,
+                                cursor: "not-allowed",
+                                pointerEvents: "none"
+                            }}
+                            // @ts-ignore
+                            isDisabled={true}
+                        >
+                            <Icon as={FaMicrophone} boxSize={4} />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            height="32px"
+                            minWidth="44px"
+                            width="44px"
+                            borderRadius="full"
+                            bg="transparent"
+                            color="gray.400"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                            boxShadow="none"
+                            _hover={{ color: "gray.600", bg: "transparent" }}
+                            _active={{ color: "gray.700", bg: "transparent" }}
+                            p={0}
+                            // onClick={() => alert("File upload clicked!")}
+                            opacity={0.5}
+                            cursor="not-allowed"
+                            title={t("coming_soon")}
+                            _disabled={{
+                                opacity: 0.5,
+                                cursor: "not-allowed",
+                                pointerEvents: "none"
+                            }}
+                            // @ts-ignore
+                            isDisabled={true}
                         >
                             <Icon as={FaPaperclip} boxSize={4} />
                         </Button>

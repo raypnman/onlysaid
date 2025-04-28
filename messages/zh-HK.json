@@ -262,7 +262,8 @@
     "log_type_plan_denied": "已拒絕",
     "no_tasks_available": "沒有任務",
     "no_plans_available": "沒有計劃",
-    "trust_mode": "信任模式"
+    "trust_mode": "信任模式",
+    "coming_soon": "即將推出"
   },
   "Plans": {
     "calendar": "日曆",

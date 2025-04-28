@@ -244,7 +244,22 @@ services:
   #     - "36430:36430"
   #   networks:
   #     - onlysaid-network
+  #   volumes:
+  #     - ./stt:/app
   #   restart: always
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]
+  #   environment:
+  #     - NVIDIA_VISIBLE_DEVICES=all
+  #   ulimits:
+  #     memlock: -1
+  #     stack: 67108864
+  #   shm_size: 16g
 
   onlysaid-n8n:
     image: docker.n8n.io/n8nio/n8n
@@ -253,7 +268,7 @@ services:
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=${PGHOST}
       - DB_POSTGRESDB_PORT=${PGPORT}
-      - DB_POSTGRESDB_DATABASE=${PGDATABASE}
+      - DB_POSTGRESDB_DATABASE=${N8N_PGDATABASE}
       - DB_POSTGRESDB_USER=${PGUSER}
       - DB_POSTGRESDB_PASSWORD=${PGPASSWORD}
       # Subdomain configuration

@@ -15,5 +15,10 @@ CREATE TABLE IF NOT EXISTS messages (
     room_id UUID,
     sender UUID,
     content TEXT NOT NULL,
-    avatar TEXT
+    avatar TEXT,
+    -- TODO: to be added
+    reactions JSONB,
+    reply_to UUID,
+    mention UUID[],
+    attachment UUID[]
 );

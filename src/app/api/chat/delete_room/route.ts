@@ -9,12 +9,6 @@ export async function POST(request: Request) {
         const session = await getServerSession(authOptions);
         const email = session?.user?.email;
 
-        if (email !== "seasonluke@gmail.com") {
-            return NextResponse.json({
-                error: "Unauthorized"
-            }, { status: 401 });
-        }
-
         const { room_id, all } = body;
 
         // If "all" flag is true, delete all rooms
