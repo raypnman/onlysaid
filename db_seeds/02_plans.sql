@@ -1,5 +1,5 @@
 -- create the plan table
-CREATE TABLE IF NOT EXISTS plan (
+CREATE TABLE IF NOT EXISTS plans (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -17,12 +17,12 @@ CREATE TABLE IF NOT EXISTS plan (
 );
 
 -- Create the task table
-CREATE TABLE IF NOT EXISTS task (
+CREATE TABLE IF NOT EXISTS tasks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     start_time TIMESTAMP WITH TIME ZONE,
     completed_at TIMESTAMP WITH TIME ZONE,
-    plan_id UUID NOT NULL REFERENCES plan(id),
+    plan_id UUID NOT NULL REFERENCES plans(id),
     step_number INTEGER NOT NULL, -- to track the order of tasks in a plan
     task_name TEXT NOT NULL, -- from the "name" field in your JSON
     task_explanation TEXT NOT NULL, -- from the "explanation" field in your JSON
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS task (
 );
 
 
-CREATE TABLE IF NOT EXISTS plan_log (
+CREATE TABLE IF NOT EXISTS logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     -- TODO: add updated_at, but not important for now
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS plan_log (
     content TEXT
 );
 
-CREATE TABLE IF NOT EXISTS skill (
+CREATE TABLE IF NOT EXISTS skills (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,

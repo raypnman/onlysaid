@@ -1,4 +1,14 @@
-import knex from 'knex';
+import knex, { Knex } from 'knex';
+
+export const DBTABLES = {
+    CHATROOM: 'chat',
+    PLANS: 'plans',
+    TASKS: 'tasks',
+    LOGS: 'logs',
+    SKILLS: 'skills',
+    USERS: 'users',
+    TEAMS: 'teams',
+}
 
 const db = knex({
     client: 'pg',
@@ -12,4 +22,4 @@ const db = knex({
     pool: { min: 0, max: 7 }
 });
 
-export default db; 
+export default db as Knex; 
