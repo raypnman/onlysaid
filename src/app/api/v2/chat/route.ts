@@ -1,6 +1,6 @@
 import { authenticateRequest } from "@/utils/auth";
 import { NextResponse } from "next/server";
-import { ICreateChatRequest } from "../../../../../onlysaid-electron/src/models/Chat/Chatroom";
+import { ICreateChatRequest, IChatRoom } from "@/../onlysaid-electron/src/types/Chat/Chatroom";
 import db from "@/lib/db";
 import { DBTABLES } from "@/lib/db";
 
@@ -50,8 +50,25 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
-    const body = await request.json();
+    const authenticated = await authenticateRequest(request);
+    if (!authenticated.isAuthenticated) {
+        return NextResponse.json(
+            { error: authenticated.error?.message },
+            { status: authenticated.error?.status || 401 }
+        );
+    }
 
+    const body: IChatRoom = await request.json();
+
+    const chat = await db(DBTABLES.CHATROOM)
+        .update(body)
+        .where('id', body.id)
+        .returning('*');
+
+    return NextResponse.json(
+        { message: "Chatroom updated", data: chat },
+        { status: 200 }
+    );
 }
 
 export async function DELETE(request: Request) {

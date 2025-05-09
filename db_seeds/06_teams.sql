@@ -3,9 +3,9 @@ CREATE TABLE IF NOT EXISTS teams (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     name TEXT NOT NULL,
+    super_admins UUID[],
+    admins UUID[],
     members UUID[],
-    owners UUID[],
-    rooms UUID[],
     invite_code TEXT,
     settings JSONB
 );

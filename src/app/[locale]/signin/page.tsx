@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   VStack,
@@ -11,7 +11,7 @@ import {
   IconButton,
   Heading,
 } from "@chakra-ui/react";
-import { redirect, useParams } from "next/navigation";
+import { redirect, useParams, useSearchParams } from "next/navigation";
 import { FaGithub, FaGoogle, FaSignInAlt } from "react-icons/fa";
 import { signIn } from "next-auth/react";
 import { toaster } from "@/components/ui/toaster";
@@ -28,6 +28,7 @@ export default function SigninPage() {
   const t = useTranslations("Signin");
   const [error, setError] = useState("");
   const { isAuthenticated } = useSelector((state: RootState) => state.user);
+  const searchParams = useSearchParams();
 
   // Color mode values - matching settings page
   const accentColor = "blue.500";
@@ -41,40 +42,61 @@ export default function SigninPage() {
   const params = useParams();
   const locale = params.locale as string;
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.4,
-        when: "beforeChildren",
-        staggerChildren: 0.1,
-      },
-    },
-  };
+  const [effectiveCallbackUrl, setEffectiveCallbackUrl] = useState('');
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  useEffect(() => {
+    const clientType = searchParams.get('client_type');
+    const electronCallbackUrl = searchParams.get('electron_callback_url');
+
+    if (clientType === 'electron' && electronCallbackUrl) {
+      setEffectiveCallbackUrl(decodeURIComponent(electronCallbackUrl));
+      console.log('[SignInPage] Detected Electron flow. Effective Callback URL:', decodeURIComponent(electronCallbackUrl));
+    } else {
+      // Default callback for regular web users
+      const webCallback = `${process.env.NEXT_PUBLIC_DOMAIN || ''}/${locale}/api/redirect/third_party_login`;
+      // Note: /api/redirect/third_party_login?locale=${locale} was used before,
+      // ensure this path is correct or adjust. If it's an API route, it usually doesn't include locale in its path directly.
+      // Let's assume the API route is /api/redirect/third_party_login and it can get locale if needed.
+      setEffectiveCallbackUrl(`${process.env.NEXT_PUBLIC_DOMAIN || ''}/api/redirect/third_party_login?locale=${locale}`);
+      console.log('[SignInPage] Standard web flow. Effective Callback URL:', `${process.env.NEXT_PUBLIC_DOMAIN || ''}/api/redirect/third_party_login?locale=${locale}`);
+    }
+  }, [searchParams, locale]);
+
+  const handleSignIn = (provider: 'google' | 'github') => {
+    if (!effectiveCallbackUrl) {
+      console.error("Callback URL not set yet! Cannot sign in.");
+      toaster.create({ title: "Error", description: "Authentication system not ready. Please try again in a moment.", type: "error" });
+      return;
+    }
+    try {
+      signIn(provider, {
+        callbackUrl: effectiveCallbackUrl,
+        redirect: true,
+      });
+    } catch (err) {
+      console.error(`Error signing in with ${provider}:`, err);
+      toaster.create({ title: `Sign-in Error (${provider})`, description: (err as Error).message, type: "error" });
+    }
   };
 
   if (isAuthenticated) {
-    return redirect("/");
+    redirect(`/${locale}/dashboard`);
+    return null;
+  }
+
+  if (!effectiveCallbackUrl && !searchParams.get('client_type')) {
+    return <Box textAlign="center" mt={10}><Text>Loading authentication options...</Text></Box>;
   }
 
   return (
-    <MotionBox
+    <Box
       maxW="2xl"
       w="100%"
       mx="auto"
       mt={12}
       px={4}
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
     >
-      <MotionVStack
+      <VStack
         align="stretch"
         p={8}
         borderWidth="1px"
@@ -82,7 +104,6 @@ export default function SigninPage() {
         bg={boxBg}
         borderColor={boxBorderColor}
         boxShadow={`0 4px 12px ${shadowColor}`}
-        variants={itemVariants}
       >
         <Heading fontSize="3xl" fontWeight="bold" textAlign="center" mb={6} color={textColorHeading}>
           <Flex align="center" justify="center">
@@ -102,19 +123,11 @@ export default function SigninPage() {
             size="xl"
             variant="outline"
             borderRadius="full"
-            // disabled={true}
             onClick={(e) => {
               e.preventDefault();
-              try {
-                signIn("google", {
-                  // callbackUrl: `${process.env.NEXT_PUBLIC_DOMAIN}/api/auth/callback/google`,
-                  redirect: true,
-                  callbackUrl: `${process.env.NEXT_PUBLIC_DOMAIN}/api/redirect/third_party_login?locale=${locale}`,
-                });
-              } catch (error) {
-                console.error("Error signing in with Google:", error);
-              }
+              handleSignIn('google');
             }}
+            disabled={!effectiveCallbackUrl}
           >
             <Icon as={FaGoogle} boxSize={6} />
           </IconButton>
@@ -127,12 +140,9 @@ export default function SigninPage() {
             borderRadius="full"
             onClick={(e) => {
               e.preventDefault();
-
-              signIn("github", {
-                callbackUrl: `${process.env.NEXT_PUBLIC_DOMAIN}/api/redirect/third_party_login?locale=${locale}`,
-                redirect: true
-              });
+              handleSignIn('github');
             }}
+            disabled={!effectiveCallbackUrl}
           >
             <Icon as={FaGithub} boxSize={6} />
           </IconButton>
@@ -143,7 +153,7 @@ export default function SigninPage() {
             {error}
           </Text>
         )}
-      </MotionVStack>
-    </MotionBox>
+      </VStack>
+    </Box>
   );
 }
