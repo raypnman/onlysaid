@@ -1,6 +1,6 @@
 import { authenticateRequest } from "@/utils/auth";
 import { NextResponse } from "next/server";
-import { ICreateChatRequest, IChatRoom } from "@/../onlysaid-electron/src/types/Chat/Chatroom";
+import { ICreateChatRequest, IChatRoom } from "@/../../types/Chat/Chatroom";
 import db from "@/lib/db";
 import { DBTABLES } from "@/lib/db";
 
@@ -83,7 +83,7 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
-    const chat = await db(DBTABLES.CHATROOM)
+    await db(DBTABLES.CHATROOM)
         .delete()
         .where('id', id);
 
