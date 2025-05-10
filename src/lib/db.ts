@@ -7,7 +7,8 @@ export const DBTABLES = {
     LOGS: 'logs',
     SKILLS: 'skills',
     USERS: 'users',
-    TEAMS: 'teams',
+    WORKSPACES: 'workspaces',
+    WORKSPACE_USERS: 'workspace_users',
 }
 
 const db = knex({

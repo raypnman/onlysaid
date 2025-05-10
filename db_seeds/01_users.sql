@@ -7,9 +7,6 @@ CREATE TABLE IF NOT EXISTS users (
     username TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
     avatar TEXT,
-    teams UUID[],
-    active_rooms UUID[],
-    archived_rooms UUID[],
     settings JSONB
 );
 

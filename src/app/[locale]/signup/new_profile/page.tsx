@@ -123,11 +123,8 @@ export default function CreateProfilePage() {
                 avatar: formData.avatarUrl,
                 created_at: createAt.toISOString(),
                 updated_at: createAt.toISOString(),
-                active_rooms: [],
-                archived_rooms: [],
                 username: "",
                 settings: {},
-                teams: []
             }
 
             await axios.post("/api/user/create_user", newUser);

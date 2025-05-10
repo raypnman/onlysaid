@@ -1,4 +1,4 @@
-import { authenticateRequest } from "@/utils/auth";
+import { authenticateRequest, unauthorized } from "@/utils/auth";
 import { NextResponse } from "next/server";
 import { ICreateChatRequest, IChatRoom } from "@/../../types/Chat/Chatroom";
 import db from "@/lib/db";
@@ -7,10 +7,7 @@ import { DBTABLES } from "@/lib/db";
 export async function POST(request: Request) {
     const authenticated = await authenticateRequest(request);
     if (!authenticated.isAuthenticated) {
-        return NextResponse.json(
-            { error: authenticated.error?.message },
-            { status: authenticated.error?.status || 401 }
-        );
+        return unauthorized();
     }
 
     const body: ICreateChatRequest = await request.json();

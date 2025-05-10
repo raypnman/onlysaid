@@ -1,15 +1,57 @@
 import { authenticateRequest, unauthorized } from "@/utils/auth";
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
-import { DBTABLES } from "@/lib/db";
+import db, { DBTABLES } from "@/lib/db";
 import { inDevelopment } from "@/utils/common";
+import { ICreateWorkspaceArgs } from "@/../../types/Workspace/Workspace";
 
 export async function POST(request: Request) {
-    return inDevelopment();
+    const authenticated = await authenticateRequest(request);
+    if (!authenticated.isAuthenticated) {
+        return unauthorized();
+    }
+
+    const body: ICreateWorkspaceArgs = await request.json();
+
+    const workspace = await db(DBTABLES.WORKSPACES)
+        .insert(body)
+        .returning('*');
+
+    return NextResponse.json(
+        { message: "Workspace created", data: workspace },
+        { status: 200 }
+    );
+
 }
 
 export async function GET(request: Request) {
-    return inDevelopment();
+    const authenticated = await authenticateRequest(request);
+    if (!authenticated.isAuthenticated) {
+        return unauthorized();
+    }
+
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+        return NextResponse.json(
+            { message: "User ID is required" },
+            { status: 400 }
+        );
+    }
+
+    const ws = DBTABLES.WORKSPACES;
+    const wu = DBTABLES.WORKSPACE_USERS;
+
+    const workspaces = await db(ws)
+        .join(wu, `${ws}.id`, '=', `${wu}.workspace_id`)
+        .where(`${wu}.user_id`, userId)
+        .select(`${ws}.*`, `${wu}.role`)
+        .returning('*');
+
+    return NextResponse.json(
+        { message: "Workspaces fetched", data: workspaces },
+        { status: 200 }
+    );
 }
 
 export async function PUT(request: Request) {
@@ -19,4 +61,3 @@ export async function PUT(request: Request) {
 export async function DELETE(request: Request) {
     return inDevelopment();
 }
-

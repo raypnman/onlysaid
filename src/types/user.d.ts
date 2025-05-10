@@ -50,11 +50,8 @@ export interface User {
     email: string;
     created_at: string;
     updated_at: string;
-    active_rooms: string[];
-    archived_rooms: string[];
     avatar?: string;
     settings: UserSettings;
-    teams: string[];
     lastOpenedTeam?: string;
 
     role?: string;

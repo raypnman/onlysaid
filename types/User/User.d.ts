@@ -45,13 +45,9 @@ export interface IUser {
   id?: string;
   username: string;
   email: string;
-  active_rooms: string[];
-  archived_rooms: string[];
   avatar?: string;
   settings: IUserSettings;
-  teams: string[];
   lastOpenedTeam?: string;
-  role?: string;
   token?: string;
 }
 

@@ -29,10 +29,7 @@ export async function GET(request: NextRequest) {
                     username: session.user.name ? session.user.name.split(' ')[0].toLowerCase() : session.user.email.split('@')[0],
                     avatar: session.user.image || null,
                     created_at: new Date(),
-                    updated_at: new Date(),
-                    active_rooms: [],
-                    archived_rooms: [],
-                    teams: []
+                    updated_at: new Date()
                 };
 
                 await db('users').insert(userToInsert);
