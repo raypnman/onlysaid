@@ -4,8 +4,9 @@ export interface IChatRoom {
     last_updated: string;
     name: string;
     unread: number;
-    active_users: string[];
     type: string;
+    workspace_id?: string;
+    user_id?: string;
 }
 
 export interface ICreateChatRequest {
@@ -13,7 +14,7 @@ export interface ICreateChatRequest {
     last_updated: string;
     name: string;
     unread: number;
-    active_users: string[];
+    user_id?: string;
 }
 
 export interface ICreateChatArgs {
@@ -25,6 +26,7 @@ export interface IGetChatArgs {
     token: string;
     userId: string;
     type: string;
+    workspaceId?: string;
 }
 
 export interface IUpdateChatArgs {

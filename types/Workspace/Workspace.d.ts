@@ -63,15 +63,10 @@ export interface IAddUsersToWorkspaceArgs {
     request: IAddUserToWorkspaceRequest[];
 }
 
-export interface IRemoveUserFromWorkspaceRequest {
-    userId: string;
-    workspaceId: string;
-}
-
-export interface IRemoveUsersFromWorkspaceArgs {
+export interface IRemoveUserFromWorkspaceArgs {
     token: string;
     workspaceId: string;
-    request: IRemoveUserFromWorkspaceRequest[];
+    userId: string;
 }
 
 export interface IWorkspaceWithRole extends IWorkspace {

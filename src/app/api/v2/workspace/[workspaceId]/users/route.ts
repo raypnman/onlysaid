@@ -11,9 +11,10 @@ export async function POST(request: Request, { params }: { params: { workspaceId
     }
 
     const userRequests = await request.json();
+    const { workspaceId } = await params;
 
     const usersToInsert = userRequests.map((user: IAddUserToWorkspaceRequest) => ({
-        workspace_id: params.workspaceId,
+        workspace_id: workspaceId,
         user_id: user.user_id,
         role: user.role
     }));
@@ -34,12 +35,14 @@ export async function GET(request: Request, { params }: { params: { workspaceId:
         return unauthorized();
     }
 
+    const { workspaceId } = await params;
+
     const wu = DBTABLES.WORKSPACE_USERS;
     const u = DBTABLES.USERS;
 
     const workspaceUsers = await db(wu)
         .join(u, `${wu}.user_id`, '=', `${u}.id`)
-        .where(`${wu}.workspace_id`, params.workspaceId)
+        .where(`${wu}.workspace_id`, workspaceId)
         .select(`${wu}.*`, `${u}.username`, `${u}.avatar`, `${u}.last_login`)
         .returning('*');
 
@@ -59,11 +62,20 @@ export async function DELETE(request: Request, { params }: { params: { workspace
         return unauthorized();
     }
 
-    const { userIds } = await request.json();
+    const url = new URL(request.url);
+    const userId = url.searchParams.get('userId');
+    const { workspaceId } = await params;
+
+    if (!userId) {
+        return NextResponse.json(
+            { message: "User ID is required" },
+            { status: 400 }
+        );
+    }
 
     const deleted = await db(DBTABLES.WORKSPACE_USERS)
-        .where('workspace_id', params.workspaceId)
-        .whereIn('user_id', userIds)
+        .where('workspace_id', workspaceId)
+        .where('user_id', userId)
         .delete()
         .returning('*');
 

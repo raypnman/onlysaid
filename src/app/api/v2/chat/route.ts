@@ -34,11 +34,18 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('userId');
     const type = searchParams.get('type');
+    const workspaceId = searchParams.get('workspaceId');
 
-    const chat = await db(DBTABLES.CHATROOM)
+    let chat: any = db(DBTABLES.CHATROOM)
         .select('*')
         .where('type', type)
-        .whereRaw('? = ANY(active_users)', [id]);
+        .where('user_id', id)
+
+    if (workspaceId && workspaceId !== 'undefined') {
+        chat = chat.where('workspace_id', workspaceId);
+    }
+
+    chat = await chat;
 
     return NextResponse.json(
         { data: chat },
