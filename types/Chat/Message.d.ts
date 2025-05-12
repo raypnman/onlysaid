@@ -5,7 +5,7 @@ export interface IChatMessage {
     id: string;
     created_at: string;
     sender: string;
-    room_id: string;
+    chat_id: string;
     reactions?: IReaction[];
     reply_to?: string;
     mentions?: string[];

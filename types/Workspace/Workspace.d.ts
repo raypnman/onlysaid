@@ -19,6 +19,7 @@ export interface IWorkspaceUser {
     avatar?: string;
     last_login?: string;
     email?: string;
+    level?: number;
     settings?: Record<string, any>;
 }
 

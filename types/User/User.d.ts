@@ -49,6 +49,8 @@ export interface IUser {
   settings: IUserSettings;
   lastOpenedTeam?: string;
   token?: string;
+  level?: number;
+  xp?: number;
 }
 
 export interface IUserGet {
@@ -56,4 +58,9 @@ export interface IUserGet {
   args: {
     ids: string[];
   }
+}
+
+export interface IUserUpdateArgs {
+  token: string;
+  user: IUser;
 }

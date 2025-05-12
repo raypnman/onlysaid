@@ -43,7 +43,7 @@ export async function GET(request: Request, { params }: { params: { workspaceId:
     const workspaceUsers = await db(wu)
         .join(u, `${wu}.user_id`, '=', `${u}.id`)
         .where(`${wu}.workspace_id`, workspaceId)
-        .select(`${wu}.*`, `${u}.username`, `${u}.avatar`, `${u}.last_login`)
+        .select(`${wu}.*`, `${u}.username`, `${u}.avatar`, `${u}.last_login`, `${u}.level`)
         .returning('*');
 
     return NextResponse.json(

@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS users (
     username TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
     avatar TEXT,
+    level INTEGER DEFAULT 0,
+    xp INTEGER DEFAULT 0,
     settings JSONB
 );
 
