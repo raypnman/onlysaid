@@ -14,11 +14,15 @@ export async function GET(request: Request) {
         return unauthorized(authenticated.error);
     }
 
+    // Update last_login timestamp
+    await db(DBTABLES.USERS)
+        .where('id', authenticated.user.id)
+        .update({ last_login: new Date() });
+
     const user = await db(DBTABLES.USERS)
         .where('id', authenticated.user.id)
         .select('*')
-        .first()
-        .returning('*');
+        .first();
 
     return NextResponse.json(
         { data: user },

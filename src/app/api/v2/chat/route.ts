@@ -32,20 +32,21 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('userId');
+    const userId = searchParams.get('userId');
     const type = searchParams.get('type');
     const workspaceId = searchParams.get('workspaceId');
 
-    let chat: any = db(DBTABLES.CHATROOM)
+    let query = db(DBTABLES.CHATROOM)
         .select('*')
-        .where('type', type)
-        .where('user_id', id)
+        .where('type', type);
 
     if (workspaceId && workspaceId !== 'undefined') {
-        chat = chat.where('workspace_id', workspaceId);
+        query = query.where('workspace_id', workspaceId);
+    } else {
+        query = query.where('user_id', userId);
     }
 
-    chat = await chat;
+    const chat = await query;
 
     return NextResponse.json(
         { data: chat },

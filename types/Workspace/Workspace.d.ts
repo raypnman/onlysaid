@@ -20,6 +20,7 @@ export interface IWorkspaceUser {
     last_login?: string;
     email?: string;
     level?: number;
+    agent_id?: string;
     settings?: Record<string, any>;
 }
 
@@ -55,6 +56,7 @@ export interface IGetWorkspaceUsersArgs {
 
 export interface IAddUserToWorkspaceRequest {
     user_id: string;
+    email?: string;
     role: 'super_admin' | 'admin' | 'member';
 }
 

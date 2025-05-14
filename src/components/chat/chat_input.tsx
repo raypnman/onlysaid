@@ -294,9 +294,6 @@ export const ChatInput = React.memo(({
                 email: currentUser?.email || '',
                 created_at: currentUser?.created_at || new Date().toISOString(),
                 updated_at: currentUser?.updated_at || new Date().toISOString(),
-                active_rooms: currentUser?.active_rooms || [],
-                archived_rooms: currentUser?.archived_rooms || [],
-                teams: currentUser?.teams || [],
                 avatar: currentUser?.avatar || '',
                 settings: currentUser?.settings || {}
             },

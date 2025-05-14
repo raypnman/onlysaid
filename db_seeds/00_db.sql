@@ -22,12 +22,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO spoo
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON SEQUENCES TO spoonbobo;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON FUNCTIONS TO spoonbobo;
 
--- Return to postgres database
--- \c postgres
 
--- We'll stay connected to the default database for other seeds
--- Only connect to n8n to create extensions
--- \c n8n
 
 -- PostgreSQL extensions that n8n might need
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

@@ -7,11 +7,12 @@ CREATE TABLE IF NOT EXISTS users (
     username TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
     avatar TEXT,
+    agent_id UUID NULL REFERENCES users(id),
     level INTEGER DEFAULT 0,
     xp INTEGER DEFAULT 0,
+    is_human BOOLEAN DEFAULT FALSE,
     settings JSONB
 );
 
-INSERT INTO users (username, email, settings, avatar) VALUES ('agent', 'agent@agent.com', '{"theme": "light"}', 'https://static.vecteezy.com/system/resources/thumbnails/046/435/654/small/illustration-of-a-cute-little-girl-with-a-smile-on-her-face-png.png');
-INSERT INTO users (username, email, settings, avatar) VALUES ('deepseek', 'deepseek@llm.com', '{"theme": "light"}', 'https://diplo-media.s3.eu-central-1.amazonaws.com/2025/01/deepseek-italy-ban-garante.png');
-INSERT INTO users (username, email, settings, avatar) VALUES ('rag-agent', 'rag-agent@rag-agent.com', '{"theme": "light"}', 'https://static.vecteezy.com/system/resources/thumbnails/046/435/654/small/illustration-of-a-cute-little-girl-with-a-smile-on-her-face-png.png');
+INSERT INTO users (id, username, email, settings, is_human) VALUES ('00000000-0000-4000-0000-000000000000', 'Assistant', 'assistant@onlysaid.com', '{"theme": "light"}', FALSE);
+insert into users (id, username, email, settings, is_human) values ('11111111-1111-4111-1111-111111111111', 'You', 'you@example.com', '{"theme": "light"}', TRUE);

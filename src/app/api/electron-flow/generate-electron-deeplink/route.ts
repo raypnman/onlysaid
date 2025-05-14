@@ -20,20 +20,50 @@ export async function GET(request: NextRequest) {
             // Check if user exists in database
             const user = await db('users').where({ email: session.user.email }).first();
 
-            // If user doesn't exist, create one
+            // If user doesn't exist, create one along with an agent
             if (!user) {
                 console.log(`[App Router API] User not found, creating new user for ${session.user.email}`);
+                const baseUsername = session.user.email.split('@')[0];
+                const emailDomain = session.user.email.split('@')[1];
 
-                const userToInsert = {
-                    email: session.user.email,
-                    username: session.user.name ? session.user.name.split(' ')[0].toLowerCase() : session.user.email.split('@')[0],
-                    avatar: session.user.image || null,
-                    created_at: new Date(),
-                    updated_at: new Date()
-                };
+                const agentUsername = `${baseUsername}_agent`;
+                const agentEmail = `${baseUsername}+agent@${emailDomain}`;
 
-                await db('users').insert(userToInsert);
-                console.log(`[App Router API] User created successfully for ${session.user.email}`);
+                try {
+                    await db.transaction(async trx => {
+                        // Create the agent user
+                        const agentToInsert = {
+                            email: agentEmail,
+                            username: agentUsername,
+                            avatar: null, // Or a default agent avatar
+                            created_at: new Date(),
+                            updated_at: new Date(),
+                            is_human: false, // Agent is not human
+                        };
+                        console.log(`[App Router API] Creating agent user: ${agentUsername}`);
+                        const insertedAgents = await trx('users').insert(agentToInsert).returning('id');
+                        const agentId = insertedAgents[0].id;
+                        console.log(`[App Router API] Agent user created successfully with ID: ${agentId}`);
+
+                        // Create the human user and link the agent
+                        const humanUserToInsert = {
+                            email: session?.user?.email || '',
+                            username: baseUsername,
+                            avatar: session?.user?.image || null,
+                            created_at: new Date(),
+                            updated_at: new Date(),
+                            is_human: true, // This is a human user
+                            agent_id: agentId, // Link to the created agent
+                        };
+                        console.log(`[App Router API] Creating human user: ${baseUsername} linked to agent ID: ${agentId}`);
+                        await trx('users').insert(humanUserToInsert);
+                        console.log(`[App Router API] Human user created successfully for ${session?.user?.email || ''}`);
+                    });
+                } catch (transactionError) {
+                    console.error('[App Router API] Transaction failed for user and agent creation:', transactionError);
+                    // Rethrow or handle appropriately, maybe redirect to an error deeplink
+                    throw transactionError; // This will be caught by the outer catch block
+                }
             }
 
             const sessionCookieName = authOptions.cookies?.sessionToken?.name ||

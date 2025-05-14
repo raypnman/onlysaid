@@ -45,12 +45,14 @@ export interface IUser {
   id?: string;
   username: string;
   email: string;
-  avatar?: string;
+  avatar?: string | null;
   settings: IUserSettings;
   lastOpenedTeam?: string;
   token?: string;
   level?: number;
   xp?: number;
+  is_human?: boolean;
+  agent_id?: string | null;
 }
 
 export interface IUserGet {

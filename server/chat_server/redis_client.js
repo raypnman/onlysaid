@@ -1,9 +1,5 @@
 const Redis = require("ioredis");
 
-const insertMessagesInRedis = (req, res) => {
-  res.send("Hello from onlysaid!");
-};
-
 async function connectToRedis() {
   const maxRetries = 10;
   let retries = 0;
