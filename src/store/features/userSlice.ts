@@ -51,7 +51,7 @@ export const userSlice = createSlice({
     reducers: {
         setUser: (state, action: PayloadAction<User>) => {
             state.currentUser = action.payload;
-            state.isAuthenticated = true && action.payload.teams && action.payload.teams.length > 0;
+            state.isAuthenticated = true;
             state.isOwner = true; // TODO: make it dynamic
             state.error = null;
             state.currentTeam = null;
@@ -92,29 +92,7 @@ export const userSlice = createSlice({
                 console.log("Session TTL refreshed to:", new Date(state.expiresAt).toLocaleString());
             }
         },
-        // New reducer to update active rooms
-        updateActiveRooms: (state, action: PayloadAction<{ roomId: string, action: 'add' | 'remove' }>) => {
-            if (!state.currentUser) return;
 
-            const { roomId, action: roomAction } = action.payload;
-
-            if (roomAction === 'add') {
-                // Create active_rooms array if it doesn't exist
-                if (!state.currentUser.active_rooms) {
-                    state.currentUser.active_rooms = [];
-                }
-
-                // Add roomId if it's not already in the array
-                if (!state.currentUser.active_rooms.includes(roomId)) {
-                    state.currentUser.active_rooms.push(roomId);
-                }
-            } else if (roomAction === 'remove') {
-                // Remove roomId if active_rooms exists
-                if (state.currentUser.active_rooms) {
-                    state.currentUser.active_rooms = state.currentUser.active_rooms.filter(id => id !== roomId);
-                }
-            }
-        },
         // New reducer to update user settings
         updateUserSettings: (state, action: PayloadAction<{ key: string; value: any }>) => {
             if (!state.currentUser) return;
@@ -204,7 +182,6 @@ export const {
     setError,
     checkSessionExpiration,
     refreshSessionTTL,
-    updateActiveRooms,
     updateUserSettings,
     setUserSettings,
     setTrustMode,
