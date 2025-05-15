@@ -167,7 +167,7 @@ export default function CreateTeamPage() {
             if (currentUser) {
                 const updatedUser = {
                     ...currentUser,
-                    teams: [...(currentUser.teams || []), createdTeam.id]
+                    teams: [...([]), createdTeam.id]
                 };
 
                 dispatch(setUser(updatedUser));
@@ -336,7 +336,7 @@ export default function CreateTeamPage() {
             if (currentUser) {
                 const updatedUser = {
                     ...currentUser,
-                    teams: [...(currentUser.teams || []), team_id]
+                    teams: [...([]), team_id]
                 };
 
                 dispatch(setUser(updatedUser));
