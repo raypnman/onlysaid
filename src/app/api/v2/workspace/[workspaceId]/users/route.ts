@@ -12,14 +12,14 @@ const findUserByEmail = async (email: string) => {
     return user;
 };
 
-export async function POST(request: Request, { params }: { params: { workspaceId: string } }) {
+export async function POST(request: Request, context: { params: Promise<{ workspaceId: string }> }) {
     const authenticated = await authenticateRequest(request);
     if (!authenticated.isAuthenticated) {
         return unauthorized();
     }
 
     const userRequests = await request.json();
-    const { workspaceId } = await params;
+    const { workspaceId } = await context.params;
 
     const usersToInsert = await Promise.all(userRequests.map(async (user: IAddUserToWorkspaceRequest) => {
         if (user.email) {
@@ -62,13 +62,13 @@ export async function POST(request: Request, { params }: { params: { workspaceId
     );
 }
 
-export async function GET(request: Request, { params }: { params: { workspaceId: string } }) {
+export async function GET(request: Request, context: { params: Promise<{ workspaceId: string }> }) {
     const authenticated = await authenticateRequest(request);
     if (!authenticated.isAuthenticated) {
         return unauthorized();
     }
 
-    const { workspaceId } = await params;
+    const { workspaceId } = await context.params;
 
     const wu = DBTABLES.WORKSPACE_USERS;
     const u = DBTABLES.USERS;
@@ -90,7 +90,7 @@ export async function PUT(request: Request) {
     return inDevelopment();
 }
 
-export async function DELETE(request: Request, { params }: { params: { workspaceId: string } }) {
+export async function DELETE(request: Request, context: { params: Promise<{ workspaceId: string }> }) {
     const authenticated = await authenticateRequest(request);
     if (!authenticated.isAuthenticated) {
         return unauthorized();
@@ -98,7 +98,7 @@ export async function DELETE(request: Request, { params }: { params: { workspace
 
     const url = new URL(request.url);
     const userId = url.searchParams.get('userId');
-    const { workspaceId } = await params;
+    const { workspaceId } = await context.params;
 
     if (!userId) {
         return NextResponse.json(
