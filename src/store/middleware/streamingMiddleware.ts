@@ -20,10 +20,7 @@ const assistantSender: User = {
     email: '',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    active_rooms: [],
-    archived_rooms: [],
     settings: defaultAssistantSettings, // Add the settings property
-    teams: [],
     avatar: '' // Add avatar if needed, or make it optional in User interface
 };
 
