@@ -21,9 +21,6 @@ export async function POST(request: Request) {
             avatar: userData.avatar || null,
             created_at: userData.created_at || new Date(),
             updated_at: userData.updated_at || new Date(),
-            active_rooms: userData.active_rooms || [],
-            archived_rooms: userData.archived_rooms || [],
-            teams: userData.teams || []
         };
 
         // Insert the user using Knex
