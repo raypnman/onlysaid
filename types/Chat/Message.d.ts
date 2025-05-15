@@ -14,7 +14,8 @@ export interface IChatMessage {
     contact?: string;
     gif?: string;
     text: string;
-
+    sent_at: string;
+    status: string;
     sender_object?: IUser;
 }
 
