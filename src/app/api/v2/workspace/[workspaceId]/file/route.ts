@@ -51,8 +51,8 @@ export async function POST(
             name: file.name,
             size: file.size,
             mime_type: file.type,
-            storage_path: storagePath,
-            user_id: authenticated.userId,
+            path: storagePath,
+            user_id: authenticated.user?.id,
             ...metadata
         }).returning('*');
 
@@ -112,7 +112,7 @@ export async function GET(
             const fileStream = createReadStream(file.storage_path);
             const readable = Readable.fromWeb(fileStream as any);
 
-            return new Response(readable, {
+            return new Response(readable as any, {
                 headers: {
                     'Content-Type': file.mime_type,
                     'Content-Disposition': `attachment; filename="${file.name}"`,
@@ -138,6 +138,8 @@ export async function DELETE(
         return unauthorized();
     }
 
+    const { workspaceId } = await params;
+
     const { searchParams } = new URL(request.url);
     const fileId = searchParams.get('fileId');
 
@@ -153,7 +155,7 @@ export async function DELETE(
         const file = await db(DBTABLES.FILES)
             .where({
                 id: fileId,
-                workspace_id: params.workspaceId
+                workspace_id: workspaceId
             })
             .first();
 

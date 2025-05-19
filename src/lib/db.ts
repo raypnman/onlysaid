@@ -10,6 +10,7 @@ export const DBTABLES = {
     WORKSPACES: 'workspaces',
     WORKSPACE_USERS: 'workspace_users',
     KNOWLEDGE_BASES: 'knowledge_bases',
+    FILES: 'files'
 }
 
 const db = knex({
