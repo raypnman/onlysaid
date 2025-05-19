@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import db, { DBTABLES } from "@/lib/db";
 import { inDevelopment } from "@/utils/common";
 import { ICreateWorkspaceArgs } from "@/../../types/Workspace/Workspace";
+import fs from 'fs';
+import path from 'path';
 
 export async function POST(request: Request) {
     const authenticated = await authenticateRequest(request);
@@ -16,11 +18,13 @@ export async function POST(request: Request) {
         .insert(body)
         .returning('*');
 
+    const storageDir = path.join(process.cwd(), 'storage', `${workspace[0].id}`);
+    await fs.promises.mkdir(storageDir, { recursive: true });
+
     return NextResponse.json(
         { message: "Workspace created", data: workspace },
         { status: 200 }
     );
-
 }
 
 export async function GET(request: Request) {

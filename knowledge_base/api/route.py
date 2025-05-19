@@ -16,13 +16,13 @@ router = APIRouter()
 def get_kb_manager(request: Request):
     return request.app.state.kb_manager
 
-@router.get("/api/list_documents/{team_id}")
-async def list_documents(request: Request, team_id: str) -> Dict[str, Any]:
+@router.get("/api/view/{workspace_id}")
+async def view(request: Request, workspace_id: str) -> Dict[str, Any]:
     """
     List all available knowledge base sources, folder structures, and documents.
     """
     kb_manager = request.app.state.kb_manager
-    data_sources = kb_manager.get_data_sources(team_id)
+    data_sources = kb_manager.get_data_sources(workspace_id)
     logger.info(data_sources)
     
     # Prepare response structure compatible with the frontend
@@ -35,7 +35,7 @@ async def list_documents(request: Request, team_id: str) -> Dict[str, Any]:
     # Add folder structures and documents for each source
     for source in data_sources:
         source_id = source["id"]
-        response["folderStructures"][source_id] = kb_manager.get_folder_structure(source_id, team_id)
+        response["folderStructures"][source_id] = kb_manager.get_folder_structure(source_id, workspace_id)
         response["documents"][source_id] = kb_manager.get_documents(source_id)
     
     return response

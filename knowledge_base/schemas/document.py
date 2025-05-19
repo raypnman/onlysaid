@@ -54,7 +54,6 @@ class QueryRequest(BaseModel):
     message_id: Optional[str] = None
 
 class KnowledgeBaseRegistration(BaseModel):
-    """Schema for registering a new knowledge base"""
     id: str
     name: str
     team_id: str

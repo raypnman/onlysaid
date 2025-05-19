@@ -37,7 +37,8 @@ export interface IGetWorkspaceArgs {
 }
 
 export interface IUpdateWorkspaceArgs {
-    request: IWorkspace;
+    workspaceId: string;
+    request: Partial<Omit<IWorkspace, 'id' | 'created_at' | 'updated_at'>>;
     token: string;
 }
 
