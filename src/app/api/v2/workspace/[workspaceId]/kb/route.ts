@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import db, { DBTABLES } from "@/lib/db";
 import { inDevelopment } from "@/utils/common";
 import { IKnowledgeBase, IKnowledgeBaseRegisterArgs } from "@/../../types/KnowledgeBase/KnowledgeBase";
+import path from "path";
+import fs from "fs";
 
 export async function POST(
     request: Request,
@@ -34,11 +36,15 @@ export async function POST(
             workspace_id: workspaceId,
             type: body.type,
             embedding_engine: body.embedding_engine,
+            configured: body.configured,
         };
 
         const [newKb] = await db(DBTABLES.KNOWLEDGE_BASES)
             .insert(dataToInsert)
             .returning('*');
+
+        const kbStorageDir = path.join(process.cwd(), 'storage', workspaceId, 'kb', body.name);
+        await fs.promises.mkdir(kbStorageDir, { recursive: true });
 
         return NextResponse.json(newKb as IKnowledgeBase, { status: 201 });
 
@@ -74,10 +80,6 @@ export async function GET(
     }
 
     try {
-        // TODO: Add validation to ensure the authenticated user has access to this workspaceId
-        // For now, we assume if authenticated, they can access any workspace's KBs if they know the ID.
-        // This might need to be tied to a user_workspaces table or similar logic.
-
         const knowledgeBases: IKnowledgeBase[] = await db(DBTABLES.KNOWLEDGE_BASES)
             .where({ workspace_id: workspaceId })
             .select('*');

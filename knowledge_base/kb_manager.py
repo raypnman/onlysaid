@@ -75,11 +75,11 @@ class KBManager:
                 kb_item = await self._kb_queue.get()
                 logger.info(f"Processing KB registration: {kb_item.id}")
                 
-                self._set_kb_status(kb_item.team_id, kb_item.id, "initializing")
+                self._set_kb_status(kb_item.workspace_id, kb_item.id, "initializing")
                 
                 if kb_item.source_type not in self.sources:
                     logger.error(f"Unknown source type: {kb_item.source_type}")
-                    self._set_kb_status(kb_item.team_id, kb_item.id, "error")
+                    self._set_kb_status(kb_item.workspace_id, kb_item.id, "error")
                     continue
                 
                 kb_config = {}
@@ -87,13 +87,13 @@ class KBManager:
                 if kb_item.source_type == "local_store":
                     if not kb_item.url:
                         logger.error(f"No path provided for local_store KB {kb_item.id}")
-                        self._set_kb_status(kb_item.team_id, kb_item.id, "error")
+                        self._set_kb_status(kb_item.workspace_id, kb_item.id, "error")
                         continue
                     
                     path = os.path.normpath(kb_item.url)
                     if not os.path.exists(path):
                         logger.error(f"Path does not exist: {path} for KB {kb_item.id}")
-                        self._set_kb_status(kb_item.team_id, kb_item.id, "error")
+                        self._set_kb_status(kb_item.workspace_id, kb_item.id, "error")
                         continue
                     
                     kb_config["path"] = path
@@ -107,62 +107,62 @@ class KBManager:
                     docs = reader.load_documents()
                     self.readers[kb_item.id] = reader
                     # Store documents in Redis instead of self.documents
-                    self._store_kb_docs(kb_item.team_id, kb_item.id, docs)
+                    self._store_kb_docs(kb_item.workspace_id, kb_item.id, docs)
                     logger.info(f"Documents: {docs}")
                     
                     folder_structure = self._build_folder_structure(docs)
-                    self._set_kb_folder_structure(kb_item.team_id, kb_item.id, folder_structure)
-                    await asyncio.to_thread(self.create_indices, kb_item.id, kb_item.team_id)
+                    self._set_kb_folder_structure(kb_item.workspace_id, kb_item.id, folder_structure)
+                    await asyncio.to_thread(self.create_indices, kb_item.id, kb_item.workspace_id)
                     
-                    self._set_kb_status(kb_item.team_id, kb_item.id, "running")
+                    self._set_kb_status(kb_item.workspace_id, kb_item.id, "running")
                     logger.info(f"KB {kb_item.id} is now running")
                 except Exception as e:
                     logger.error(f"Error processing KB {kb_item.id}: {str(e)}")
-                    self._set_kb_status(kb_item.team_id, kb_item.id, "error")
+                    self._set_kb_status(kb_item.workspace_id, kb_item.id, "error")
             except Exception as e:
                 logger.error(f"Error in KB queue processing: {str(e)}")
                 await asyncio.sleep(5)
     
-    def _get_kb_status_key(self, team_id: str, kb_id: str) -> str:
+    def _get_kb_status_key(self, workspace_id: str, kb_id: str) -> str:
         """Generate Redis key for KB status"""
-        return f"kb:{team_id}:{kb_id}:status"
+        return f"kb:{workspace_id}:{kb_id}:status"
     
-    def _get_kb_folder_structure_key(self, team_id: str, kb_id: str) -> str:
+    def _get_kb_folder_structure_key(self, workspace_id: str, kb_id: str) -> str:
         """Generate Redis key for KB folder structure"""
-        return f"kb:{team_id}:{kb_id}:folder_structure"
+        return f"kb:{workspace_id}:{kb_id}:folder_structure"
     
-    def _get_kb_docs_key(self, team_id: str, kb_id: str) -> str:
+    def _get_kb_docs_key(self, workspace_id: str, kb_id: str) -> str:
         """Generate Redis key for KB documents"""
-        return f"kb:{team_id}:{kb_id}:docs"
+        return f"kb:{workspace_id}:{kb_id}:docs"
     
-    def _set_kb_status(self, team_id: str, kb_id: str, status: str) -> None:
+    def _set_kb_status(self, workspace_id: str, kb_id: str, status: str) -> None:
         """Set KB status in Redis"""
-        key = self._get_kb_status_key(team_id, kb_id)
+        key = self._get_kb_status_key(workspace_id, kb_id)
         self.redis_client.set(key, status)
     
-    def _get_kb_status(self, team_id: str, kb_id: str) -> str:
+    def _get_kb_status(self, workspace_id: str, kb_id: str) -> str:
         """Get KB status from Redis"""
-        key = self._get_kb_status_key(team_id, kb_id)
+        key = self._get_kb_status_key(workspace_id, kb_id)
         status = self.redis_client.get(key)
-        logger.info(f"Status of {kb_id} in {team_id}: {status} (query key: {key})")
+        logger.info(f"Status of {kb_id} in {workspace_id}: {status} (query key: {key})")
         if not status:
             return "not_found"
         return status
     
-    def _set_kb_folder_structure(self, team_id: str, kb_id: str, folder_structure: list) -> None:
+    def _set_kb_folder_structure(self, workspace_id: str, kb_id: str, folder_structure: list) -> None:
         """Store KB folder structure in Redis"""
-        key = self._get_kb_folder_structure_key(team_id, kb_id)
+        key = self._get_kb_folder_structure_key(workspace_id, kb_id)
         self.redis_client.set(key, json.dumps(folder_structure))
     
-    def _get_kb_folder_structure(self, team_id: str, kb_id: str) -> list:
+    def _get_kb_folder_structure(self, workspace_id: str, kb_id: str) -> list:
         """Get KB folder structure from Redis"""
-        key = self._get_kb_folder_structure_key(team_id, kb_id)
+        key = self._get_kb_folder_structure_key(workspace_id, kb_id)
         folder_structure = self.redis_client.get(key)
         return json.loads(folder_structure) if folder_structure else []
     
-    def _store_kb_docs(self, team_id: str, kb_id: str, docs: list) -> None:
+    def _store_kb_docs(self, workspace_id: str, kb_id: str, docs: list) -> None:
         """Store KB documents in Redis"""
-        key = self._get_kb_docs_key(team_id, kb_id)
+        key = self._get_kb_docs_key(workspace_id, kb_id)
         
         # Convert documents to serializable format
         serializable_docs = []
@@ -187,15 +187,15 @@ class KBManager:
         self.redis_client.set(key, json.dumps(serializable_docs))
         logger.info(f"Stored {len(serializable_docs)} documents for KB {kb_id} in Redis")
     
-    def _get_kb_docs(self, team_id: str, kb_id: str) -> list:
+    def _get_kb_docs(self, workspace_id: str, kb_id: str) -> list:
         """Get KB documents from Redis"""
-        key = self._get_kb_docs_key(team_id, kb_id)
+        key = self._get_kb_docs_key(workspace_id, kb_id)
         docs_json = self.redis_client.get(key)
         return json.loads(docs_json) if docs_json else []
     
     def register_knowledge_base(self, kb_item: KnowledgeBaseRegistration):
         """Register a new knowledge base and queue it for processing"""
-        self._set_kb_status(kb_item.team_id, kb_item.id, "disabled")
+        self._set_kb_status(kb_item.workspace_id, kb_item.id, "disabled")
         
         if not hasattr(self, 'kb_names'):
             self.kb_names = {}
@@ -205,16 +205,16 @@ class KBManager:
         
         return {"status": "queued", "id": kb_item.id}
     
-    def get_kb_status(self, kb_id: str, team_id: str):
+    def get_kb_status(self, kb_id: str, workspace_id: str):
         """Get the status of a knowledge base"""
-        return self._get_kb_status(team_id, kb_id)
+        return self._get_kb_status(workspace_id, kb_id)
     
-    def create_indices(self, source_name=None, team_id=None):
+    def create_indices(self, source_name=None, workspace_id=None):
         """Create vector indices for document sources and store in Qdrant
         
         Args:
             source_name: Optional name of specific source to index
-            team_id: Optional team ID for the source
+            workspace_id: Optional workspace ID for the source
         """
         if source_name:
             sources_to_index = [source_name]
@@ -230,20 +230,20 @@ class KBManager:
         logger.info(f"Sources to index: {sources_to_index}")
         
         for src_name in sources_to_index:
-            # If team_id is not provided, try to find it from Redis keys
-            src_team_id = team_id
-            if not src_team_id:
+            # If workspace_id is not provided, try to find it from Redis keys
+            src_workspace_id = workspace_id
+            if not src_workspace_id:
                 for key in self.redis_client.scan_iter(match=f"kb:*:{src_name}:docs"):
                     parts = key.split(":")
                     if len(parts) >= 4:
-                        src_team_id = parts[1]
+                        src_workspace_id = parts[1]
                         break
             
-            if not src_team_id:
-                logger.warning(f"Could not find team_id for source {src_name}")
+            if not src_workspace_id:
+                logger.warning(f"Could not find workspace_id for source {src_name}")
                 continue
             
-            docs = self._get_kb_docs(src_team_id, src_name)
+            docs = self._get_kb_docs(src_workspace_id, src_name)
             logger.info(f"Creating index for {src_name} with {len(docs)} documents")
             
             original_docs = []
@@ -300,9 +300,9 @@ class KBManager:
         
         return True
 
-    def generate_context(self, team_id: str, query_text: str, knowledge_bases: Optional[List[str]] = None, top_k: int = 5):
+    def generate_context(self, workspace_id: str, query_text: str, knowledge_bases: Optional[List[str]] = None, top_k: int = 5):
        """Generate context from knowledge base for LLM augmentation"""
-       results = self.query_knowledge_base(team_id, query_text, knowledge_bases, top_k)
+       results = self.query_knowledge_base(workspace_id, query_text, knowledge_bases, top_k)
        
        context = "Relevant information:\n\n"
        logger.info(f"Results: {len(results)}")
@@ -311,7 +311,7 @@ class KBManager:
         
        return context
 
-    def query_knowledge_base(self, team_id: str, query_text: str, knowledge_bases: Optional[List[str]] = None, top_k: int = 5):
+    def query_knowledge_base(self, workspace_id: str, query_text: str, knowledge_bases: Optional[List[str]] = None, top_k: int = 5):
         """Query the knowledge base and return relevant documents"""
         results = []
         
@@ -319,8 +319,8 @@ class KBManager:
             logger.info(f"Querying knowledge bases: {knowledge_bases}")
             sources_to_query = []
             for kb_id in knowledge_bases:
-                status = self._get_kb_status(team_id, kb_id)
-                logger.info(f"Checking status of {kb_id} in {team_id}: {status}")
+                status = self._get_kb_status(workspace_id, kb_id)
+                logger.info(f"Checking status of {kb_id} in {workspace_id}: {status}")
                 if status == "running":
                     sources_to_query.append(kb_id)
             
@@ -330,7 +330,7 @@ class KBManager:
         else:
             # Get all running knowledge bases from Redis
             sources_to_query = []
-            for key in self.redis_client.scan_iter(match=f"kb:{team_id}:*:status"):
+            for key in self.redis_client.scan_iter(match=f"kb:{workspace_id}:*:status"):
                 parts = key.split(":")
                 if len(parts) >= 4:
                     kb_id = parts[2]
@@ -345,10 +345,10 @@ class KBManager:
             index_key = f"kb:{source}:index_created"
             if not self.redis_client.exists(index_key):
                 # Check if documents exist for this source
-                docs_key = self._get_kb_docs_key(team_id, source)
+                docs_key = self._get_kb_docs_key(workspace_id, source)
                 if self.redis_client.exists(docs_key):
                     logger.info(f"Creating index for {source} on demand")
-                    self.create_indices(source, team_id)
+                    self.create_indices(source, workspace_id)
                 else:
                     logger.warning(f"No documents found for source {source}")
                     continue
@@ -389,7 +389,7 @@ class KBManager:
         query_text = query.query[-1] if isinstance(query.query, list) else query.query
         
         context = self.generate_context(
-            query.team_id,
+            query.workspace_id,
             query_text,
             query.knowledge_bases,
             query.top_k
@@ -410,7 +410,7 @@ class KBManager:
         query_text = query.query[-1] if isinstance(query.query, list) else query.query
         
         context = self.generate_context(
-            query.team_id,
+            query.workspace_id,
             query_text, 
             query.knowledge_bases, 
             query.top_k
@@ -498,15 +498,15 @@ class KBManager:
         
         return [folder.dict() for folder in root_folders]
     
-    def get_data_sources(self, team_id: str):
+    def get_data_sources(self, workspace_id: str):
         """Return information about available data sources"""
         sources = []
-        # Get all document keys for this team
-        for key in self.redis_client.scan_iter(match=f"kb:{team_id}:*:docs"):
+        # Get all document keys for this workspace
+        for key in self.redis_client.scan_iter(match=f"kb:{workspace_id}:*:docs"):
             parts = key.split(":")
             if len(parts) >= 4:
                 source_name = parts[2]
-                status = self._get_kb_status(team_id, source_name)
+                status = self._get_kb_status(workspace_id, source_name)
                 if status == "running":
                     display_name = source_name
                     
@@ -516,7 +516,7 @@ class KBManager:
                         display_name = f"{source_name.split('-')[0]} KB"
                     
                     # Get document count
-                    docs = self._get_kb_docs(team_id, source_name)
+                    docs = self._get_kb_docs(workspace_id, source_name)
                     
                     source_info = DataSource(
                         id=source_name,
@@ -527,67 +527,67 @@ class KBManager:
                     sources.append(source_info.dict())
         return sources
     
-    def get_folder_structure(self, source_id, team_id):
+    def get_folder_structure(self, source_id, workspace_id):
         """Return the folder structure for a specific source"""
-        if not team_id:
-            logger.warning(f"Team ID not provided for folder structure retrieval of {source_id}")
+        if not workspace_id:
+            logger.warning(f"Workspace ID not provided for folder structure retrieval of {source_id}")
             return []
             
         # Get folder structure from Redis
-        return self._get_kb_folder_structure(team_id, source_id)
+        return self._get_kb_folder_structure(workspace_id, source_id)
     
-    def get_documents(self, source_id, team_id=None):
+    def get_documents(self, source_id, workspace_id=None):
         """Return all documents for a specific source"""
-        # If team_id is not provided, try to find it from Redis keys
-        if not team_id:
+        # If workspace_id is not provided, try to find it from Redis keys
+        if not workspace_id:
             for key in self.redis_client.scan_iter(match=f"kb:*:{source_id}:docs"):
                 parts = key.split(":")
                 if len(parts) >= 4:
-                    team_id = parts[1]
+                    workspace_id = parts[1]
                     break
         
-        if not team_id:
-            logger.warning(f"Could not find team_id for source {source_id}")
+        if not workspace_id:
+            logger.warning(f"Could not find workspace_id for source {source_id}")
             return []
         
-        return self._get_kb_docs(team_id, source_id)
+        return self._get_kb_docs(workspace_id, source_id)
 
-    def update_kb_status(self, kb_id: str, enabled: bool, team_id: str):
+    def update_kb_status(self, kb_id: str, enabled: bool, workspace_id: str):
         """Update the status of a knowledge base (enable/disable)"""
-        current_status = self._get_kb_status(team_id, kb_id)
+        current_status = self._get_kb_status(workspace_id, kb_id)
         if current_status == "not_found":
             logger.warning(f"Knowledge base {kb_id} not found")
             return {"status": "error", "message": "Knowledge base not found"}
         
         if enabled:
             if current_status == "disabled":
-                self._set_kb_status(team_id, kb_id, "running")
+                self._set_kb_status(workspace_id, kb_id, "running")
                 logger.info(f"Knowledge base {kb_id} enabled")
         else:
             if current_status == "running":
-                self._set_kb_status(team_id, kb_id, "disabled")
+                self._set_kb_status(workspace_id, kb_id, "disabled")
                 logger.info(f"Knowledge base {kb_id} disabled")
         
         return {"status": "success", "id": kb_id, "enabled": enabled}
 
-    def delete_knowledge_base(self, kb_id: str, team_id: str):
+    def delete_knowledge_base(self, kb_id: str, workspace_id: str):
         """Delete a knowledge base completely"""
-        current_status = self._get_kb_status(team_id, kb_id)
+        current_status = self._get_kb_status(workspace_id, kb_id)
         if current_status == "not_found":
             logger.warning(f"Knowledge base {kb_id} not found")
             return {"status": "error", "message": "Knowledge base not found"}
         
         try:
             # Delete status key
-            status_key = self._get_kb_status_key(team_id, kb_id)
+            status_key = self._get_kb_status_key(workspace_id, kb_id)
             self.redis_client.delete(status_key)
             
             # Delete folder structure key
-            folder_structure_key = self._get_kb_folder_structure_key(team_id, kb_id)
+            folder_structure_key = self._get_kb_folder_structure_key(workspace_id, kb_id)
             self.redis_client.delete(folder_structure_key)
             
             # Delete documents key
-            docs_key = self._get_kb_docs_key(team_id, kb_id)
+            docs_key = self._get_kb_docs_key(workspace_id, kb_id)
             self.redis_client.delete(docs_key)
             
             # Delete index created flag

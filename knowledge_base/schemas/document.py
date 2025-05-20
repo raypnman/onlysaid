@@ -44,7 +44,7 @@ class DataSource(BaseModel):
 
 
 class QueryRequest(BaseModel):
-    team_id: str
+    workspace_id: str
     knowledge_bases: Optional[List[str]] = None
     query: Union[str, List[str]]  # Can be a single string or list of strings
     conversation_history: Union[str, List[str]] = ""
@@ -56,11 +56,12 @@ class QueryRequest(BaseModel):
 class KnowledgeBaseRegistration(BaseModel):
     id: str
     name: str
-    team_id: str
+    workspace_id: str
     description: Optional[str] = ""
-    source_type: str
+    source: str
     url: str
     enabled: bool = True
+    embedding_engine: str
     
 
 class KnowledgeBaseStatus(BaseModel):
