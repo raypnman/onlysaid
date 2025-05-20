@@ -23,7 +23,8 @@ from prompts.lang import lng_map, lng_prompt
 class KBManager:
     """Manages configurable data sources and communicates with qdrant"""
     sources: Dict[str, type[BaseReader]] = {
-        "local_store": LocalStoreReader
+        "local_store": LocalStoreReader,
+        "onlysaid-kb": LocalStoreReader
     }
 
     def __init__(
@@ -77,14 +78,14 @@ class KBManager:
                 
                 self._set_kb_status(kb_item.workspace_id, kb_item.id, "initializing")
                 
-                if kb_item.source_type not in self.sources:
-                    logger.error(f"Unknown source type: {kb_item.source_type}")
+                if kb_item.source not in self.sources:
+                    logger.error(f"Unknown source type: {kb_item.source}")
                     self._set_kb_status(kb_item.workspace_id, kb_item.id, "error")
                     continue
                 
                 kb_config = {}
                 
-                if kb_item.source_type == "local_store":
+                if kb_item.source == "local_store":
                     if not kb_item.url:
                         logger.error(f"No path provided for local_store KB {kb_item.id}")
                         self._set_kb_status(kb_item.workspace_id, kb_item.id, "error")
@@ -101,7 +102,8 @@ class KBManager:
                     kb_config["url"] = kb_item.url
                 
                 try:
-                    reader = self.sources[kb_item.source_type]()
+                    reader = self.sources[kb_item.source]()
+                    print(kb_config)
                     reader.configure(kb_config)
                     
                     docs = reader.load_documents()
@@ -147,7 +149,7 @@ class KBManager:
         logger.info(f"Status of {kb_id} in {workspace_id}: {status} (query key: {key})")
         if not status:
             return "not_found"
-        return status
+        return status # type: ignore
     
     def _set_kb_folder_structure(self, workspace_id: str, kb_id: str, folder_structure: list) -> None:
         """Store KB folder structure in Redis"""
@@ -158,7 +160,7 @@ class KBManager:
         """Get KB folder structure from Redis"""
         key = self._get_kb_folder_structure_key(workspace_id, kb_id)
         folder_structure = self.redis_client.get(key)
-        return json.loads(folder_structure) if folder_structure else []
+        return json.loads(folder_structure) if folder_structure else [] # type: ignore
     
     def _store_kb_docs(self, workspace_id: str, kb_id: str, docs: list) -> None:
         """Store KB documents in Redis"""
@@ -191,7 +193,7 @@ class KBManager:
         """Get KB documents from Redis"""
         key = self._get_kb_docs_key(workspace_id, kb_id)
         docs_json = self.redis_client.get(key)
-        return json.loads(docs_json) if docs_json else []
+        return json.loads(docs_json) if docs_json else [] # type: ignore
     
     def register_knowledge_base(self, kb_item: KnowledgeBaseRegistration):
         """Register a new knowledge base and queue it for processing"""

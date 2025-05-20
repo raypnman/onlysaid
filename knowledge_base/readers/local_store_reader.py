@@ -13,7 +13,7 @@ class LocalStoreReader(BaseReader):
         self.documents = None
         
     def configure(self, config: dict):
-        path = config.get("path")
+        path = config.get("url")
         if not path:
             raise ValueError("Path must be provided for LocalStoreReader")
         

@@ -14,6 +14,14 @@ router = APIRouter()
 
 def get_kb_manager(request: Request):
     return request.app.state.kb_manager
+  
+@router.post("/api/register")
+async def register(request: Request, registration: KnowledgeBaseRegistration) -> Dict[str, Any]:
+    print("register called with:", registration)
+    kb_manager = request.app.state.kb_manager
+    result = kb_manager.register_knowledge_base(registration)
+    return result
+
 
 @router.get("/api/view/{workspace_id}")
 async def view(request: Request, workspace_id: str) -> Dict[str, Any]:
@@ -33,14 +41,6 @@ async def view(request: Request, workspace_id: str) -> Dict[str, Any]:
         response["documents"][source_id] = kb_manager.get_documents(source_id)
     
     return response
-
-@router.post("/api/register")
-async def register(request: Request, registration: KnowledgeBaseRegistration) -> Dict[str, Any]:
-    print("register called with:", registration)
-    # kb_manager = request.app.state.kb_manager
-    # result = kb_manager.register_knowledge_base(registration)
-    # return result
-    return {}
 
 @router.get("/api/kb_status/{workspace_id}/{kb_id}")
 async def kb_status(request: Request, workspace_id: str, kb_id: str) -> KnowledgeBaseStatus:
