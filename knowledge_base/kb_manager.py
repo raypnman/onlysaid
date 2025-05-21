@@ -1,4 +1,4 @@
-from typing import Dict, AsyncGenerator, List, Optional
+from typing import Dict, AsyncGenerator, List, Optional, Any
 import os
 import uuid
 import json
@@ -63,6 +63,7 @@ class KBManager:
         # Remove self.indices as we'll rely on Qdrant and Redis tracking
         self._message_store = {}
         self.readers = {}
+        self.kb_names: Dict[str, str] = {}
         # self.documents = {}  # We'll store documents in Redis instead
         self._kb_queue = asyncio.Queue()
         
@@ -199,8 +200,6 @@ class KBManager:
         """Register a new knowledge base and queue it for processing"""
         self._set_kb_status(kb_item.workspace_id, kb_item.id, "disabled")
         
-        if not hasattr(self, 'kb_names'):
-            self.kb_names = {}
         self.kb_names[kb_item.id] = kb_item.name or kb_item.id
         
         asyncio.create_task(self._kb_queue.put(kb_item))
@@ -512,7 +511,7 @@ class KBManager:
                 if status == "running":
                     display_name = source_name
                     
-                    if hasattr(self, 'kb_names') and source_name in self.kb_names:
+                    if source_name in self.kb_names:
                         display_name = self.kb_names[source_name]
                     elif "-" in source_name:
                         display_name = f"{source_name.split('-')[0]} KB"
@@ -528,7 +527,28 @@ class KBManager:
                     )
                     sources.append(source_info.dict())
         return sources
-    
+
+    def get_data_source(self, workspace_id: str, kb_id: str) -> Optional[Dict[str, Any]]:
+        """Return information about a specific data source if it is running."""
+        status = self._get_kb_status(workspace_id, kb_id)
+        if status == "running":
+            display_name = kb_id  # Default
+            if kb_id in self.kb_names:
+                display_name = self.kb_names[kb_id]
+            elif "-" in kb_id:  # Fallback logic
+                display_name = f"{kb_id.split('-')[0]} KB"
+            
+            docs = self._get_kb_docs(workspace_id, kb_id)
+            
+            source_info = DataSource(
+                id=kb_id,
+                name=display_name,
+                icon="database",  # Default icon
+                count=len(docs)
+            )
+            return source_info.dict()
+        return None
+
     def get_folder_structure(self, source_id, workspace_id):
         """Return the folder structure for a specific source"""
         if not workspace_id:

@@ -1,7 +1,7 @@
 from typing import List, Dict, Any, Optional
 import os
 from starlette.background import BackgroundTask
-from fastapi import Request, Depends, Response, HTTPException
+from fastapi import Request, Depends, Response, HTTPException, Query
 from fastapi.routing import APIRouter
 from fastapi.responses import PlainTextResponse, StreamingResponse
 from schemas.document import QueryRequest, KnowledgeBaseRegistration, KnowledgeBaseStatus
@@ -24,21 +24,36 @@ async def register(request: Request, registration: KnowledgeBaseRegistration) ->
 
 
 @router.get("/api/view/{workspace_id}")
-async def view(request: Request, workspace_id: str) -> Dict[str, Any]:
+async def view(request: Request, workspace_id: str, kb_id: Optional[str] = Query(None)) -> Dict[str, Any]:
     kb_manager = request.app.state.kb_manager
-    data_sources = kb_manager.get_data_sources(workspace_id)
-    logger.info(data_sources)
     
     response = {
-        "dataSources": data_sources,
+        "dataSources": [],
         "folderStructures": {},
         "documents": {}
     }
-    
-    for source in data_sources:
-        source_id = source["id"]
-        response["folderStructures"][source_id] = kb_manager.get_folder_structure(source_id, workspace_id)
-        response["documents"][source_id] = kb_manager.get_documents(source_id)
+
+    if kb_id:
+        # View specific knowledge base
+        data_source = kb_manager.get_data_source(workspace_id, kb_id)
+        if data_source:
+            response["dataSources"] = [data_source]
+            response["folderStructures"][kb_id] = kb_manager.get_folder_structure(kb_id, workspace_id)
+            response["documents"][kb_id] = kb_manager.get_documents(kb_id, workspace_id)
+        else:
+            # KB not found or not running, return empty for that specific ID or handle as an error
+            # Current implementation returns empty structures as per original design for missing items.
+            pass # Response is already initialized to be empty
+    else:
+        # View all knowledge bases in the workspace
+        data_sources = kb_manager.get_data_sources(workspace_id)
+        logger.info(data_sources)
+        response["dataSources"] = data_sources
+        
+        for source in data_sources:
+            source_id = source["id"]
+            response["folderStructures"][source_id] = kb_manager.get_folder_structure(source_id, workspace_id)
+            response["documents"][source_id] = kb_manager.get_documents(source_id, workspace_id)
     
     return response
 
