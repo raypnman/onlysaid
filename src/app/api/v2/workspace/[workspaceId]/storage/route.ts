@@ -21,12 +21,24 @@ async function getDirectoryContents(basePath: string, relativeDir: string = '') 
 
         const dirents = await fs.readdir(targetPath, { withFileTypes: true });
         for (const dirent of dirents) {
-            contents.push({
-                name: dirent.name,
-                type: dirent.isDirectory() ? 'directory' : 'file',
-                // Path relative to the workspace storage root
-                path: path.join(relativeDir, dirent.name)
-            });
+            if (dirent.isDirectory()) {
+                contents.push({
+                    name: dirent.name, // Directory name remains as is
+                    type: 'directory',
+                    path: path.join(relativeDir, dirent.name) // Path for directory remains as is
+                });
+            } else { // It's a file
+                const physicalFileName = dirent.name; // e.g., "uuid-123.pdf"
+                const extension = path.extname(physicalFileName); // e.g., ".pdf"
+                const uuidName = path.basename(physicalFileName, extension); // e.g., "uuid-123"
+
+                contents.push({
+                    name: uuidName, // Use UUID as the 'name' for client
+                    type: 'file',
+                    // Path for client should also use the UUID, relative to current directory
+                    path: path.join(relativeDir, uuidName)
+                });
+            }
         }
         return {
             currentPath: relativeDir,

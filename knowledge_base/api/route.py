@@ -17,7 +17,6 @@ def get_kb_manager(request: Request):
   
 @router.post("/api/register")
 async def register(request: Request, registration: KnowledgeBaseRegistration) -> Dict[str, Any]:
-    print("register called with:", registration)
     kb_manager = request.app.state.kb_manager
     result = kb_manager.register_knowledge_base(registration)
     return result
@@ -175,44 +174,6 @@ async def query_knowledge_base(request: Request, query: QueryRequest):
     else:
         answer = kb_manager.answer_with_context(query)
         return {"status": "success", "results": answer}
-
-@router.get("/api/stream")
-async def stream_knowledge_base(
-    request: Request,
-    workspace_id: str,
-    query: str,
-    message_id: Optional[str] = None,
-    conversation_history: Optional[str] = "",
-    preferred_language: str = "en",
-    top_k: int = 5
-):
-    kb_manager = request.app.state.kb_manager
-    
-    query_request = QueryRequest(
-        workspace_id=workspace_id,
-        query=query,
-        conversation_history=conversation_history or [],
-        streaming=True,
-        top_k=top_k,
-        preferred_language=preferred_language,
-        message_id=message_id
-    )
-    
-    logger.info(f"Stream request received: {query_request}")
-    
-    session_id = f"stream_{os.urandom(8).hex()}"
-    
-    kb_manager.store_message(session_id, {
-        "query": query_request.dict(),
-        "current_content": "",
-        "is_complete": False
-    })
-    
-    return StreamingResponse(
-        stream_tokens(kb_manager, query_request, session_id),
-        media_type="text/event-stream",
-        background=BackgroundTask(cleanup_session, kb_manager, session_id)
-    )
 
 @router.post("/api/retrieve")
 async def retrieve_from_knowledge_base(request: Request, query_data: dict) -> Dict[str, Any]:

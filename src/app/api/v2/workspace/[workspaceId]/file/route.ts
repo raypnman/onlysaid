@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import db, { DBTABLES } from "@/lib/db";
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
+import { IFile } from '@/../../types/File/File';
 
 export async function POST(
     request: Request,
@@ -18,9 +19,10 @@ export async function POST(
 
     try {
         const formData = await request.formData();
+        console.log("formData", formData);
         const file = formData.get('file') as File;
         const metadataStr = formData.get('metadata') as string;
-        const metadata = metadataStr ? JSON.parse(metadataStr) : {};
+        const frontendMetadata = metadataStr ? JSON.parse(metadataStr) : {};
 
         if (!file) {
             return NextResponse.json(
@@ -29,35 +31,36 @@ export async function POST(
             );
         }
 
-        // Create workspace storage directory if it doesn't exist
         const { workspaceId } = await params;
-        const storageDir = path.join(process.cwd(), 'storage', workspaceId);
-        await fs.mkdir(storageDir, { recursive: true });
+        const baseStorageDir = path.join(process.cwd(), 'storage', workspaceId);
 
-        // Generate unique filename
+        const logicalTargetPath = frontendMetadata.targetPath || file.name;
+        const logicalTargetDir = path.dirname(logicalTargetPath);
+        const fullTargetDir = logicalTargetDir === '.' ? baseStorageDir : path.join(baseStorageDir, logicalTargetDir);
+        await fs.mkdir(fullTargetDir, { recursive: true });
+
         const fileId = uuidv4();
-        const fileExt = path.extname(file.name);
-        const storagePath = path.join(storageDir, `${fileId}${fileExt}`);
+        const originalFileExtension = path.extname(file.name);
+        const physicalFileNameWithExtension = fileId + originalFileExtension;
+        const physicalStoragePath = path.join(fullTargetDir, physicalFileNameWithExtension);
 
-        // Save file
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        await fs.writeFile(storagePath, buffer);
+        await fs.writeFile(physicalStoragePath, buffer);
 
-        // Save file metadata to database
         const fileRecord = await db(DBTABLES.FILES).insert({
             id: fileId,
             workspace_id: workspaceId,
             name: file.name,
             size: file.size,
             mime_type: file.type,
-            path: storagePath,
+            path: physicalStoragePath,
             user_id: authenticated.user?.id,
-            ...metadata
+            metadata: frontendMetadata
         }).returning('*');
 
         return NextResponse.json(
-            { message: "File uploaded successfully", data: fileRecord[0] },
+            { message: "File uploaded successfully", data: fileRecord[0] as IFile },
             { status: 200 }
         );
     } catch (error) {
@@ -83,18 +86,21 @@ export async function GET(
     const { workspaceId } = await params;
 
     if (!fileId) {
-        // List files in workspace
-        const files = await db(DBTABLES.FILES)
+        const files: IFile[] = await db(DBTABLES.FILES)
             .where('workspace_id', workspaceId)
             .select('*');
 
+        const filesWithLogicalPath = files.map(f => ({
+            ...f,
+            logicalPath: f.metadata?.targetPath || null
+        }));
+
         return NextResponse.json(
-            { message: "Files retrieved", data: files },
+            { message: "Files retrieved", data: filesWithLogicalPath },
             { status: 200 }
         );
     } else {
-        // Get specific file
-        const file = await db(DBTABLES.FILES)
+        const file: IFile | undefined = await db(DBTABLES.FILES)
             .where({
                 id: fileId,
                 workspace_id: workspaceId
@@ -109,16 +115,54 @@ export async function GET(
         }
 
         try {
-            const fileStream = createReadStream(file.storage_path);
-            const readable = Readable.fromWeb(fileStream as any);
+            // Check if file exists
+            await fs.access(file.path);
 
-            return new Response(readable as any, {
-                headers: {
-                    'Content-Type': file.mime_type,
-                    'Content-Disposition': `attachment; filename="${file.name}"`,
-                    'Content-Length': String(file.size)
-                }
-            });
+            // Read the file as a buffer for smaller files, or use streaming for larger files
+            const stats = await fs.stat(file.path);
+
+            if (stats.size < 10 * 1024 * 1024) { // Less than 10MB, read into memory
+                const fileBuffer = await fs.readFile(file.path);
+
+                return new Response(new Uint8Array(fileBuffer), {
+                    headers: {
+                        'Content-Type': file.mime_type,
+                        'Content-Disposition': `attachment; filename="${file.name}"`,
+                        'Content-Length': String(file.size)
+                    }
+                });
+            } else { // Larger files, use streaming
+                const nodeStream = createReadStream(file.path);
+
+                // Convert Node.js ReadStream to Web ReadableStream
+                const webStream = new ReadableStream({
+                    start(controller) {
+                        nodeStream.on('data', (chunk) => {
+                            const uint8Array = chunk instanceof Buffer ? new Uint8Array(chunk) : new Uint8Array(Buffer.from(chunk as string));
+                            controller.enqueue(uint8Array);
+                        });
+
+                        nodeStream.on('end', () => {
+                            controller.close();
+                        });
+
+                        nodeStream.on('error', (error) => {
+                            controller.error(error);
+                        });
+                    },
+                    cancel() {
+                        nodeStream.destroy();
+                    }
+                });
+
+                return new Response(webStream, {
+                    headers: {
+                        'Content-Type': file.mime_type,
+                        'Content-Disposition': `attachment; filename="${file.name}"`,
+                        'Content-Length': String(file.size)
+                    }
+                });
+            }
         } catch (error) {
             console.error("Error streaming file:", error);
             return NextResponse.json(
@@ -139,7 +183,6 @@ export async function DELETE(
     }
 
     const { workspaceId } = await params;
-
     const { searchParams } = new URL(request.url);
     const fileId = searchParams.get('fileId');
 
@@ -151,8 +194,7 @@ export async function DELETE(
     }
 
     try {
-        // Get file details
-        const file = await db(DBTABLES.FILES)
+        const file: IFile | undefined = await db(DBTABLES.FILES)
             .where({
                 id: fileId,
                 workspace_id: workspaceId
@@ -166,10 +208,8 @@ export async function DELETE(
             );
         }
 
-        // Delete from filesystem
-        await fs.unlink(file.storage_path);
+        await fs.unlink(file.path);
 
-        // Delete from database
         await db(DBTABLES.FILES)
             .where('id', fileId)
             .delete();

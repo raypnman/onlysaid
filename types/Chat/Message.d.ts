@@ -1,5 +1,22 @@
 import { IUser } from "@/types/User/User";
 import { IFile } from "../File/File";
+import type OpenAI from 'openai';
+
+export interface IChatMessageToolCallFunction {
+    name: string;
+    arguments: string | Record<string, any>; // Allows string or parsed object for arguments
+}
+
+export interface IChatMessageToolCall {
+    id: string;
+    type: 'function';
+    function: IChatMessageToolCallFunction;
+    tool_description?: string;
+    mcp_server?: string;
+    status?: 'pending' | 'approved' | 'denied' | 'executed' | 'error' | string;
+    result?: string | Record<string, any>;
+    execution_time_seconds?: number;
+}
 
 export interface IChatMessage {
     id: string;
@@ -17,6 +34,10 @@ export interface IChatMessage {
     sent_at: string;
     status: string;
     sender_object?: IUser;
+    tool_calls?: IChatMessageToolCall[];
+    is_tool_response?: boolean;
+    responding_to_tool_call_id?: string;
+    tool_function_name?: string;
 }
 
 export interface IReaction {
