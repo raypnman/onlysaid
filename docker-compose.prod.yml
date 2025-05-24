@@ -105,7 +105,7 @@ services:
   # # main application services
   onlysaid-socket_server:
     build:
-      context: server/socket_server
+      context: socket_server
       dockerfile: Dockerfile.socket_server
     container_name: onlysaid-socket_server
     ports:
