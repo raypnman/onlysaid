@@ -149,8 +149,10 @@ services:
       - NEXT_PUBLIC_AGENT_HOME_PATH=${AGENT_HOME_PATH}
     # volumes:
     #   - .:/app
+        # volumes:
+    #   - .:/app
     volumes:
-      - .:/app
+      #   - .:/app
       - ./storage:/storage
       - onlysaid-storage:/storage
     restart: always
