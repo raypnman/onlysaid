@@ -103,11 +103,11 @@ services:
     restart: always
 
   # # main application services
-  onlysaid-chat_server:
+  onlysaid-socket_server:
     build:
-      context: server/chat_server
-      dockerfile: Dockerfile.chat_server
-    container_name: onlysaid-chat_server
+      context: server/socket_server
+      dockerfile: Dockerfile.socket_server
+    container_name: onlysaid-socket_server
     ports:
       - "3001:3001"
     environment:
@@ -118,7 +118,7 @@ services:
       - NODE_ENV=${NODE_ENV}
     restart: always
     volumes:
-      - ./server/chat_server:/app
+      - ./socket_server:/app
     depends_on:
       - onlysaid-psqldb
       - redis-node-5
@@ -150,11 +150,13 @@ services:
     # volumes:
     #   - .:/app
     volumes:
-      - ./agent_home:/agent_home
+      - .:/app
+      - ./storage:/storage
+      - onlysaid-storage:/storage
     restart: always
     command: sh -c "npm run build && npm start"
     depends_on:
-      - onlysaid-chat_server
+      - onlysaid-socket_server
       - onlysaid-psqldb
     networks:
       - onlysaid-network
@@ -166,7 +168,7 @@ services:
       dockerfile: docker/Dockerfile.mcp.client
     container_name: onlysaid-mcp_client
     depends_on:
-      - onlysaid-chat_server
+      - onlysaid-socket_server
       - onlysaid-psqldb
       - onlysaid-app
       - onlysaid-ollama
@@ -175,7 +177,7 @@ services:
     volumes:
       - ./mcp/client:/app
       - ./mcp/servers:/servers
-      - ./agent_home:/agent_home
+      - ./storage:/storage
       - ./mcp/client/utils:/servers/utils
       - ./mcp/client/schemas:/servers/schemas
       - ./mcp/client/prompts:/servers/prompts
@@ -200,7 +202,7 @@ services:
     container_name: onlysaid-kb
     volumes:
       - ./knowledge_base:/app
-      - ./agent_home:/agent_home
+      - ./storage:/storage
       - qdrant_data:/qdrant/storage
     ports:
       - "35430:35430"
@@ -281,7 +283,7 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - onlysaid-app
-      - onlysaid-chat_server
+      - onlysaid-socket_server
       - onlysaid-mcp_client
     networks:
       - onlysaid-network
@@ -334,6 +336,7 @@ volumes:
     driver: local
   redis-cluster_data-5:
     driver: local
+  onlysaid-storage:
 
 networks:
   onlysaid-network:
