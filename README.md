@@ -6,6 +6,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/spoonbobo/onlysaid?style=for-the-badge&logo=github)](https://github.com/spoonbobo/onlysaid/network/members)
 [![GitHub issues](https://img.shields.io/github/issues/spoonbobo/onlysaid?style=for-the-badge&logo=github)](https://github.com/spoonbobo/onlysaid/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/spoonbobo/onlysaid?style=for-the-badge&logo=github)](https://github.com/spoonbobo/onlysaid/pulls)
+[![Documentation](https://img.shields.io/badge/documentation-view-brightgreen?style=for-the-badge)](https://onlysaid.com/docs/#/)
 
 [![GitHub license](https://img.shields.io/github/license/spoonbobo/onlysaid?style=for-the-badge)](https://github.com/spoonbobo/onlysaid/blob/main/LICENSE)
 [![GitHub contributors](https://img.shields.io/github/contributors/spoonbobo/onlysaid?style=for-the-badge&logo=github)](https://github.com/spoonbobo/onlysaid/graphs/contributors)
