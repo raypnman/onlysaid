@@ -1,11 +1,3 @@
 # Interface
 
-## Settings
-
-## Workspaces
-
-## Menu
-
-## File Explorer
-
-## MainUI
+![Interface](assets/interface/interface.png)
