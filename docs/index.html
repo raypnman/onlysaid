@@ -258,17 +258,6 @@
       color: var(--text-color-base);
     }
     
-    /* Search box styling */
-    [data-theme="dark"] .search input {
-      background: var(--background-secondary);
-      border: 1px solid var(--border-color);
-      color: var(--text-color-base);
-    }
-    
-    [data-theme="dark"] .search input::placeholder {
-      color: var(--text-color-secondary);
-    }
-    
     /* Enhanced link styling for dark mode */
     [data-theme="dark"] .markdown-section a {
       color: #58a6ff;
@@ -282,6 +271,61 @@
     [data-theme="dark"] .markdown-section strong {
       color: var(--title-color);
       font-weight: 600;
+    }
+    
+    /* Move title up */
+    .app-name-link {
+      margin-top: -10px !important;
+      padding-top: 15px !important;
+    }
+    
+    .sidebar > h1 {
+      margin-top: -8px !important;
+      padding-top: 15px !important;
+    }
+    
+    .sidebar .app-name {
+      margin-top: -8px !important;
+      padding-top: 15px !important;
+    }
+    
+    .sidebar {
+      padding-top: 15px !important;
+    }
+    
+    .sidebar-nav {
+      padding-top: 0 !important;
+      margin-top: -5px !important;
+    }
+    
+    /* Static sidebar - hide toggle button on desktop only */
+    .sidebar-toggle {
+      display: none !important;
+    }
+    
+    /* Show toggle button on mobile and let Docsify handle the behavior */
+    @media screen and (max-width: 768px) {
+      .sidebar-toggle {
+        display: block !important;
+        background: none !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+    }
+    
+    /* Animation for collapsible sidebar items */
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        max-height: 300px;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
@@ -402,9 +446,8 @@
       name: 'Onlysaid',
       repo: 'https://github.com/spoonbobo/onlysaid',
       loadSidebar: true,
-      subMaxLevel: 2,
+      subMaxLevel: 0,
       auto2top: true,
-      search: 'auto',
       copyCode: {
         buttonText: 'Copy to clipboard',
         errorText: 'Error',
@@ -415,19 +458,200 @@
           hook.ready(function() {
             // Initialize language selector
             updateLanguageSelector();
+            
+            // Debug: Check if sidebar elements exist
+            console.log('Sidebar element:', document.querySelector('.sidebar'));
+            console.log('Sidebar nav:', document.querySelector('.sidebar-nav'));
+            console.log('All sidebar content:', document.querySelector('.sidebar')?.innerHTML);
+            
+            // Add collapsible sidebar functionality
+            addCollapsibleSidebar();
           });
           
           hook.doneEach(function() {
             // Update language selector after each page load
             updateLanguageSelector();
+            
+            // Debug: Check sidebar after page load
+            setTimeout(() => {
+              console.log('After page load - Sidebar element:', document.querySelector('.sidebar'));
+              console.log('After page load - Sidebar nav:', document.querySelector('.sidebar-nav'));
+              console.log('After page load - All sidebar content:', document.querySelector('.sidebar')?.innerHTML);
+            }, 100);
+            
+            // Re-add collapsible functionality after page changes
+            addCollapsibleSidebar();
           });
         }
       ]
     }
+    
+    // Function to add collapsible sidebar functionality
+    function addCollapsibleSidebar() {
+      const sidebarItems = {
+        'Interface': [
+          { name: 'Navigation & Layout', link: 'interface/navigation-layout.md' },
+          { name: 'Workbench', link: 'interface/workbench.md' },
+          { name: 'Customization', link: 'interface/customization.md' },
+          { name: 'Accessibility', link: 'interface/accessibility.md' },
+          { name: 'Performance & Tips', link: 'interface/performance-tips.md' }
+        ],
+        'Knowledge Base': [
+          { name: 'Overview', link: 'knowledge-base/README.md' },
+          { name: 'Document Management', link: 'knowledge-base/document-management.md' },
+          { name: 'Search & Retrieval', link: 'knowledge-base/search-retrieval.md' },
+          { name: 'Collaboration', link: 'knowledge-base/collaboration.md' },
+          { name: 'API Integration', link: 'knowledge-base/api-integration.md' }
+        ],
+        'AI Mode': [
+          { name: 'Overview', link: 'ai-mode/README.md' },
+          { name: 'Ask Mode', link: 'ai-mode/ask.md' },
+          { name: 'Query Mode', link: 'ai-mode/query.md' },
+          { name: 'Agentic Mode', link: 'ai-mode/agentic.md' }
+        ],
+        'Use Cases': [
+          { name: 'Overview', link: 'use-cases/README.md' },
+          { name: 'Business Management', link: 'use-cases/business-management.md' },
+          { name: 'Software Development', link: 'use-cases/software-development.md' },
+          { name: 'Data & Research', link: 'use-cases/data-research.md' },
+          { name: 'Advanced Scenarios', link: 'use-cases/advanced-scenarios.md' }
+        ]
+      };
+      
+      const sidebarNav = document.querySelector('.sidebar-nav');
+      if (!sidebarNav) return;
+      
+      // Get expanded states from localStorage
+      const expandedSections = JSON.parse(localStorage.getItem('docsify-expanded-sections') || '[]');
+      
+      const links = sidebarNav.querySelectorAll('a');
+      
+      links.forEach(link => {
+        const text = link.textContent.trim();
+        
+        if (sidebarItems[text] && !link.hasAttribute('data-collapsible-handler')) {
+          // Mark as processed to prevent duplicate handlers
+          link.setAttribute('data-collapsible-handler', 'true');
+          
+          // Add click handler for expandable sections
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('Clicked on:', text); // Debug log
+            
+            // Find existing sub-items for this link
+            const existingSubItems = link.parentElement.querySelector('.sub-items');
+            const indicator = link.querySelector('.expand-indicator');
+            
+            if (existingSubItems) {
+              // Collapse - remove sub-items
+              existingSubItems.remove();
+              if (indicator) indicator.textContent = '+';
+              
+              // Remove from expanded sections
+              const updatedSections = expandedSections.filter(section => section !== text);
+              localStorage.setItem('docsify-expanded-sections', JSON.stringify(updatedSections));
+              return;
+            }
+            
+            // Expand - create sub-items
+            expandSection(link, text, sidebarItems[text]);
+            
+            // Add to expanded sections
+            const expandedSections = JSON.parse(localStorage.getItem('docsify-expanded-sections') || '[]');
+            if (!expandedSections.includes(text)) {
+              expandedSections.push(text);
+              localStorage.setItem('docsify-expanded-sections', JSON.stringify(expandedSections));
+            }
+          });
+          
+          // Add visual indicator for expandable items
+          if (!link.querySelector('.expand-indicator')) {
+            link.style.position = 'relative';
+            const indicator = document.createElement('span');
+            indicator.className = 'expand-indicator';
+            indicator.textContent = '+';
+            indicator.style.cssText = `
+              position: absolute;
+              right: 10px;
+              font-size: 0.8em;
+              transition: transform 0.2s ease;
+              pointer-events: none;
+            `;
+            link.appendChild(indicator);
+          }
+          
+          // Restore expanded state if it was previously expanded
+          if (expandedSections.includes(text)) {
+            expandSection(link, text, sidebarItems[text]);
+          }
+        }
+      });
+    }
+    
+    // Helper function to expand a section
+    function expandSection(link, text, items) {
+      // Remove sub-items from other sections first
+      document.querySelectorAll('.sub-items').forEach(item => item.remove());
+      document.querySelectorAll('.expand-indicator').forEach(ind => ind.textContent = '+');
+      
+      // Create sub-items container
+      const subItemsContainer = document.createElement('ul');
+      subItemsContainer.className = 'sub-items';
+      subItemsContainer.style.cssText = `
+        list-style: none !important;
+        padding-left: 20px !important;
+        margin: 5px 0 !important;
+        border-left: 2px solid var(--theme-color);
+        background: var(--background-secondary);
+        border-radius: 0 6px 6px 0;
+        animation: slideDown 0.3s ease;
+      `;
+      
+      // Add sub-items
+      items.forEach(item => {
+        const li = document.createElement('li');
+        li.style.cssText = 'margin: 0 !important; padding: 0 !important;';
+        
+        const subLink = document.createElement('a');
+        subLink.href = `#/${item.link}`;
+        subLink.textContent = item.name;
+        subLink.style.cssText = `
+          display: block !important;
+          padding: 6px 12px !important;
+          margin: 1px 0 !important;
+          border-radius: 4px !important;
+          text-decoration: none !important;
+          color: var(--text-color-secondary) !important;
+          font-size: 0.9em !important;
+          transition: all 0.2s ease !important;
+        `;
+        
+        subLink.addEventListener('mouseenter', function() {
+          this.style.background = 'var(--theme-color)';
+          this.style.color = 'white';
+        });
+        
+        subLink.addEventListener('mouseleave', function() {
+          this.style.background = 'transparent';
+          this.style.color = 'var(--text-color-secondary)';
+        });
+        
+        li.appendChild(subLink);
+        subItemsContainer.appendChild(li);
+      });
+      
+      // Insert sub-items after the main link
+      link.parentElement.appendChild(subItemsContainer);
+      
+      // Update indicator
+      const indicator = link.querySelector('.expand-indicator');
+      if (indicator) indicator.textContent = '−';
+    }
   </script>
   <!-- Docsify v4 -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-copy-code@2"></script>
 </body>
 </html>

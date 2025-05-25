@@ -1,3 +1,7 @@
+// Import Field type from MCPDialog
+import { Field } from "@/components/Dialog/MCPDialog";
+import { ReactNode } from "react";
+
 export interface IBaseServerConfig {
     enabled: boolean;
     configured: boolean;
@@ -33,13 +37,110 @@ export interface IServerModule<TConfig = any> {
     getAutoApproved: () => boolean;
 }
 
-export interface ITavilyConfig {
-    apiKey: string;
+// Enhanced server metadata interface
+export interface IServerMetadata {
+    id: string;
+    title: string;
+    description: string;
+    version: string;
+    icon?: string; // Icon name or component
+    sourceUrl?: string;
+    platforms?: ('windows' | 'macos' | 'linux')[];
+    category?: 'communication' | 'weather' | 'location' | 'research' | 'productivity' | 'delivery' | 'development' | 'accommodation' | 'other';
 }
 
-export interface ITavilyState {
-    tavilyEnabled: boolean;
-    tavilyConfig: ITavilyConfig;
+// Enhanced server module interface
+export interface IEnhancedServerModule<TConfig = any> extends IServerModule<TConfig> {
+    metadata: IServerMetadata;
+
+    // UI Configuration - make getDialogFields optional since we might use DialogComponent
+    getDialogFields?: () => Field[];
+    validateConfig?: (config: TConfig) => { isValid: boolean; errors?: Record<string, string> };
+
+    // Optional custom components
+    customServerCard?: React.ComponentType<ICustomServerCardProps>;
+    customDialog?: React.ComponentType<ICustomDialogProps>;
+
+    // New: Embedded dialog component
+    DialogComponent?: React.ComponentType<ICustomDialogProps>;
+}
+
+// Registry for server modules
+export interface IServerRegistry {
+    [serverKey: string]: IEnhancedServerModule;
+}
+
+// UI Component Props Interfaces
+export interface IServerCardProps {
+    title: string;
+    description: string;
+    version: string;
+    isEnabled: boolean;
+    isConfigured: boolean;
+    isAutoApproved: boolean;
+    onToggle: (enabled: boolean) => void;
+    onAutoApprovalToggle: (autoApproved: boolean) => void;
+    onConfigure: () => void;
+    onReset?: () => void;
+    icon?: ReactNode;
+    sourceUrl?: string;
+}
+
+export interface ICustomServerCardProps {
+    serverModule: IEnhancedServerModule;
+    isEnabled: boolean;
+    isConfigured: boolean;
+    isAutoApproved: boolean;
+    onToggle: (enabled: boolean) => void;
+    onAutoApprovalToggle: (autoApproved: boolean) => void;
+    onConfigure: () => void;
+    onReset?: () => void;
+}
+
+export interface ICustomDialogProps {
+    open: boolean;
+    initialData?: Record<string, any>;
+    onClose: () => void;
+    onSave: (data: Record<string, any>) => void;
+}
+
+export interface IServiceItem {
+    serverKey: string;
+    type: string;
+    enabledFlag: boolean;
+    config: any;
+    humanName: string;
+    category: string;
+    isRegistered: boolean;
+    metadata?: any;
+}
+
+export interface IServersProps {
+    services: IServiceItem[];
+    configureHandlers: Record<string, () => void>;
+}
+
+export interface IGenericServerProps {
+    serverKey: string;
+    onReset?: () => void;
+    isAutoApproved?: boolean;
+    onAutoApprovalToggle?: (autoApproved: boolean) => void;
+}
+
+export interface IConfigurableComponentProps {
+    onConfigure?: () => void;
+    serverKey?: string;
+}
+
+export interface IEnhancedComponentProps extends IConfigurableComponentProps {
+    onReset?: () => void;
+    isAutoApproved?: boolean;
+    onAutoApprovalToggle?: (autoApproved: boolean) => void;
+}
+
+// Server Configuration Interfaces
+export interface ITavilyConfig {
+    apiKey: string;
 }
 
 export interface IWeatherConfig {
@@ -48,28 +149,13 @@ export interface IWeatherConfig {
     units: string;
 }
 
-export interface IWeatherState {
-    weatherEnabled: boolean;
-    weatherConfig: IWeatherConfig;
-}
-
 export interface ILocationConfig {
     path: string;
-}
-
-export interface ILocationState {
-    locationEnabled: boolean;
-    locationConfig: ILocationConfig;
 }
 
 export interface IWeatherForecastConfig {
     apiKey: string;
     path: string;
-}
-
-export interface IWeatherForecastState {
-    weatherForecastEnabled: boolean;
-    weatherForecastConfig: IWeatherForecastConfig;
 }
 
 export interface INearbySearchConfig {
@@ -78,19 +164,9 @@ export interface INearbySearchConfig {
     defaultRadius: number;
 }
 
-export interface INearbySearchState {
-    nearbySearchEnabled: boolean;
-    nearbySearchConfig: INearbySearchConfig;
-}
-
 export interface IWeb3ResearchConfig {
     apiKey: string;
     endpoint: string;
-}
-
-export interface IWeb3ResearchState {
-    web3ResearchEnabled: boolean;
-    web3ResearchConfig: IWeb3ResearchConfig;
 }
 
 export interface IDoorDashConfig {
@@ -99,13 +175,61 @@ export interface IDoorDashConfig {
     region: string;
 }
 
+export interface IWhatsAppConfig {
+    path: string;
+}
+
+export interface IGitHubConfig {
+    accessToken: string;
+}
+
+export interface IIPLocationConfig {
+    apiKey: string;
+}
+
+export interface IAirbnbConfig {
+    // No required config for Airbnb
+}
+
+export interface ILinkedInConfig {
+    email: string;
+    password: string;
+}
+
+// Server State Interfaces (for backward compatibility)
+export interface ITavilyState {
+    tavilyEnabled: boolean;
+    tavilyConfig: ITavilyConfig;
+}
+
+export interface IWeatherState {
+    weatherEnabled: boolean;
+    weatherConfig: IWeatherConfig;
+}
+
+export interface ILocationState {
+    locationEnabled: boolean;
+    locationConfig: ILocationConfig;
+}
+
+export interface IWeatherForecastState {
+    weatherForecastEnabled: boolean;
+    weatherForecastConfig: IWeatherForecastConfig;
+}
+
+export interface INearbySearchState {
+    nearbySearchEnabled: boolean;
+    nearbySearchConfig: INearbySearchConfig;
+}
+
+export interface IWeb3ResearchState {
+    web3ResearchEnabled: boolean;
+    web3ResearchConfig: IWeb3ResearchConfig;
+}
+
 export interface IDoorDashState {
     doorDashEnabled: boolean;
     doorDashConfig: IDoorDashConfig;
-}
-
-export interface IWhatsAppConfig {
-    path: string;
 }
 
 export interface IWhatsAppState {
@@ -113,17 +237,9 @@ export interface IWhatsAppState {
     whatsAppConfig: IWhatsAppConfig;
 }
 
-export interface IGitHubConfig {
-    accessToken: string;
-}
-
 export interface IGitHubState {
     gitHubEnabled: boolean;
     gitHubConfig: IGitHubConfig;
-}
-
-export interface IIPLocationConfig {
-    apiKey: string;
 }
 
 export interface IIPLocationState {
@@ -131,18 +247,9 @@ export interface IIPLocationState {
     ipLocationConfig: IIPLocationConfig;
 }
 
-export interface IAirbnbConfig {
-    // No required config for Airbnb
-}
-
 export interface IAirbnbState {
     airbnbEnabled: boolean;
-    airbnbConfig: IAirbnbConfig;
-}
-
-export interface ILinkedInConfig {
-    email: string;
-    password: string;
+    airbnbConfig: IAirbnbState;
 }
 
 export interface ILinkedInState {
