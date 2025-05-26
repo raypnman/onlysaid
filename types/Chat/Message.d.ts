@@ -26,7 +26,8 @@ export interface IChatMessage {
     reactions?: IReaction[];
     reply_to?: string;
     mentions?: string[];
-    files?: IFile[];
+    file_ids?: string; // JSON string of file IDs, not array
+    files?: IFile[]; // Populated when retrieved from DB
     poll?: string;
     contact?: string;
     gif?: string;
