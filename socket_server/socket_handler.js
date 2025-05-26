@@ -6,15 +6,93 @@ function setupSocketIO(io, client) {
   io.on("connection", async (socket) => {
     try {
       const user = socket.handshake.auth.user;
-  
-      if (!user || !user.id) {
-        console.error("Socket connection rejected: No valid user provided");
-        socket.disconnect(true);
-        return;
+      const serviceAuth = socket.handshake.auth.service;
+      
+      // Handle Electron main process connections
+      if (user && user.id === 'electron-main-process') {
+        console.log(`🔧 Electron main process connected with socket ${socket.id}`);
+        socket.emit("connection_established", { socketId: socket.id });
+        
+        socket.on("disconnect", () => {
+          console.log(`🔧 Electron main process disconnected socket ${socket.id}`);
+        });
+        
+        return; // Early return for electron main process
+      }
+      
+      // Handle backend service connections
+      if (serviceAuth && serviceAuth.type === 'backend-service') {
+        console.log(`🔧 Backend service connected with socket ${socket.id}`);
+        socket.emit("service_connection_established", { socketId: socket.id });
+        
+        // Handle service broadcast events and forward to electron main process
+        socket.on("broadcast:file:progress", async (data) => {
+          const { operationId, progress, stage, userId } = data;
+          console.log(`📊 Broadcasting file progress: ${operationId} - ${progress}% for user ${userId}`);
+          
+          // ✅ Add deduplication here
+          if (this.lastProgress && 
+              this.lastProgress.operationId === operationId && 
+              this.lastProgress.progress === progress && 
+              this.lastProgress.stage === stage) {
+            return; // Skip duplicate
+          }
+          this.lastProgress = { operationId, progress, stage };
+          
+          // Broadcast to users
+          if (userId) {
+            const socketIds = await client.smembers(`user:${userId}:sockets`);
+            socketIds.forEach(socketId => {
+              io.to(socketId).emit("file:progress", { operationId, progress, stage });
+            });
+          }
+          
+          // Forward to Electron main process
+          io.emit("file:progress", { operationId, progress, stage });
+        });
+
+        socket.on("broadcast:file:completed", async (data) => {
+          const { operationId, result, userId } = data;
+          console.log(`✅ Broadcasting file completed: ${operationId} for user ${userId}`);
+          
+          // Broadcast to users
+          if (userId) {
+            const socketIds = await client.smembers(`user:${userId}:sockets`);
+            socketIds.forEach(socketId => {
+              io.to(socketId).emit("file:completed", { operationId, result });
+            });
+          }
+          
+          // Forward to Electron main process
+          io.emit("file:completed", { operationId, result });
+        });
+
+        socket.on("broadcast:file:error", async (data) => {
+          const { operationId, error, userId } = data;
+          console.log(`❌ Broadcasting file error: ${operationId} for user ${userId}`);
+          
+          // Broadcast to users
+          if (userId) {
+            const socketIds = await client.smembers(`user:${userId}:sockets`);
+            socketIds.forEach(socketId => {
+              io.to(socketId).emit("file:error", { operationId, error });
+            });
+          }
+          
+          // Forward to Electron main process
+          io.emit("file:error", { operationId, error });
+        });
+
+        socket.on("disconnect", () => {
+          console.log(`🔧 Backend service disconnected socket ${socket.id}`);
+        });
+
+        return; // Early return for service connections
       }
 
-      const userId = user.id;
-      console.log(`User ${userId} connected with socket ${socket.id}`);
+      // Handle regular user connections (existing code)
+      const userId = user?.id || 'backend-service';
+      console.log(`Connection accepted for ${userId} with socket ${socket.id}`);
 
       socket.emit("connection_established", { socketId: socket.id });
 
@@ -185,6 +263,39 @@ function setupSocketIO(io, client) {
         } catch (error) {
           console.error("Error in delete_message event:", error.message);
         }
+      });
+
+      // Enhanced file progress event handling
+      socket.on("file:progress", async (data) => {
+        const { operationId, progress, stage, userId } = data;
+        console.log(`📊 File progress: ${operationId} - ${progress}% for user ${userId}`);
+        
+        if (userId) {
+          const socketIds = await client.smembers(`user:${userId}:sockets`);
+          socketIds.forEach(socketId => {
+            io.to(socketId).emit("file:progress", { operationId, progress, stage });
+          });
+        }
+      });
+
+      socket.on("file:completed", async (data) => {
+        const { operationId, result } = data;
+        console.log(`✅ File upload completed: ${operationId}`);
+        
+        const socketIds = await client.smembers(`user:${userId}:sockets`);
+        socketIds.forEach(socketId => {
+          io.to(socketId).emit("file:completed", { operationId, result });
+        });
+      });
+
+      socket.on("file:error", async (data) => {
+        const { operationId, error } = data;
+        console.log(`❌ File upload error: ${operationId} - ${error}`);
+        
+        const socketIds = await client.smembers(`user:${userId}:sockets`);
+        socketIds.forEach(socketId => {
+          io.to(socketId).emit("file:error", { operationId, error });
+        });
       });
     } catch (error) {
       console.error("Error in socket connection handler:", error);
