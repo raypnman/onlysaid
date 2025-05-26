@@ -8,40 +8,58 @@ import { createReadStream } from 'fs';
 import { IFile } from '@/../../types/File/File';
 import { backendSocketClient } from '@/lib/socketClient';
 
-// Progress tracking via socket events
-const uploadProgress = new Map<string, {
-    stage: 'parsing' | 'validating' | 'writing' | 'database' | 'complete';
-    progress: number;
-    startTime: number;
-}>();
+// Real progress tracking
+class FileUploadProgress {
+    private operationId: string;
+    private userId: string;
+    private totalOperations: number = 0;
+    private completedOperations: number = 0;
+    private currentStage: string = '';
 
-// Helper to update progress
-function updateProgress(
-    operationId: string,
-    stage: 'parsing' | 'validating' | 'writing' | 'database' | 'complete',
-    progress: number,
-    userId: string
-) {
-    uploadProgress.set(operationId, {
-        stage,
-        progress,
-        startTime: uploadProgress.get(operationId)?.startTime || Date.now()
-    });
+    constructor(operationId: string, userId: string) {
+        this.operationId = operationId;
+        this.userId = userId;
+    }
 
-    console.log(`📊 Upload ${operationId}: ${stage} - ${progress}%`);
+    setTotalOperations(total: number) {
+        this.totalOperations = total;
+    }
 
-    // Use new backend socket client
-    backendSocketClient.emit('broadcast:file:progress', {
-        operationId,
-        progress,
-        stage,
-        userId
-    });
+    completeOperation(stageName: string) {
+        this.completedOperations++;
+        this.currentStage = stageName;
+        this.broadcast();
+    }
 
-    if (stage === 'complete') {
-        backendSocketClient.emit('broadcast:file:completed', {
-            operationId,
-            userId
+    updateFileWriteProgress(bytesWritten: number, totalBytes: number, stageName: string) {
+        // For file writing, calculate progress within the writing stage
+        const baseProgress = Math.floor((this.completedOperations / this.totalOperations) * 100);
+        const writeProgress = Math.floor((bytesWritten / totalBytes) * (100 / this.totalOperations));
+        const totalProgress = Math.min(99, baseProgress + writeProgress);
+
+        this.currentStage = stageName;
+        this.broadcastCustom(totalProgress);
+    }
+
+    complete() {
+        this.completedOperations = this.totalOperations;
+        this.currentStage = 'complete';
+        this.broadcastCustom(100);
+    }
+
+    private broadcast() {
+        const progress = Math.floor((this.completedOperations / this.totalOperations) * 100);
+        this.broadcastCustom(progress);
+    }
+
+    private broadcastCustom(progress: number) {
+        console.log(`📊 Upload ${this.operationId}: ${this.currentStage} - ${progress}% (${this.completedOperations}/${this.totalOperations})`);
+
+        backendSocketClient.emit('broadcast:file:progress', {
+            operationId: this.operationId,
+            progress,
+            stage: this.currentStage,
+            userId: this.userId
         });
     }
 }
@@ -58,16 +76,16 @@ export async function POST(
     }
 
     const userId = authenticated.user?.id;
+    const progress = new FileUploadProgress(operationId, userId);
 
-    // Initialize progress tracking
-    updateProgress(operationId, 'parsing', 0, userId);
+    // Define total operations for real progress
+    progress.setTotalOperations(8); // 8 main operations
 
     // Check content length first
     const contentLength = request.headers.get('content-length');
     const maxSize = 100 * 1024 * 1024; // 100MB
 
     if (contentLength && parseInt(contentLength) > maxSize) {
-        uploadProgress.delete(operationId);
         return NextResponse.json(
             { error: "File too large. Maximum size is 100MB." },
             { status: 413 }
@@ -75,14 +93,12 @@ export async function POST(
     }
 
     try {
-        updateProgress(operationId, 'parsing', 5, userId);
-
+        // Operation 1: Parse form data
         let formData;
         try {
             formData = await request.formData();
-            updateProgress(operationId, 'parsing', 20, userId);
+            progress.completeOperation('parsing');
         } catch (error) {
-            uploadProgress.delete(operationId);
             return NextResponse.json(
                 { error: "File too large. Maximum size is 100MB." },
                 { status: 413 }
@@ -94,59 +110,67 @@ export async function POST(
         const metadataStr = formData.get('metadata') as string;
         const frontendMetadata = metadataStr ? JSON.parse(metadataStr) : {};
 
-        // Stage 2: Validate File (20-30%)
-        updateProgress(operationId, 'validating', 25, userId);
-
+        // Operation 2: Validate file exists
         if (!file) {
-            uploadProgress.delete(operationId);
             return NextResponse.json(
                 { error: "No file provided" },
                 { status: 400 }
             );
         }
+        progress.completeOperation('validating');
 
-        // Additional file size check after parsing
+        // Operation 3: Validate file size
         if (file && file.size > maxSize) {
-            uploadProgress.delete(operationId);
             return NextResponse.json(
                 { error: "File too large. Maximum size is 100MB." },
                 { status: 413 }
             );
         }
+        progress.completeOperation('validating');
 
-        updateProgress(operationId, 'validating', 30, userId);
-
+        // Operation 4: Prepare storage paths
         const { workspaceId } = await params;
         const baseStorageDir = path.join(process.cwd(), 'storage', workspaceId);
-
         const logicalTargetPath = frontendMetadata.targetPath || file.name;
         const logicalTargetDir = path.dirname(logicalTargetPath);
         const fullTargetDir = logicalTargetDir === '.' ? baseStorageDir : path.join(baseStorageDir, logicalTargetDir);
+        progress.completeOperation('preparing');
 
-        // Stage 3: Prepare Storage (30-40%)
-        updateProgress(operationId, 'writing', 35, userId);
+        // Operation 5: Create directories
         await fs.mkdir(fullTargetDir, { recursive: true });
-
         const fileId = uuidv4();
         const originalFileExtension = path.extname(file.name);
         const physicalFileNameWithExtension = fileId + originalFileExtension;
         const physicalStoragePath = path.join(fullTargetDir, physicalFileNameWithExtension);
+        progress.completeOperation('preparing');
 
-        updateProgress(operationId, 'writing', 40, userId);
-
-        // Stage 4: Write File with Progress (40-80%)
+        // Operation 6: Convert file to buffer
         const bytes = await file.arrayBuffer();
-        updateProgress(operationId, 'writing', 60, userId);
-
         const buffer = Buffer.from(bytes);
-        updateProgress(operationId, 'writing', 70, userId);
+        progress.completeOperation('writing');
 
-        await fs.writeFile(physicalStoragePath, buffer);
-        updateProgress(operationId, 'writing', 80, userId);
+        // Operation 7: Write file with real progress
+        const totalBytes = buffer.length;
+        const chunkSize = Math.max(1024 * 1024, Math.floor(totalBytes / 10)); // 1MB chunks or 10% chunks
+        let bytesWritten = 0;
 
-        // Stage 5: Database Operations (80-95%)
-        updateProgress(operationId, 'database', 85, userId);
+        // Write file in chunks to track real progress
+        const fileHandle = await fs.open(physicalStoragePath, 'w');
+        try {
+            for (let i = 0; i < totalBytes; i += chunkSize) {
+                const chunk = buffer.slice(i, Math.min(i + chunkSize, totalBytes));
+                await fileHandle.write(chunk, 0, chunk.length, i);
+                bytesWritten += chunk.length;
 
+                // Update progress based on actual bytes written
+                progress.updateFileWriteProgress(bytesWritten, totalBytes, 'writing');
+            }
+        } finally {
+            await fileHandle.close();
+        }
+        progress.completeOperation('writing');
+
+        // Operation 8: Database insertion
         const fileRecord = await db(DBTABLES.FILES).insert({
             id: fileId,
             workspace_id: workspaceId,
@@ -158,15 +182,14 @@ export async function POST(
             metadata: frontendMetadata
         }).returning('*');
 
-        updateProgress(operationId, 'database', 95, userId);
+        // Complete
+        progress.complete();
 
-        // Stage 6: Complete (95-100%)
-        updateProgress(operationId, 'complete', 100, userId);
-
-        // Clean up progress tracking after a delay
-        setTimeout(() => {
-            uploadProgress.delete(operationId);
-        }, 30000); // Keep for 30 seconds for final status checks
+        // Clean up after completion
+        backendSocketClient.emit('broadcast:file:completed', {
+            operationId,
+            userId
+        });
 
         return NextResponse.json({
             message: "File uploaded successfully",
@@ -176,14 +199,12 @@ export async function POST(
     } catch (error) {
         console.error("Error uploading file:", error);
 
-        // Emit error through new socket client
         backendSocketClient.emit('broadcast:file:error', {
             operationId,
             error: (error as Error).message,
             userId
         });
 
-        uploadProgress.delete(operationId);
         return NextResponse.json(
             { error: "Failed to upload file" },
             { status: 500 }
@@ -197,16 +218,6 @@ export async function GET(
 ) {
     const { searchParams } = new URL(request.url);
     const operationId = searchParams.get('operationId');
-
-    if (operationId && uploadProgress.has(operationId)) {
-        const progress = uploadProgress.get(operationId)!;
-        return NextResponse.json({
-            operationId,
-            stage: progress.stage,
-            progress: progress.progress,
-            elapsedTime: Date.now() - progress.startTime
-        });
-    }
 
     const authenticated = await authenticateRequest(request);
     if (!authenticated.isAuthenticated) {
