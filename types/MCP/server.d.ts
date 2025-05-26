@@ -196,6 +196,10 @@ export interface ILinkedInConfig {
     password: string;
 }
 
+export interface IMS365Config {
+    readOnly?: boolean;
+}
+
 // Server State Interfaces (for backward compatibility)
 export interface ITavilyState {
     tavilyEnabled: boolean;
@@ -255,4 +259,37 @@ export interface IAirbnbState {
 export interface ILinkedInState {
     linkedInEnabled: boolean;
     linkedInConfig: ILinkedInConfig;
+}
+
+export interface IMS365State {
+    ms365Enabled: boolean;
+    ms365Config: IMS365Config;
+    ms365AutoApproved?: boolean;
+}
+
+// Added MS Teams Config and State
+export interface IMSTeamsConfig {
+    appId: string;
+    appPassword: string;
+    appType: "SingleTenant" | "MultiTenant";
+    tenantId?: string;
+    teamId: string;
+    channelId: string;
+}
+
+export interface IMSTeamsState {
+    msTeamsEnabled?: boolean;
+    msTeamsConfig?: IMSTeamsConfig;
+    msTeamsAutoApproved?: boolean;
+}
+
+// Added Google Calendar Config and State
+export interface IGoogleCalendarConfig {
+    indexPath: string; // Path to the server's index.js file
+}
+
+export interface IGoogleCalendarState {
+    googleCalendarEnabled?: boolean;
+    googleCalendarConfig?: IGoogleCalendarConfig;
+    googleCalendarAutoApproved?: boolean;
 }

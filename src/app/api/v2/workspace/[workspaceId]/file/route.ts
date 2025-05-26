@@ -5,7 +5,6 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import db, { DBTABLES } from "@/lib/db";
 import { createReadStream } from 'fs';
-import { Readable } from 'stream';
 import { IFile } from '@/../../types/File/File';
 
 export async function POST(
@@ -17,10 +16,41 @@ export async function POST(
         return unauthorized();
     }
 
+    // Check content length first
+    const contentLength = request.headers.get('content-length');
+    const maxSize = 100 * 1024 * 1024; // 100MB
+
+    if (contentLength && parseInt(contentLength) > maxSize) {
+        return NextResponse.json(
+            { error: "File too large. Maximum size is 100MB." },
+            { status: 413 }
+        );
+    }
+
     try {
-        const formData = await request.formData();
+        // For large files, use a try-catch around formData parsing
+        let formData;
+        try {
+            formData = await request.formData();
+        } catch (error) {
+            // If formData parsing fails due to size, return 413
+            return NextResponse.json(
+                { error: "File too large. Maximum size is 100MB." },
+                { status: 413 }
+            );
+        }
+
         console.log("formData", formData);
         const file = formData.get('file') as File;
+
+        // Additional file size check after parsing
+        if (file && file.size > maxSize) {
+            return NextResponse.json(
+                { error: "File too large. Maximum size is 100MB." },
+                { status: 413 }
+            );
+        }
+
         const metadataStr = formData.get('metadata') as string;
         const frontendMetadata = metadataStr ? JSON.parse(metadataStr) : {};
 
@@ -226,3 +256,6 @@ export async function DELETE(
         );
     }
 }
+
+export const maxDuration = 60; // 60 seconds timeout
+export const dynamic = 'force-dynamic';
