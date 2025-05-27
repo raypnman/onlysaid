@@ -1,17 +1,15 @@
 import { authenticateRequest, unauthorized } from "@/utils/auth";
 import { NextResponse } from "next/server";
 import path from 'path';
-import { promises as fs, constants as fsConstants } from 'fs'; // Import fsConstants
+import { promises as fs, constants as fsConstants } from 'fs';
 
 async function getDirectoryContents(basePath: string, relativeDir: string = '') {
     const targetPath = path.join(basePath, relativeDir);
     const contents = [];
 
     try {
-        // Check if targetPath exists and is a directory
         const stats = await fs.stat(targetPath);
         if (!stats.isDirectory()) {
-            // If it's a file or something else, we can't list its contents
             return {
                 currentPath: relativeDir,
                 contents: [],
@@ -23,19 +21,18 @@ async function getDirectoryContents(basePath: string, relativeDir: string = '') 
         for (const dirent of dirents) {
             if (dirent.isDirectory()) {
                 contents.push({
-                    name: dirent.name, // Directory name remains as is
+                    name: dirent.name,
                     type: 'directory',
-                    path: path.join(relativeDir, dirent.name) // Path for directory remains as is
+                    path: path.join(relativeDir, dirent.name)
                 });
-            } else { // It's a file
-                const physicalFileName = dirent.name; // e.g., "uuid-123.pdf"
-                const extension = path.extname(physicalFileName); // e.g., ".pdf"
-                const uuidName = path.basename(physicalFileName, extension); // e.g., "uuid-123"
+            } else {
+                const physicalFileName = dirent.name;
+                const extension = path.extname(physicalFileName);
+                const uuidName = path.basename(physicalFileName, extension);
 
                 contents.push({
-                    name: uuidName, // Use UUID as the 'name' for client
+                    name: uuidName,
                     type: 'file',
-                    // Path for client should also use the UUID, relative to current directory
                     path: path.join(relativeDir, uuidName)
                 });
             }
@@ -46,7 +43,6 @@ async function getDirectoryContents(basePath: string, relativeDir: string = '') 
         };
     } catch (error: any) {
         if (error.code === 'ENOENT') {
-            // Directory doesn't exist
             return {
                 currentPath: relativeDir,
                 contents: [],
@@ -54,7 +50,7 @@ async function getDirectoryContents(basePath: string, relativeDir: string = '') 
             };
         }
         console.error(`Error reading directory ${targetPath}:`, error);
-        throw error; // Re-throw for the main handler to catch
+        throw error;
     }
 }
 
@@ -83,7 +79,6 @@ export async function GET(
         );
     }
     const safeRelativePath = path.relative(workspaceStorageRoot, absoluteRequestedPath);
-
 
     try {
         try {

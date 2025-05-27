@@ -10,6 +10,7 @@ This guide will help you download and get started with the platform.
 - [Setup MCP Servers](#setup-mcp-servers)
 - [Create a Workspace](#create-a-workspace)
 - [Create a Chat in workspace](#create-a-chat-in-workspace)
+- [Interface](#interface)
 
 ## Download
 
@@ -27,7 +28,7 @@ This guide will help you download and get started with the platform.
 
 To log in, follow these steps:
 
-1.  navigate to settings (read [here](interface.md))
+1.  navigate to settings (read [here](#interface))
 2.  navigate to user general settings.
 3.  click login
 
@@ -42,7 +43,7 @@ To log in, follow these steps:
 
 To setup model API keys, follow these steps:
 
-1. navigate to settings (read [here](interface.md))
+1. navigate to settings (read [here](#interface))
 2. navigate to model API Keys
 3. input, for example, deepeseek API key, and click `verify`
 4. if verification is successful, enable to models to complete the setup
@@ -73,6 +74,10 @@ Similar to Model API key, all data you input to enable MCP services are kept pri
 
 To create a workspace, follow these steps:
 
-1. click `+` button (create workspace) in sidebar (read [here](interface.md))
+1. click `+` button (create workspace) in sidebar (read [here](#interface))
 2. select a name for the workspace
 3. click create
+
+## Interface
+
+![Interface](assets/interface/interface.png)

@@ -1,5 +1,5 @@
 // Import Field type from MCPDialog
-import { Field } from "@/components/Dialog/MCPDialog";
+import { Field } from "@/renderer/components/Dialog/MCPDialog";
 import { ReactNode } from "react";
 
 export interface IBaseServerConfig {

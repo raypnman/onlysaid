@@ -81,3 +81,75 @@ export interface IGetUsersFromWorkspaceArgs {
     token: string;
     workspaceId: string;
 }
+
+export interface IWorkspaceInvitation {
+    id: string;
+    workspace_id: string;
+    inviter_id: string;
+    invitee_email: string;
+    status: 'pending' | 'accepted' | 'declined';
+    created_at: string;
+    updated_at: string;
+    inviter_username?: string;
+    inviter_avatar?: string;
+}
+
+export interface IWorkspaceJoin {
+    id: string;
+    user_id: string;
+    workspace_id: string;
+    status: 'pending' | 'active' | 'left';
+    created_at: string;
+    updated_at: string;
+    username?: string;
+    avatar?: string;
+    email?: string;
+}
+
+export interface ISendInvitationArgs {
+    token: string;
+    workspaceId: string;
+    invitee_email: string;
+}
+
+export interface IGetInvitationsArgs {
+    token: string;
+    workspaceId: string;
+    status?: string;
+}
+
+export interface IUpdateInvitationArgs {
+    token: string;
+    workspaceId: string;
+    invitation_id: string;
+    status: 'accepted' | 'declined';
+}
+
+export interface ICancelInvitationArgs {
+    token: string;
+    workspaceId: string;
+    invitationId: string;
+}
+
+export interface IJoinWorkspaceArgs {
+    token: string;
+    workspaceId: string;
+    invite_code?: string;
+}
+
+export interface IGetJoinRequestsArgs {
+    token: string;
+    workspaceId: string;
+}
+
+export interface IUpdateJoinRequestArgs {
+    token: string;
+    workspaceId: string;
+    user_id: string;
+    status: 'active' | 'left';
+}
+
+export interface ILeaveWorkspaceArgs {
+    token: string;
+    workspaceId: string;
+}

@@ -32,10 +32,12 @@ class FileUploadProgress {
     }
 
     updateFileWriteProgress(bytesWritten: number, totalBytes: number, stageName: string) {
-        // For file writing, calculate progress within the writing stage
-        const baseProgress = Math.floor((this.completedOperations / this.totalOperations) * 100);
-        const writeProgress = Math.floor((bytesWritten / totalBytes) * (100 / this.totalOperations));
-        const totalProgress = Math.min(99, baseProgress + writeProgress);
+        // Map server processing to 50-100% range
+        const baseProgress = Math.floor((this.completedOperations / this.totalOperations) * 50);
+        const writeProgress = Math.floor((bytesWritten / totalBytes) * (50 / this.totalOperations));
+        const serverProgress = baseProgress + writeProgress;
+        // Final progress = 50% (network complete) + server progress
+        const totalProgress = Math.min(99, 50 + serverProgress);
 
         this.currentStage = stageName;
         this.broadcastCustom(totalProgress);
@@ -48,8 +50,10 @@ class FileUploadProgress {
     }
 
     private broadcast() {
-        const progress = Math.floor((this.completedOperations / this.totalOperations) * 100);
-        this.broadcastCustom(progress);
+        // Map server operations to 50-100% range
+        const serverProgress = Math.floor((this.completedOperations / this.totalOperations) * 50);
+        const totalProgress = 50 + serverProgress; // 50% network + 50% server
+        this.broadcastCustom(totalProgress);
     }
 
     private broadcastCustom(progress: number) {
