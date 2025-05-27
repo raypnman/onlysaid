@@ -9,6 +9,7 @@ This guide will help you download and get started with the platform.
 - [Setup Model API keys](#setup-model-api-keys)
 - [Setup MCP Servers](#setup-mcp-servers)
 - [Create a Workspace](#create-a-workspace)
+- [Create a Knowledge Base for your Workspace](#create-a-knowledge-base-for-your-workspace)
 - [Create a Chat in workspace](#create-a-chat-in-workspace)
 - [Interface](#interface)
 
@@ -77,6 +78,49 @@ To create a workspace, follow these steps:
 1. click `+` button (create workspace) in sidebar (read [here](#interface))
 2. select a name for the workspace
 3. click create
+
+## Create a Knowledge Base for your Workspace
+
+> **Info**
+> Onlysaid allows users to query private or public knowledge bases. All knowledge bases created in workspaces are considered `public` and hosted on dedicated storage on Cloud where only members of your workspace can access.
+
+Video walkthrough:
+
+<div align="center">
+  <iframe src="https://drive.google.com/file/d/1CX4mTbW7ZTXoBbWjoEj0eeQk1o_Z8odH/preview" 
+          width="640" 
+          height="360" 
+          frameborder="0" 
+          allowfullscreen="true">
+  </iframe>
+</div>
+
+## Create a Chat in workspace
+
+Video walkthrough:
+
+<div align="center">
+  <iframe src="https://drive.google.com/file/d/1CX4mTbW7ZTXoBbWjoEj0eeQk1o_Z8odH/preview" 
+          width="640" 
+          height="360" 
+          frameborder="0" 
+          allowfullscreen="true">
+  </iframe>
+</div>
+
+### Select AI mode in Chat
+
+OnlySaid offers three AI interaction modes:
+
+- **Ask Mode**: Direct conversational assistance with professional responses
+- **Query Mode**: Knowledge base retrieval using selected databases and embedding models
+- **Agent Mode**: Autonomous tool execution through MCP integrations
+
+| Mode  | Use Cases                                          | Tool Access | Knowledge Base |
+| ----- | -------------------------------------------------- | ----------- | -------------- |
+| Ask   | General Q&A, conversational assistance             | No          | No             |
+| Query | RAG-based knowledge base querying, document search | No          | Yes            |
+| Agent | AI automated task execution, workflow automation   | Yes         | Optional       |
 
 ## Interface
 
