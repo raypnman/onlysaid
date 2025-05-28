@@ -8,6 +8,9 @@ Before proceeding with these tutorials, please ensure you have completed the [Ge
 
 ## Table of Contents
 
+- [Upload Knowledge and Query](#upload-knowledge-and-query)
+- [Setup MCP and let Agent Use It](#setup-mcp-and-let-agent-use-it)
+
 ## Upload Knowledge and Query
 
 Video Walkthrough
@@ -22,6 +25,8 @@ Video Walkthrough
 </div>
 
 ## Setup MCP and let Agent Use It
+
+Video Walkthrough
 
 <div align="center">
   <iframe src="https://drive.google.com/file/d/1O6PCKASA6rcr4iE-YdzYZ2FjyduKDp6T/preview" 

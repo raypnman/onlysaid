@@ -92,6 +92,8 @@ export interface IWorkspaceInvitation {
     updated_at: string;
     inviter_username?: string;
     inviter_avatar?: string;
+    workspace_name?: string;
+    workspace_image?: string;
 }
 
 export interface IWorkspaceJoin {
@@ -152,4 +154,9 @@ export interface IUpdateJoinRequestArgs {
 export interface ILeaveWorkspaceArgs {
     token: string;
     workspaceId: string;
+}
+
+export interface IGetUserInvitationsArgs {
+    token: string;
+    status?: string;
 }
